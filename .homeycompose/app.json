@@ -45,6 +45,18 @@
     "putConfig": {
       "method": "PUT",
       "path": "/config/:deviceId"
+    },
+    "getMoods": {
+      "method": "GET",
+      "path": "/moods"
+    },
+    "getFlows": {
+      "method": "GET",
+      "path": "/flows"
+    },
+    "postCalendarTest": {
+      "method": "POST",
+      "path": "/calendar/test"
     }
   }
 }

@@ -1,7 +1,23 @@
 {
-  "on": "Aan", "off": "Uit",
-  "inside": "Binnen", "next": "Straks", "noEvents": "Geen afspraken", "today": "Vandaag", "tomorrow": "Morgen",
-  "allDay": "hele dag", "moods": "Sferen", "climate": "Klimaat", "calendar": "Agenda", "target": "Doel",
-  "heating": "Verwarmen", "atTemp": "Op temperatuur", "now": "nu", "outside": "buiten", "noThermostat": "Geen thermostaat",
-  "max": "max", "min": "min", "close": "Sluiten"
+  "on": "Aan",
+  "off": "Uit",
+  "inside": "Binnen",
+  "next": "Straks",
+  "noEvents": "Geen afspraken",
+  "today": "Vandaag",
+  "tomorrow": "Morgen",
+  "allDay": "hele dag",
+  "moods": "Sferen",
+  "climate": "Klimaat",
+  "calendar": "Agenda",
+  "target": "Doel",
+  "heating": "Verwarmen",
+  "atTemp": "Op temperatuur",
+  "now": "nu",
+  "outside": "buiten",
+  "noThermostat": "Geen thermostaat",
+  "max": "max",
+  "min": "min",
+  "close": "Sluiten",
+  "actionFailed": "Actie mislukt"
 }

@@ -7,10 +7,13 @@
     body { font-family: -apple-system, sans-serif; padding: 12px; }
     fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 10px; }
     legend { font-weight: 600; }
-    .slot { display: grid; grid-template-columns: 1.4fr 1.2fr 0.8fr 0.6fr; gap: 6px; margin-bottom: 6px; }
-    .slot.chip { grid-template-columns: 1.4fr 1.2fr 0.8fr; }
+    .slot { display: grid; grid-template-columns: 1.4fr 1.2fr 0.8fr; gap: 6px; margin-bottom: 6px; }
+    .slot.mood { grid-template-columns: 0.8fr 1.6fr 0.8fr 1fr; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
     select, input { width: 100%; box-sizing: border-box; padding: 4px; }
-    #status { margin-top: 8px; }
+    .hint { color: #777; font-size: 12px; margin: 2px 0 8px; }
+    #status, #cal-result { margin-top: 8px; }
+    #cal-result li { font-size: 13px; }
     .error { color: #c00; }
   </style>
 </head>
@@ -19,26 +22,51 @@
   <p><select id="panel"></select></p>
   <div id="form" hidden>
     <fieldset><legend>Thermostat</legend><select id="thermostat"></select></fieldset>
+
     <fieldset><legend>Chips (icon shown while active)</legend><div id="chips"></div></fieldset>
-    <fieldset><legend>Values</legend><div id="values"></div></fieldset>
+
+    <fieldset><legend>Moods page</legend>
+      <p class="hint">8 tiles. Labels fit about 10 characters per line (2 lines).</p>
+      <div id="moods"></div>
+    </fieldset>
+
+    <fieldset><legend>Calendar</legend>
+      <div class="row">
+        <label>Public iCloud link (webcal://…)<input id="cal-url" placeholder="webcal://p01-caldav.icloud.com/published/2/…"></label>
+        <label>Days ahead<input id="cal-days" type="number" min="1" max="14" value="7"></label>
+      </div>
+      <button id="cal-test" type="button">Test</button>
+      <ul id="cal-result"></ul>
+    </fieldset>
+
+    <fieldset><legend>Screen</legend>
+      <div class="row">
+        <label>Screensaver after (minutes, 0 = never)<input id="ss-min" type="number" min="0" max="240" value="0"></label>
+        <label>Screensaver brightness (%)<input id="ss-dim" type="number" min="0" max="100" value="10"></label>
+      </div>
+    </fieldset>
+
     <fieldset><legend>Physical buttons</legend>
       <label>Left <select id="btn-left"><option value="relay">Toggle relay</option><option value="event">Event only</option></select></label>
       <label>Right <select id="btn-right"><option value="relay">Toggle relay</option><option value="event">Event only</option></select></label>
     </fieldset>
+
     <button id="save" class="hy-button-primary">Save</button>
     <div id="status"></div>
   </div>
   <datalist id="icon-names"></datalist>
 
   <script>
-    const CHIPS = 7, VALUES = 4;
-    let H, devices = {}, icons = {}, glyphToName = {};
+    const CHIPS = 7, MOODS = 8;
+    let H, devices = {}, icons = {}, glyphToName = {}, moods = [], flows = [];
 
     const api = (method, path, body) => new Promise((ok, fail) => H.api(method, path, body ?? null, (e, r) => e ? fail(e) : ok(r)));
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const isPanel = (d) => d.driverId === 'nspanel' || String(d.driverId).endsWith(':nspanel');
+    const $ = (id) => document.getElementById(id);
 
     function deviceOptions(filter) {
-      const list = Object.values(devices).filter((d) => d.driverId !== 'nspanel' && (!filter || filter(d)))
+      const list = Object.values(devices).filter((d) => !isPanel(d) && (!filter || filter(d)))
         .sort((a, b) => (a.zoneName + a.name).localeCompare(b.zoneName + b.name));
       return '<option value="">—</option>' + list.map((d) => `<option value="${esc(d.id)}">${esc(d.zoneName ? d.zoneName + ' · ' : '')}${esc(d.name)}</option>`).join('');
     }
@@ -50,69 +78,129 @@
         `<option value="${esc(c)}" ${c === selected ? 'selected' : ''}>${esc(d.capabilitiesObj[c]?.title || c)}</option>`).join('');
     }
 
-    function slotRow(kind, i, slot) {
+    function chipRow(slot) {
       const row = document.createElement('div');
-      row.className = `slot ${kind}`;
+      row.className = 'slot';
       row.innerHTML = `
         <select data-k="deviceId">${deviceOptions()}</select>
         <select data-k="capability"></select>
-        <input data-k="icon" list="icon-names" placeholder="icon name">
-        ${kind === 'value' ? '<input data-k="unit" placeholder="unit">' : ''}`;
+        <input data-k="icon" list="icon-names" placeholder="icon name">`;
       const [dev, cap, icon] = row.querySelectorAll('select, input');
       dev.value = slot?.deviceId ?? '';
       cap.innerHTML = capOptions(dev.value, slot?.capability);
       dev.onchange = () => { cap.innerHTML = capOptions(dev.value, ''); };
       icon.value = slot ? iconLabel(slot.icon, glyphToName) : '';
-      if (kind === 'value') row.querySelector('[data-k=unit]').value = slot?.unit ?? '';
       return row;
     }
 
-    function readSlots(containerId) {
-      return [...document.getElementById(containerId).children].map((row) => {
-        const get = (k) => row.querySelector(`[data-k=${k}]`)?.value ?? '';
+    function targetOptions(type) {
+      if (type === 'mood') return '<option value="">—</option>' + moods.map((m) => `<option value="${esc(m.id)}">${esc(m.zone ? m.zone + ' · ' : '')}${esc(m.name)}</option>`).join('');
+      if (type === 'flow') return '<option value="">—</option>' + flows.map((f) => `<option value="${esc(f.id)}" data-advanced="${f.advanced}">${esc(f.name)}${f.advanced ? ' (advanced)' : ''}</option>`).join('');
+      if (type === 'toggle') return deviceOptions((d) => d.capabilities.includes('onoff'));
+      return '<option value="">(use the "Mood tile pressed" flow card)</option>';
+    }
+
+    function moodRow(tile) {
+      const row = document.createElement('div');
+      row.className = 'slot mood';
+      row.innerHTML = `
+        <select data-k="type">
+          <option value="">—</option><option value="mood">Mood</option><option value="flow">Flow</option>
+          <option value="toggle">Toggle device</option><option value="trigger">Flow card only</option>
+        </select>
+        <select data-k="target"></select>
+        <input data-k="icon" list="icon-names" placeholder="icon name">
+        <input data-k="label" maxlength="20" placeholder="label">`;
+      const [type, target, icon, label] = row.querySelectorAll('select, input');
+      type.value = tile?.type ?? '';
+      target.innerHTML = targetOptions(type.value);
+      target.value = tile?.moodId ?? tile?.flowId ?? tile?.deviceId ?? '';
+      type.onchange = () => { target.innerHTML = targetOptions(type.value); };
+      icon.value = tile ? iconLabel(tile.icon, glyphToName) : '';
+      label.value = tile?.label ?? '';
+      return row;
+    }
+
+    function readIcon(value) {
+      const icon = resolveIcon(value, icons);
+      if (icon.error) throw new Error(icon.error);
+      return icon.glyph;
+    }
+
+    function readChips() {
+      return [...$('chips').children].map((row) => {
+        const get = (k) => row.querySelector(`[data-k=${k}]`).value;
         if (!get('deviceId') || !get('capability')) return null;
-        const icon = resolveIcon(get('icon'), icons);
-        if (icon.error) throw new Error(icon.error);
-        return { deviceId: get('deviceId'), capability: get('capability'), icon: icon.glyph, unit: get('unit') };
+        return { deviceId: get('deviceId'), capability: get('capability'), icon: readIcon(get('icon')) };
+      });
+    }
+
+    function readMoods() {
+      return [...$('moods').children].map((row) => {
+        const get = (k) => row.querySelector(`[data-k=${k}]`);
+        const type = get('type').value;
+        const target = get('target');
+        const base = { icon: readIcon(get('icon').value), label: get('label').value.trim() };
+        if (type === 'mood' && target.value) return { type, moodId: target.value, ...base };
+        if (type === 'flow' && target.value) {
+          return { type, flowId: target.value, advanced: target.selectedOptions[0]?.dataset.advanced === 'true', ...base };
+        }
+        if (type === 'toggle' && target.value) return { type, deviceId: target.value, ...base };
+        if (type === 'trigger') return { type, ...base };
+        return null;
       });
     }
 
     async function loadPanel(id) {
       const cfg = await api('GET', `/config/${encodeURIComponent(id)}`);
-      const thermo = document.getElementById('thermostat');
-      thermo.innerHTML = deviceOptions((d) => d.capabilities.includes('target_temperature'));
-      thermo.value = cfg.home.thermostat?.deviceId ?? '';
-      const chips = document.getElementById('chips'); chips.innerHTML = '';
-      for (let i = 0; i < CHIPS; i++) chips.appendChild(slotRow('chip', i, cfg.home.chips[i]));
-      const values = document.getElementById('values'); values.innerHTML = '';
-      for (let i = 0; i < VALUES; i++) values.appendChild(slotRow('value', i, cfg.home.values[i]));
-      document.getElementById('btn-left').value = cfg.buttons.left;
-      document.getElementById('btn-right').value = cfg.buttons.right;
-      document.getElementById('form').hidden = false;
+      $('thermostat').innerHTML = deviceOptions((d) => d.capabilities.includes('target_temperature'));
+      $('thermostat').value = cfg.home.thermostat?.deviceId ?? '';
+      $('chips').innerHTML = '';
+      for (let i = 0; i < CHIPS; i++) $('chips').appendChild(chipRow(cfg.home.chips[i]));
+      $('moods').innerHTML = '';
+      for (let i = 0; i < MOODS; i++) $('moods').appendChild(moodRow(cfg.moods?.[i]));
+      $('cal-url').value = cfg.calendar?.url ?? '';
+      $('cal-days').value = cfg.calendar?.daysAhead ?? 7;
+      $('ss-min').value = cfg.screen?.screensaverMinutes ?? 0;
+      $('ss-dim').value = cfg.screen?.screensaverBrightness ?? 10;
+      $('btn-left').value = cfg.buttons.left;
+      $('btn-right').value = cfg.buttons.right;
+      $('form').hidden = false;
+    }
+
+    async function testCalendar() {
+      const out = $('cal-result');
+      out.className = ''; out.innerHTML = '<li>Loading…</li>';
+      try {
+        const events = await api('POST', '/calendar/test', { url: $('cal-url').value });
+        out.innerHTML = events.length
+          ? events.map((e) => `<li>${esc(new Date(e.start).toLocaleString([], e.allDay ? { dateStyle: 'medium' } : { dateStyle: 'medium', timeStyle: 'short' }))} — ${esc(e.title)}</li>`).join('')
+          : '<li>No events in the next 14 days.</li>';
+      } catch (e) {
+        out.className = 'error'; out.innerHTML = `<li>${esc(e.message || e)}</li>`;
+      }
     }
 
     async function save() {
-      const status = document.getElementById('status');
-      const id = document.getElementById('panel').value;
-      const thermostat = document.getElementById('thermostat').value;
-      let chips, values;
+      const status = $('status');
+      let chips, tiles;
       try {
-        chips = readSlots('chips');
-        values = readSlots('values');
+        chips = readChips();
+        tiles = readMoods();
       } catch (e) {
         status.className = 'error'; status.textContent = e.message;
         return;
       }
+      const thermostat = $('thermostat').value;
       const body = {
-        home: {
-          thermostat: thermostat ? { deviceId: thermostat } : null,
-          chips,
-          values,
-        },
-        buttons: { left: document.getElementById('btn-left').value, right: document.getElementById('btn-right').value },
+        home: { thermostat: thermostat ? { deviceId: thermostat } : null, chips },
+        moods: tiles,
+        calendar: $('cal-url').value.trim() ? { url: $('cal-url').value.trim(), daysAhead: Number($('cal-days').value) } : null,
+        screen: { screensaverMinutes: Number($('ss-min').value), screensaverBrightness: Number($('ss-dim').value) },
+        buttons: { left: $('btn-left').value, right: $('btn-right').value },
       };
       try {
-        await api('PUT', `/config/${encodeURIComponent(id)}`, body);
+        await api('PUT', `/config/${encodeURIComponent($('panel').value)}`, body);
         status.className = ''; status.textContent = 'Saved.';
       } catch (e) {
         status.className = 'error'; status.textContent = `Save failed: ${e.message || e}`;
@@ -122,14 +210,18 @@
     async function onHomeyReady(homey) {
       H = homey;
       H.ready();
-      [devices, icons] = await Promise.all([api('GET', '/devices'), api('GET', '/icons')]);
+      [devices, icons, moods, flows] = await Promise.all([
+        api('GET', '/devices'), api('GET', '/icons'),
+        api('GET', '/moods').catch(() => []), api('GET', '/flows').catch(() => []),
+      ]);
       glyphToName = Object.fromEntries(Object.entries(icons).map(([n, g]) => [g, n]));
-      document.getElementById('icon-names').innerHTML = Object.keys(icons).map((n) => `<option value="${n}">`).join('');
-      const panels = Object.values(devices).filter((d) => d.driverId === 'nspanel');
-      const sel = document.getElementById('panel');
+      $('icon-names').innerHTML = Object.keys(icons).map((n) => `<option value="${n}">`).join('');
+      const panels = Object.values(devices).filter((d) => d.driverId === 'nspanel'); // the app's own records (keyed by data id)
+      const sel = $('panel');
       sel.innerHTML = panels.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
       sel.onchange = () => loadPanel(sel.value);
-      document.getElementById('save').onclick = save;
+      $('save').onclick = save;
+      $('cal-test').onclick = testCalendar;
       if (panels.length) await loadPanel(panels[0].id);
       else document.body.insertAdjacentHTML('beforeend', '<p>No NSPanel paired yet.</p>');
     }

@@ -23,6 +23,7 @@ interface NSPanelDevice extends Homey.Device {
   wakeUp(): Promise<void>;
   playSound(melody: string): Promise<void>;
   gotoPage(page: string): Promise<void>;
+  refreshCalendar(): Promise<void>;
 }
 
 class NSPanelDriver extends Homey.Driver {
@@ -33,6 +34,9 @@ class NSPanelDriver extends Homey.Driver {
       .registerRunListener(async (args, state) => (args.button === 'any' || args.button === state.button)
         && (args.action === 'any' || args.action === state.action));
 
+    this.homey.flow.getDeviceTriggerCard('tile_pressed')
+      .registerRunListener(async (args, state) => args.tile === 'any' || args.tile === state.tile);
+
     const action = (id: string, run: (device: NSPanelDevice, args: Record<string, any>) => Promise<void>): void => {
       this.homey.flow.getActionCard(id).registerRunListener(async (args) => run(args.device as NSPanelDevice, args));
     };
@@ -41,6 +45,7 @@ class NSPanelDriver extends Homey.Driver {
     action('wake_up', (d) => d.wakeUp());
     action('play_sound', (d, a) => d.playSound(a.melody));
     action('goto_page', (d, a) => d.gotoPage(a.page));
+    action('refresh_calendar', (d) => d.refreshCalendar());
   }
 
   async onPairListDevices(): Promise<PairDevice[]> {

@@ -1,0 +1,118 @@
+{
+  "id": "tile_pressed",
+  "title": {
+    "en": "Mood tile pressed",
+    "nl": "Sfeertegel ingedrukt"
+  },
+  "titleFormatted": {
+    "en": "Mood tile [[tile]] pressed",
+    "nl": "Sfeertegel [[tile]] ingedrukt"
+  },
+  "hint": {
+    "en": "Fires when a tile on the moods page is tapped, for any tile type.",
+    "nl": "Wordt uitgevoerd wanneer een tegel op de sferenpagina wordt aangeraakt."
+  },
+  "tokens": [
+    {
+      "name": "tile",
+      "type": "number",
+      "title": {
+        "en": "Tile",
+        "nl": "Tegel"
+      },
+      "example": 3
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "title": {
+        "en": "Label",
+        "nl": "Label"
+      },
+      "example": {
+        "en": "Movie",
+        "nl": "Film"
+      }
+    }
+  ],
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "dropdown",
+      "name": "tile",
+      "title": {
+        "en": "Tile",
+        "nl": "Tegel"
+      },
+      "values": [
+        {
+          "id": "any",
+          "label": {
+            "en": "Any",
+            "nl": "Elke"
+          }
+        },
+        {
+          "id": "1",
+          "label": {
+            "en": "1",
+            "nl": "1"
+          }
+        },
+        {
+          "id": "2",
+          "label": {
+            "en": "2",
+            "nl": "2"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "3",
+            "nl": "3"
+          }
+        },
+        {
+          "id": "4",
+          "label": {
+            "en": "4",
+            "nl": "4"
+          }
+        },
+        {
+          "id": "5",
+          "label": {
+            "en": "5",
+            "nl": "5"
+          }
+        },
+        {
+          "id": "6",
+          "label": {
+            "en": "6",
+            "nl": "6"
+          }
+        },
+        {
+          "id": "7",
+          "label": {
+            "en": "7",
+            "nl": "7"
+          }
+        },
+        {
+          "id": "8",
+          "label": {
+            "en": "8",
+            "nl": "8"
+          }
+        }
+      ]
+    }
+  ]
+}

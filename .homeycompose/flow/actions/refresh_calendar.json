@@ -1,0 +1,18 @@
+{
+  "id": "refresh_calendar",
+  "title": {
+    "en": "Refresh calendar",
+    "nl": "Agenda vernieuwen"
+  },
+  "hint": {
+    "en": "Fetch the calendar now instead of waiting up to 15 minutes.",
+    "nl": "Haal de agenda nu op in plaats van tot 15 minuten te wachten."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    }
+  ]
+}

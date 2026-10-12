@@ -29,6 +29,10 @@ inline std::vector<std::string> split_csv(const std::string &s) {
 inline std::string escape_txt(const std::string &v) {
   std::string o;
   for (char c : v) {
+    if (c == '\n') {  // Nextion line break is the two characters \r
+      o += "\\r";
+      continue;
+    }
     if (c == '"' || c == '\\') o += '\\';
     o += c;
   }

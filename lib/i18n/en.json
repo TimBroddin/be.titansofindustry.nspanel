@@ -1,7 +1,23 @@
 {
-  "on": "On", "off": "Off",
-  "inside": "Inside", "next": "Up next", "noEvents": "No events", "today": "Today", "tomorrow": "Tomorrow",
-  "allDay": "all day", "moods": "Moods", "climate": "Climate", "calendar": "Calendar", "target": "Target",
-  "heating": "Heating", "atTemp": "At temperature", "now": "now", "outside": "outside", "noThermostat": "No thermostat",
-  "max": "max", "min": "min", "close": "Close"
+  "on": "On",
+  "off": "Off",
+  "inside": "Inside",
+  "next": "Up next",
+  "noEvents": "No events",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "allDay": "all day",
+  "moods": "Moods",
+  "climate": "Climate",
+  "calendar": "Calendar",
+  "target": "Target",
+  "heating": "Heating",
+  "atTemp": "At temperature",
+  "now": "now",
+  "outside": "outside",
+  "noThermostat": "No thermostat",
+  "max": "max",
+  "min": "min",
+  "close": "Close",
+  "actionFailed": "Action failed"
 }

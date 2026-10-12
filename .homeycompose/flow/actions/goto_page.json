@@ -25,25 +25,29 @@
         {
           "id": "home",
           "label": {
-            "en": "Home"
+            "en": "Home",
+            "nl": "Home"
           }
         },
         {
-          "id": "weather01",
+          "id": "moods",
           "label": {
-            "en": "Weather"
+            "en": "Moods",
+            "nl": "Sferen"
           }
         },
         {
           "id": "climate",
           "label": {
-            "en": "Climate"
+            "en": "Climate",
+            "nl": "Klimaat"
           }
         },
         {
-          "id": "settings",
+          "id": "calendar",
           "label": {
-            "en": "Settings"
+            "en": "Calendar",
+            "nl": "Agenda"
           }
         }
       ]
