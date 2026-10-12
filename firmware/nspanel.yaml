@@ -1,5 +1,5 @@
 substitutions:
-  name: nspanel
+  name: nspanelkeuken
   friendly_name: NSPanel
   icon_relay_on: "\uE334"  # mdi:lightbulb
 
