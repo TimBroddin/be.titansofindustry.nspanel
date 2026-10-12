@@ -33,6 +33,11 @@ export class PanelRenderer {
     this.sent.clear();
   }
 
+  // The panel changed these itself (e.g. a tile flipped on touch): resend them on the next flush.
+  forget(keys: string[]): void {
+    for (const k of keys) this.sent.delete(k);
+  }
+
   async flush(): Promise<void> {
     const dirty = this.dirtyKeys();
     for (let i = 0; i < dirty.length; i += MAX_BATCH) {

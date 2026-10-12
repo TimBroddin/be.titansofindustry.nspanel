@@ -60,3 +60,15 @@ describe('PanelRenderer', () => {
     expect(sent).toEqual([['home.a.txt']]);
   });
 });
+
+describe('PanelRenderer.forget', () => {
+  test('forgotten keys are resent even when the desired value did not change (panel changed it locally)', async () => {
+    const calls: string[][] = [];
+    const r = new PanelRenderer(async (k) => { calls.push(k); }, () => {}, 50);
+    r.update({ 'moods.i01.picc': '3', 'moods.l01.picc': '3', 'moods.title.txt': 'Sferen' });
+    await r.flush();
+    r.forget(['moods.i01.picc', 'moods.l01.picc']);
+    await r.flush();
+    expect(calls[1]).toEqual(['moods.i01.picc', 'moods.l01.picc']);
+  });
+});
