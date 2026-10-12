@@ -88,13 +88,19 @@ api:
       then:
         - rtttl.play:
             rtttl: !lambda return tone;
+    - action: power_cycle_display
+      then:
+        - switch.turn_off: screen_power
+        - delay: 2s
+        - switch.turn_on: screen_power
     - action: upload_tft
       variables:
         url: string
+        baud: int  # 0 = keep current (115200); 921600 is ~8x faster but not every panel copes
       then:
         - lambda: |-
             id(disp1).set_tft_url(url);
-            id(disp1).upload_tft();
+            id(disp1).upload_tft(baud > 0 ? (uint32_t) baud : 0);
 
 ota:
   - platform: esphome
@@ -250,6 +256,15 @@ binary_sensor:
           - script.execute: { id: hw_button, button: right, action: long }
 
 switch:
+  # Display power (inverted: low = on). Lets us power-cycle a hung display, e.g. after a failed TFT upload.
+  - platform: gpio
+    id: screen_power
+    name: Screen power
+    entity_category: config
+    pin:
+      number: 4
+      inverted: true
+    restore_mode: ALWAYS_ON
   - platform: gpio
     id: relay_1
     name: Relay 1
