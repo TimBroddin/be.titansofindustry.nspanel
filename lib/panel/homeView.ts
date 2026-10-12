@@ -1,6 +1,6 @@
 import { DashboardConfig, capKey } from '../config';
 import {
-  Lang, dayKey, formatNumber, formatShortDay, formatTime, isActive, t,
+  Lang, dayKey, dayLabel, formatNumber, formatShortDay, formatTime, isActive, t,
 } from '../i18n';
 import icons from '../icons.json';
 import { CalEvent } from '../sources/calendar';
@@ -39,7 +39,7 @@ export function buildHomeProps(config: DashboardConfig, s: HomeState): Record<st
   p['home.wx_hilo.txt'] = w && typeof w.high === 'number' && typeof w.low === 'number'
     ? `${t(lang, 'max')} ${deg(Math.round(w.high), 0)} · ${t(lang, 'min')} ${deg(Math.round(w.low), 0)}` : '';
 
-  const thermostat = config.home.thermostat;
+  const { thermostat } = config.home;
   const current = thermostat ? get(thermostat.deviceId, 'measure_temperature') : undefined;
   const target = thermostat ? get(thermostat.deviceId, 'target_temperature') : undefined;
   const indoor = typeof current === 'number' ? current : s.panelTemperature;
@@ -52,26 +52,22 @@ export function buildHomeProps(config: DashboardConfig, s: HomeState): Record<st
 
   const [first, second] = s.events ?? [];
   const today = dayKey(s.now, s.timeZone);
-  const tomorrow = dayKey(new Date(s.now.getTime() + 86400000), s.timeZone);
-  const keyOf = (e: CalEvent): string => dayKey(e.start < s.now ? s.now : e.start, s.timeZone);
-  if (!first) {
-    p['home.nx1_t.txt'] = '';
-    p['home.nx1.txt'] = t(lang, 'noEvents');
-    p['home.nx2.txt'] = '';
-  } else {
-    const isToday = keyOf(first) === today;
-    p['home.nx1_t.txt'] = isToday
-      ? (first.allDay ? '' : formatTime(first.start, s.h24, s.timeZone))
-      : formatShortDay(first.start, lang, s.timeZone).split(' ').slice(0, 2).join(' ');
-    p['home.nx1.txt'] = truncate(first.title, NX1_MAX);
-    if (second) {
-      const key = keyOf(second);
-      const day = key === today ? '' : key === tomorrow ? t(lang, 'tomorrow').toLowerCase() : formatShortDay(second.start, lang, s.timeZone);
-      const time = second.allDay ? t(lang, 'allDay') : formatTime(second.start, s.h24, s.timeZone);
-      p['home.nx2.txt'] = truncate([day, time, second.title].filter(Boolean).join(' '), NX2_MAX);
-    } else {
-      p['home.nx2.txt'] = '';
+  const shown = (e: CalEvent): Date => (e.start < s.now ? s.now : e.start);
+  p['home.nx1_t.txt'] = '';
+  p['home.nx1.txt'] = first ? truncate(first.title, NX1_MAX) : t(lang, 'noEvents');
+  p['home.nx2.txt'] = '';
+  if (first) {
+    if (dayKey(shown(first), s.timeZone) !== today) {
+      p['home.nx1_t.txt'] = formatShortDay(first.start, lang, s.timeZone).split(' ').slice(0, 2).join(' ');
+    } else if (!first.allDay) {
+      p['home.nx1_t.txt'] = formatTime(first.start, s.h24, s.timeZone);
     }
+  }
+  if (second) {
+    const label = dayLabel(shown(second), s.now, lang, s.timeZone);
+    const day = dayKey(shown(second), s.timeZone) === today ? '' : label.replace(t(lang, 'tomorrow'), t(lang, 'tomorrow').toLowerCase());
+    const time = second.allDay ? t(lang, 'allDay') : formatTime(second.start, s.h24, s.timeZone);
+    p['home.nx2.txt'] = truncate([day, time, second.title].filter(Boolean).join(' '), NX2_MAX);
   }
   return p;
 }

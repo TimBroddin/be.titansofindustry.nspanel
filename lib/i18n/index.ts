@@ -55,16 +55,30 @@ export function isActive(value: unknown): boolean {
 }
 
 export function formatShortDay(date: Date, lang: Lang, timeZone: string): string {
-  const parts = new Intl.DateTimeFormat(LOCALES[lang], { timeZone, weekday: 'short', day: 'numeric', month: 'short' }).formatToParts(date);
+  const parts = new Intl.DateTimeFormat(LOCALES[lang], {
+    timeZone, weekday: 'short', day: 'numeric', month: 'short',
+  }).formatToParts(date);
   const get = (type: string): string => (parts.find((p) => p.type === type)?.value ?? '').replace(/\.$/, '');
   return `${get('weekday')} ${get('day')} ${get('month')}`;
 }
 
 export function formatTime(date: Date, h24: boolean, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', minute: '2-digit', hourCycle: h24 ? 'h23' : 'h12' })
-    .format(date).replace(/^(\d):/, h24 ? '0$1:' : '$1:').replace(/ /g, ' ');
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone, hour: 'numeric', minute: '2-digit', hourCycle: h24 ? 'h23' : 'h12',
+  })
+    .format(date).replace(/^(\d):/, h24 ? '0$1:' : '$1:').replace(/\u202f/g, ' ');
 }
 
 export function dayKey(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(date);
+}
+
+// "Vandaag" / "Morgen" / "do 15 okt" for the day containing `date` (seen from `now`).
+export function dayLabel(date: Date, now: Date, lang: Lang, timeZone: string): string {
+  const key = dayKey(date, timeZone);
+  if (key === dayKey(now, timeZone)) return t(lang, 'today');
+  if (key === dayKey(new Date(now.getTime() + 86400000), timeZone)) return t(lang, 'tomorrow');
+  return formatShortDay(date, lang, timeZone);
 }

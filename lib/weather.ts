@@ -6,11 +6,12 @@ export async function fetchWeather(lat: number, lon: number, fetchFn: FetchFn = 
     + '&current=temperature_2m,weather_code,is_day&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto';
   const res = await fetchFn(url);
   if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
-  // eslint-disable-next-line camelcase -- Open-Meteo field names
+  /* eslint-disable camelcase -- Open-Meteo field names */
   const data = await res.json() as {
     current?: { temperature_2m?: unknown; weather_code?: unknown; is_day?: unknown };
     daily?: { temperature_2m_max?: unknown[]; temperature_2m_min?: unknown[] };
   };
+  /* eslint-enable camelcase */
   const c = data.current;
   if (!c || typeof c.temperature_2m !== 'number' || typeof c.weather_code !== 'number') {
     throw new Error('Open-Meteo: unexpected response');

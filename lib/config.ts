@@ -71,7 +71,9 @@ function parseTile(item: Obj): MoodTile | null {
   const base = { icon: decodeIcon(item.icon), label: str(item.label) };
   switch (item.type) {
     case 'mood': return str(item.moodId) ? { type: 'mood', moodId: str(item.moodId), ...base } : null;
-    case 'flow': return str(item.flowId) ? { type: 'flow', flowId: str(item.flowId), advanced: item.advanced === true, ...base } : null;
+    case 'flow': return str(item.flowId) ? {
+      type: 'flow', flowId: str(item.flowId), advanced: item.advanced === true, ...base,
+    } : null;
     case 'toggle': return str(item.deviceId) ? { type: 'toggle', deviceId: str(item.deviceId), ...base } : null;
     case 'trigger': return { type: 'trigger', ...base };
     default: return null;
