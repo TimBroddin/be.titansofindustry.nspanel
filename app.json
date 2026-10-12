@@ -8,10 +8,10 @@
     "local"
   ],
   "name": {
-    "en": "NSPanel HA Blueprint"
+    "en": "NSPanel for Homey"
   },
   "description": {
-    "en": "Adds support for NSPanel devices running the HA Blueprint firmware. "
+    "en": "Fast, configurable Homey dashboard for the Sonoff NSPanel."
   },
   "category": [
     "appliances"
@@ -42,309 +42,6 @@
   },
   "flow": {
     "triggers": [
-      {
-        "id": "button_pressed",
-        "title": {
-          "en": "A button was pressed"
-        },
-        "titleFormatted": {
-          "en": "[[button]] was [[action]]"
-        },
-        "hint": {
-          "en": "Triggers when a physical or touch button is pressed on the NSPanel"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=nspanel"
-          },
-          {
-            "type": "dropdown",
-            "name": "button",
-            "title": {
-              "en": "Button"
-            },
-            "values": [
-              {
-                "id": "hw_bt_left",
-                "label": {
-                  "en": "Left Physical Button"
-                }
-              },
-              {
-                "id": "hw_bt_right",
-                "label": {
-                  "en": "Right Physical Button"
-                }
-              },
-              {
-                "id": "buttonpage01.bt01",
-                "label": {
-                  "en": "Page 1 - Button 1"
-                }
-              },
-              {
-                "id": "buttonpage01.bt02",
-                "label": {
-                  "en": "Page 1 - Button 2"
-                }
-              },
-              {
-                "id": "buttonpage01.bt03",
-                "label": {
-                  "en": "Page 1 - Button 3"
-                }
-              },
-              {
-                "id": "buttonpage01.bt04",
-                "label": {
-                  "en": "Page 1 - Button 4"
-                }
-              },
-              {
-                "id": "buttonpage01.bt05",
-                "label": {
-                  "en": "Page 1 - Button 5"
-                }
-              },
-              {
-                "id": "buttonpage01.bt06",
-                "label": {
-                  "en": "Page 1 - Button 6"
-                }
-              },
-              {
-                "id": "buttonpage01.bt07",
-                "label": {
-                  "en": "Page 1 - Button 7"
-                }
-              },
-              {
-                "id": "buttonpage01.bt08",
-                "label": {
-                  "en": "Page 1 - Button 8"
-                }
-              },
-              {
-                "id": "buttonpage02.bt01",
-                "label": {
-                  "en": "Page 2 - Button 1"
-                }
-              },
-              {
-                "id": "buttonpage02.bt02",
-                "label": {
-                  "en": "Page 2 - Button 2"
-                }
-              },
-              {
-                "id": "buttonpage02.bt03",
-                "label": {
-                  "en": "Page 2 - Button 3"
-                }
-              },
-              {
-                "id": "buttonpage02.bt04",
-                "label": {
-                  "en": "Page 2 - Button 4"
-                }
-              },
-              {
-                "id": "buttonpage02.bt05",
-                "label": {
-                  "en": "Page 2 - Button 5"
-                }
-              },
-              {
-                "id": "buttonpage02.bt06",
-                "label": {
-                  "en": "Page 2 - Button 6"
-                }
-              },
-              {
-                "id": "buttonpage02.bt07",
-                "label": {
-                  "en": "Page 2 - Button 7"
-                }
-              },
-              {
-                "id": "buttonpage02.bt08",
-                "label": {
-                  "en": "Page 2 - Button 8"
-                }
-              },
-              {
-                "id": "buttonpage03.bt01",
-                "label": {
-                  "en": "Page 3 - Button 1"
-                }
-              },
-              {
-                "id": "buttonpage03.bt02",
-                "label": {
-                  "en": "Page 3 - Button 2"
-                }
-              },
-              {
-                "id": "buttonpage03.bt03",
-                "label": {
-                  "en": "Page 3 - Button 3"
-                }
-              },
-              {
-                "id": "buttonpage03.bt04",
-                "label": {
-                  "en": "Page 3 - Button 4"
-                }
-              },
-              {
-                "id": "buttonpage03.bt05",
-                "label": {
-                  "en": "Page 3 - Button 5"
-                }
-              },
-              {
-                "id": "buttonpage03.bt06",
-                "label": {
-                  "en": "Page 3 - Button 6"
-                }
-              },
-              {
-                "id": "buttonpage03.bt07",
-                "label": {
-                  "en": "Page 3 - Button 7"
-                }
-              },
-              {
-                "id": "buttonpage03.bt08",
-                "label": {
-                  "en": "Page 3 - Button 8"
-                }
-              },
-              {
-                "id": "buttonpage04.bt01",
-                "label": {
-                  "en": "Page 4 - Button 1"
-                }
-              },
-              {
-                "id": "buttonpage04.bt02",
-                "label": {
-                  "en": "Page 4 - Button 2"
-                }
-              },
-              {
-                "id": "buttonpage04.bt03",
-                "label": {
-                  "en": "Page 4 - Button 3"
-                }
-              },
-              {
-                "id": "buttonpage04.bt04",
-                "label": {
-                  "en": "Page 4 - Button 4"
-                }
-              },
-              {
-                "id": "buttonpage04.bt05",
-                "label": {
-                  "en": "Page 4 - Button 5"
-                }
-              },
-              {
-                "id": "buttonpage04.bt06",
-                "label": {
-                  "en": "Page 4 - Button 6"
-                }
-              },
-              {
-                "id": "buttonpage04.bt07",
-                "label": {
-                  "en": "Page 4 - Button 7"
-                }
-              },
-              {
-                "id": "buttonpage04.bt08",
-                "label": {
-                  "en": "Page 4 - Button 8"
-                }
-              },
-              {
-                "id": "any",
-                "label": {
-                  "en": "Any Button"
-                }
-              }
-            ]
-          },
-          {
-            "type": "dropdown",
-            "name": "action",
-            "title": {
-              "en": "Action"
-            },
-            "values": [
-              {
-                "id": "short_click",
-                "label": {
-                  "en": "Short Clicked"
-                }
-              },
-              {
-                "id": "long_click",
-                "label": {
-                  "en": "Long Clicked"
-                }
-              },
-              {
-                "id": "release",
-                "label": {
-                  "en": "Released"
-                }
-              },
-              {
-                "id": "any",
-                "label": {
-                  "en": "Any Action"
-                }
-              }
-            ]
-          }
-        ],
-        "tokens": [
-          {
-            "name": "button",
-            "type": "string",
-            "title": {
-              "en": "Button"
-            },
-            "example": {
-              "en": "hw_bt_left"
-            }
-          },
-          {
-            "name": "action",
-            "type": "string",
-            "title": {
-              "en": "Action"
-            },
-            "example": {
-              "en": "short_click"
-            }
-          },
-          {
-            "name": "page",
-            "type": "string",
-            "title": {
-              "en": "Page"
-            },
-            "example": {
-              "en": "buttonpage01"
-            }
-          }
-        ]
-      },
       {
         "id": "physical_button_pressed",
         "title": {
@@ -492,51 +189,9 @@
                 }
               },
               {
-                "id": "buttonpage01",
+                "id": "weather01",
                 "label": {
-                  "en": "Buttons Page 1"
-                }
-              },
-              {
-                "id": "buttonpage02",
-                "label": {
-                  "en": "Buttons Page 2"
-                }
-              },
-              {
-                "id": "buttonpage03",
-                "label": {
-                  "en": "Buttons Page 3"
-                }
-              },
-              {
-                "id": "buttonpage04",
-                "label": {
-                  "en": "Buttons Page 4"
-                }
-              },
-              {
-                "id": "entitypage01",
-                "label": {
-                  "en": "Entity Page 1"
-                }
-              },
-              {
-                "id": "entitypage02",
-                "label": {
-                  "en": "Entity Page 2"
-                }
-              },
-              {
-                "id": "entitypage03",
-                "label": {
-                  "en": "Entity Page 3"
-                }
-              },
-              {
-                "id": "entitypage04",
-                "label": {
-                  "en": "Entity Page 4"
+                  "en": "Weather"
                 }
               },
               {
@@ -546,45 +201,9 @@
                 }
               },
               {
-                "id": "weather01",
-                "label": {
-                  "en": "Weather"
-                }
-              },
-              {
-                "id": "utilities",
-                "label": {
-                  "en": "Utilities"
-                }
-              },
-              {
-                "id": "qrcode",
-                "label": {
-                  "en": "QR Code"
-                }
-              },
-              {
-                "id": "media_player",
-                "label": {
-                  "en": "Media Player"
-                }
-              },
-              {
-                "id": "alarm",
-                "label": {
-                  "en": "Alarm"
-                }
-              },
-              {
                 "id": "settings",
                 "label": {
                   "en": "Settings"
-                }
-              },
-              {
-                "id": "screensaver",
-                "label": {
-                  "en": "Screensaver"
                 }
               }
             ]
@@ -708,396 +327,6 @@
         ]
       },
       {
-        "id": "show_qrcode",
-        "title": {
-          "en": "Show QR code"
-        },
-        "titleFormatted": {
-          "en": "Show QR code with [[content]] and heading [[heading]]"
-        },
-        "hint": {
-          "en": "Display a QR code on the NSPanel screen"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=nspanel"
-          },
-          {
-            "type": "text",
-            "name": "content",
-            "title": {
-              "en": "QR Code Content"
-            },
-            "placeholder": {
-              "en": "https://example.com or text..."
-            }
-          },
-          {
-            "type": "text",
-            "name": "heading",
-            "title": {
-              "en": "Heading"
-            },
-            "placeholder": {
-              "en": "Scan me!"
-            },
-            "required": false
-          }
-        ]
-      },
-      {
-        "id": "update_button",
-        "title": {
-          "en": "Update button appearance"
-        },
-        "titleFormatted": {
-          "en": "Set [[button]] on [[page]] to [[label]] ([[state]])"
-        },
-        "hint": {
-          "en": "Update the appearance of a button on the NSPanel"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=nspanel"
-          },
-          {
-            "type": "dropdown",
-            "name": "page",
-            "title": {
-              "en": "Page"
-            },
-            "values": [
-              {
-                "id": "buttonpage01",
-                "label": {
-                  "en": "Button Page 1"
-                }
-              },
-              {
-                "id": "buttonpage02",
-                "label": {
-                  "en": "Button Page 2"
-                }
-              },
-              {
-                "id": "buttonpage03",
-                "label": {
-                  "en": "Button Page 3"
-                }
-              },
-              {
-                "id": "buttonpage04",
-                "label": {
-                  "en": "Button Page 4"
-                }
-              }
-            ]
-          },
-          {
-            "type": "dropdown",
-            "name": "button",
-            "title": {
-              "en": "Button"
-            },
-            "values": [
-              {
-                "id": "bt01",
-                "label": {
-                  "en": "Button 1"
-                }
-              },
-              {
-                "id": "bt02",
-                "label": {
-                  "en": "Button 2"
-                }
-              },
-              {
-                "id": "bt03",
-                "label": {
-                  "en": "Button 3"
-                }
-              },
-              {
-                "id": "bt04",
-                "label": {
-                  "en": "Button 4"
-                }
-              },
-              {
-                "id": "bt05",
-                "label": {
-                  "en": "Button 5"
-                }
-              },
-              {
-                "id": "bt06",
-                "label": {
-                  "en": "Button 6"
-                }
-              },
-              {
-                "id": "bt07",
-                "label": {
-                  "en": "Button 7"
-                }
-              },
-              {
-                "id": "bt08",
-                "label": {
-                  "en": "Button 8"
-                }
-              }
-            ]
-          },
-          {
-            "type": "text",
-            "name": "label",
-            "title": {
-              "en": "Label"
-            },
-            "placeholder": {
-              "en": "Button label"
-            }
-          },
-          {
-            "type": "checkbox",
-            "name": "state",
-            "title": {
-              "en": "On/Off State"
-            }
-          }
-        ]
-      },
-      {
-        "id": "update_home_entity",
-        "title": {
-          "en": "Update home screen entity"
-        },
-        "titleFormatted": {
-          "en": "Set home [[entity]] to [[value]] with icon [[icon]]"
-        },
-        "hint": {
-          "en": "Update an entity display on the NSPanel home screen (chips, values, etc.)"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=nspanel"
-          },
-          {
-            "type": "dropdown",
-            "name": "entity",
-            "title": {
-              "en": "Entity"
-            },
-            "values": [
-              {
-                "id": "chip01",
-                "label": {
-                  "en": "Chip 1"
-                }
-              },
-              {
-                "id": "chip02",
-                "label": {
-                  "en": "Chip 2"
-                }
-              },
-              {
-                "id": "chip03",
-                "label": {
-                  "en": "Chip 3"
-                }
-              },
-              {
-                "id": "chip04",
-                "label": {
-                  "en": "Chip 4"
-                }
-              },
-              {
-                "id": "chip05",
-                "label": {
-                  "en": "Chip 5"
-                }
-              },
-              {
-                "id": "chip06",
-                "label": {
-                  "en": "Chip 6"
-                }
-              },
-              {
-                "id": "outdoor_temp",
-                "label": {
-                  "en": "Outdoor Temperature"
-                }
-              },
-              {
-                "id": "indoor_temp",
-                "label": {
-                  "en": "Indoor Temperature"
-                }
-              },
-              {
-                "id": "weather_icon",
-                "label": {
-                  "en": "Weather Icon"
-                }
-              },
-              {
-                "id": "date",
-                "label": {
-                  "en": "Date Display"
-                }
-              },
-              {
-                "id": "time",
-                "label": {
-                  "en": "Time Display"
-                }
-              }
-            ]
-          },
-          {
-            "type": "text",
-            "name": "value",
-            "title": {
-              "en": "Value/Text"
-            },
-            "placeholder": {
-              "en": "Display value"
-            }
-          },
-          {
-            "type": "text",
-            "name": "icon",
-            "title": {
-              "en": "Icon (MDI codepoint)"
-            },
-            "placeholder": {
-              "en": "e.g. \\uE599 for sunny"
-            }
-          }
-        ]
-      },
-      {
-        "id": "update_weather",
-        "title": {
-          "en": "Update weather display"
-        },
-        "titleFormatted": {
-          "en": "Update weather: [[temperature]]° [[condition]]"
-        },
-        "hint": {
-          "en": "Update the weather information displayed on the NSPanel home screen"
-        },
-        "args": [
-          {
-            "type": "device",
-            "name": "device",
-            "filter": "driver_id=nspanel"
-          },
-          {
-            "type": "text",
-            "name": "temperature",
-            "title": {
-              "en": "Temperature"
-            },
-            "placeholder": {
-              "en": "21"
-            }
-          },
-          {
-            "type": "dropdown",
-            "name": "condition",
-            "title": {
-              "en": "Weather Condition"
-            },
-            "values": [
-              {
-                "id": "sunny",
-                "label": {
-                  "en": "Sunny"
-                }
-              },
-              {
-                "id": "clear-night",
-                "label": {
-                  "en": "Clear Night"
-                }
-              },
-              {
-                "id": "partlycloudy",
-                "label": {
-                  "en": "Partly Cloudy"
-                }
-              },
-              {
-                "id": "cloudy",
-                "label": {
-                  "en": "Cloudy"
-                }
-              },
-              {
-                "id": "fog",
-                "label": {
-                  "en": "Fog"
-                }
-              },
-              {
-                "id": "rainy",
-                "label": {
-                  "en": "Rainy"
-                }
-              },
-              {
-                "id": "snowy",
-                "label": {
-                  "en": "Snowy"
-                }
-              },
-              {
-                "id": "lightning",
-                "label": {
-                  "en": "Thunderstorm"
-                }
-              },
-              {
-                "id": "windy",
-                "label": {
-                  "en": "Windy"
-                }
-              },
-              {
-                "id": "pouring",
-                "label": {
-                  "en": "Heavy Rain"
-                }
-              },
-              {
-                "id": "snowy-rainy",
-                "label": {
-                  "en": "Sleet"
-                }
-              },
-              {
-                "id": "hail",
-                "label": {
-                  "en": "Hail"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      {
         "id": "wake_up",
         "title": {
           "en": "Wake up display"
@@ -1129,8 +358,6 @@
         "measure_temperature",
         "nspanel_page",
         "nspanel_rssi",
-        "nspanel_brightness",
-        "nspanel_version_blueprint",
         "nspanel_version_esphome",
         "nspanel_version_tft"
       ],
@@ -1271,6 +498,28 @@
           },
           "children": [
             {
+              "id": "language",
+              "type": "dropdown",
+              "label": {
+                "en": "Panel language"
+              },
+              "value": "nl",
+              "values": [
+                {
+                  "id": "nl",
+                  "label": {
+                    "en": "Nederlands"
+                  }
+                },
+                {
+                  "id": "en",
+                  "label": {
+                    "en": "English"
+                  }
+                }
+              ]
+            },
+            {
               "id": "dateFormat",
               "type": "dropdown",
               "label": {
@@ -1339,22 +588,6 @@
     }
   ],
   "capabilities": {
-    "nspanel_brightness": {
-      "type": "number",
-      "title": {
-        "en": "Display Brightness"
-      },
-      "units": {
-        "en": "%"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/icons/sun.svg",
-      "insights": true,
-      "min": 0,
-      "max": 100
-    },
     "nspanel_page": {
       "type": "string",
       "title": {
@@ -1380,16 +613,6 @@
       "insights": true,
       "min": -100,
       "max": 0
-    },
-    "nspanel_version_blueprint": {
-      "type": "string",
-      "title": {
-        "en": "Blueprint Version"
-      },
-      "getable": true,
-      "setable": false,
-      "uiComponent": "sensor",
-      "icon": "/assets/icons/tag.svg"
     },
     "nspanel_version_esphome": {
       "type": "string",

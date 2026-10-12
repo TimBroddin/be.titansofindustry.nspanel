@@ -7,10 +7,10 @@
     "local"
   ],
   "name": {
-    "en": "NSPanel HA Blueprint"
+    "en": "NSPanel for Homey"
   },
   "description": {
-    "en": "Adds support for NSPanel devices running the HA Blueprint firmware. "
+    "en": "Fast, configurable Homey dashboard for the Sonoff NSPanel."
   },
   "category": [
     "appliances"

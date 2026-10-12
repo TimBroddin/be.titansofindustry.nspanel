@@ -8,8 +8,6 @@
     "measure_temperature",
     "nspanel_page",
     "nspanel_rssi",
-    "nspanel_brightness",
-    "nspanel_version_blueprint",
     "nspanel_version_esphome",
     "nspanel_version_tft"
   ],
@@ -150,6 +148,28 @@
       },
       "children": [
         {
+          "id": "language",
+          "type": "dropdown",
+          "label": {
+            "en": "Panel language"
+          },
+          "value": "nl",
+          "values": [
+            {
+              "id": "nl",
+              "label": {
+                "en": "Nederlands"
+              }
+            },
+            {
+              "id": "en",
+              "label": {
+                "en": "English"
+              }
+            }
+          ]
+        },
+        {
           "id": "dateFormat",
           "type": "dropdown",
           "label": {
@@ -157,11 +177,36 @@
           },
           "value": "ddd DD MMM",
           "values": [
-            { "id": "ddd DD MMM", "label": { "en": "Mon 25 Dec" } },
-            { "id": "DD/MM/YYYY", "label": { "en": "25/12/2024" } },
-            { "id": "MM/DD/YYYY", "label": { "en": "12/25/2024" } },
-            { "id": "YYYY-MM-DD", "label": { "en": "2024-12-25" } },
-            { "id": "DD MMM YYYY", "label": { "en": "25 Dec 2024" } }
+            {
+              "id": "ddd DD MMM",
+              "label": {
+                "en": "Mon 25 Dec"
+              }
+            },
+            {
+              "id": "DD/MM/YYYY",
+              "label": {
+                "en": "25/12/2024"
+              }
+            },
+            {
+              "id": "MM/DD/YYYY",
+              "label": {
+                "en": "12/25/2024"
+              }
+            },
+            {
+              "id": "YYYY-MM-DD",
+              "label": {
+                "en": "2024-12-25"
+              }
+            },
+            {
+              "id": "DD MMM YYYY",
+              "label": {
+                "en": "25 Dec 2024"
+              }
+            }
           ]
         },
         {
@@ -172,8 +217,18 @@
           },
           "value": "HH:mm",
           "values": [
-            { "id": "HH:mm", "label": { "en": "24-hour (14:30)" } },
-            { "id": "h:mm A", "label": { "en": "12-hour (2:30 PM)" } }
+            {
+              "id": "HH:mm",
+              "label": {
+                "en": "24-hour (14:30)"
+              }
+            },
+            {
+              "id": "h:mm A",
+              "label": {
+                "en": "12-hour (2:30 PM)"
+              }
+            }
           ]
         }
       ]

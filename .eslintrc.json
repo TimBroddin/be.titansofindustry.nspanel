@@ -1,3 +1,10 @@
 {
-  "extends": "athom/homey-app"
+  "extends": "athom/homey-app",
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "node/no-missing-import": "off",
+    "no-useless-constructor": "off",
+    "no-empty-function": "off"
+  }
 }

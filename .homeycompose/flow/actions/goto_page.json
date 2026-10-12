@@ -22,23 +22,30 @@
         "en": "Page"
       },
       "values": [
-        { "id": "home", "label": { "en": "Home" } },
-        { "id": "buttonpage01", "label": { "en": "Buttons Page 1" } },
-        { "id": "buttonpage02", "label": { "en": "Buttons Page 2" } },
-        { "id": "buttonpage03", "label": { "en": "Buttons Page 3" } },
-        { "id": "buttonpage04", "label": { "en": "Buttons Page 4" } },
-        { "id": "entitypage01", "label": { "en": "Entity Page 1" } },
-        { "id": "entitypage02", "label": { "en": "Entity Page 2" } },
-        { "id": "entitypage03", "label": { "en": "Entity Page 3" } },
-        { "id": "entitypage04", "label": { "en": "Entity Page 4" } },
-        { "id": "climate", "label": { "en": "Climate" } },
-        { "id": "weather01", "label": { "en": "Weather" } },
-        { "id": "utilities", "label": { "en": "Utilities" } },
-        { "id": "qrcode", "label": { "en": "QR Code" } },
-        { "id": "media_player", "label": { "en": "Media Player" } },
-        { "id": "alarm", "label": { "en": "Alarm" } },
-        { "id": "settings", "label": { "en": "Settings" } },
-        { "id": "screensaver", "label": { "en": "Screensaver" } }
+        {
+          "id": "home",
+          "label": {
+            "en": "Home"
+          }
+        },
+        {
+          "id": "weather01",
+          "label": {
+            "en": "Weather"
+          }
+        },
+        {
+          "id": "climate",
+          "label": {
+            "en": "Climate"
+          }
+        },
+        {
+          "id": "settings",
+          "label": {
+            "en": "Settings"
+          }
+        }
       ]
     }
   ]

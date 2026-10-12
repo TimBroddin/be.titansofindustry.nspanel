@@ -6,6 +6,7 @@ export async function fetchWeather(lat: number, lon: number, fetchFn: FetchFn = 
     + '&current=temperature_2m,weather_code,is_day&timezone=auto';
   const res = await fetchFn(url);
   if (!res.ok) throw new Error(`Open-Meteo HTTP ${res.status}`);
+  // eslint-disable-next-line camelcase -- Open-Meteo field names
   const data = await res.json() as { current?: { temperature_2m?: unknown; weather_code?: unknown; is_day?: unknown } };
   const c = data.current;
   if (!c || typeof c.temperature_2m !== 'number' || typeof c.weather_code !== 'number') {
