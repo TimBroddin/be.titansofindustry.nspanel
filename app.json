@@ -35,9 +35,17 @@
       "method": "GET",
       "path": "/devices"
     },
-    "putNspanelConfig": {
+    "getIcons": {
+      "method": "GET",
+      "path": "/icons"
+    },
+    "getConfig": {
+      "method": "GET",
+      "path": "/config/:deviceId"
+    },
+    "putConfig": {
       "method": "PUT",
-      "path": "/nspanel/:deviceId/config"
+      "path": "/config/:deviceId"
     }
   },
   "flow": {
