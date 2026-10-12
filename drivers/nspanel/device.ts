@@ -28,6 +28,7 @@ const WEATHER_INTERVAL_MS = 30 * 60 * 1000;
 const CALENDAR_INTERVAL_MS = 15 * 60 * 1000;
 const RENDER_TICK_MS = 60 * 1000; // keeps date and "up next" current; unchanged values are not resent
 const MOMENTARY_MS = 1500;
+const CALENDAR_STALE_MS = 2 * CALENDAR_INTERVAL_MS;
 
 const SENSOR_CAPABILITIES: Record<string, string> = {
   RSSI: 'nspanel_rssi',
@@ -48,6 +49,8 @@ class NSPanelDevice extends Homey.Device {
   private config!: DashboardConfig;
   private weather: WeatherNow | null = null;
   private events: CalEvent[] | null = null;
+  private calendarUrl = '';
+  private calendarOkAt = 0;
   private thermostat: ThermostatInfo | null = null;
   private panelTemperature: number | null = null;
   private momentary = new Set<number>();
@@ -256,7 +259,12 @@ class NSPanelDevice extends Homey.Device {
         outside: weather?.temperature ?? null,
       }),
       ...buildCalendarProps(upcoming ?? [], {
-        now, lang, timeZone, h24, fonts,
+        now,
+        lang,
+        timeZone,
+        h24,
+        fonts,
+        stale: Boolean(this.config.calendar) && Date.now() - this.calendarOkAt > CALENDAR_STALE_MS,
       }),
       'screensaver.date.txt': formatDate(now, s.dateFormat || 'ddd DD MMM', lang, timeZone),
       'notification.close_lbl.txt': t(lang, 'close'),
@@ -274,14 +282,23 @@ class NSPanelDevice extends Homey.Device {
 
   async refreshCalendar(): Promise<void> {
     const cal = this.config.calendar;
-    if (!cal) {
+    if (cal?.url !== this.calendarUrl) {
+      // A different (or removed) calendar: never keep showing the previous one's events.
+      this.calendarUrl = cal?.url ?? '';
       this.events = null;
+      this.calendarOkAt = 0;
+    }
+    if (!cal) {
       this.render();
       return;
     }
-    const ics = await fetchCalendar(cal.url);
-    this.events = parseUpcoming(ics, new Date(), cal.daysAhead, this.homey.clock.getTimezone());
-    this.render();
+    try {
+      const ics = await fetchCalendar(cal.url);
+      this.events = parseUpcoming(ics, new Date(), cal.daysAhead, this.homey.clock.getTimezone());
+      this.calendarOkAt = Date.now();
+    } finally {
+      this.render();
+    }
   }
 
   private onSensor(name: string, value: unknown): void {
@@ -317,8 +334,8 @@ class NSPanelDevice extends Homey.Device {
       this.renderer.forget(tileKeys(result.revertTile));
       this.render();
     }
-    if (ev.type === 'touch' && ev.page === 'climate') {
-      // The panel already shows the tapped target; resend ours so a refused or clamped value is corrected.
+    if (result.revertClimate) {
+      // The panel shows a target Homey did not take; resend the real one.
       this.renderer.forget(['climate.tgt.val', 'climate.tgt_txt.txt']);
       this.render();
     }

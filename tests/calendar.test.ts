@@ -86,6 +86,29 @@ describe('parseUpcoming', () => {
     ]);
   });
 
+  test('long-running series (daily since 2018) still yields upcoming occurrences', () => {
+    const out = parseUpcoming(cal(ev('old', ['DTSTART;TZID=Europe/Brussels:20180101T190000', 'DTEND;TZID=Europe/Brussels:20180101T200000', 'RRULE:FREQ=DAILY', 'SUMMARY:Afwas'])), NOW, 2, TZ);
+    expect(out.map((e) => iso(e.start))).toEqual(['2026-10-12T17:00:00.000Z', '2026-10-13T17:00:00.000Z']);
+  });
+
+  test('an occurrence moved out of the window does not cut off the rest of the series', () => {
+    const out = parseUpcoming(cal(
+      ev('mv', ['DTSTART;TZID=Europe/Brussels:20261001T190000', 'DTEND;TZID=Europe/Brussels:20261001T200000', 'RRULE:FREQ=DAILY', 'SUMMARY:Yoga']),
+      ev('mv', ['RECURRENCE-ID;TZID=Europe/Brussels:20261013T190000', 'DTSTART;TZID=Europe/Brussels:20261030T190000',
+        'DTEND;TZID=Europe/Brussels:20261030T200000', 'SUMMARY:Yoga (verzet)']),
+    ), NOW, 5, TZ);
+    expect(out.map((e) => iso(e.start))).toEqual(['2026-10-12T17:00:00.000Z', '2026-10-14T17:00:00.000Z', '2026-10-15T17:00:00.000Z', '2026-10-16T17:00:00.000Z']);
+  });
+
+  test('an occurrence moved into the window from later is included', () => {
+    const out = parseUpcoming(cal(
+      ev('in', ['DTSTART;TZID=Europe/Brussels:20261001T090000', 'DTEND;TZID=Europe/Brussels:20261001T100000', 'RRULE:FREQ=MONTHLY', 'SUMMARY:Kapper']),
+      ev('in', ['RECURRENCE-ID;TZID=Europe/Brussels:20261101T090000', 'DTSTART;TZID=Europe/Brussels:20261014T090000',
+        'DTEND;TZID=Europe/Brussels:20261014T100000', 'SUMMARY:Kapper (vervroegd)']),
+    ), NOW, 5, TZ);
+    expect(out.map((e) => [iso(e.start), e.title])).toEqual([['2026-10-14T07:00:00.000Z', 'Kapper (vervroegd)']]);
+  });
+
   test('caps the result at 20 events', () => {
     const out = parseUpcoming(cal(ev('k', ['DTSTART;TZID=Europe/Brussels:20261012T120000', 'DURATION:PT10M', 'RRULE:FREQ=HOURLY', 'SUMMARY:Ping'])), NOW, 7, TZ);
     expect(out).toHaveLength(20);

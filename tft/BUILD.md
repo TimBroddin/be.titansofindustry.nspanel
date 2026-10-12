@@ -79,7 +79,9 @@ printh FF FF FF
 ### All pages except boot and screensaver: Preinitialize Event
 ```
 dim=brightness
+sendme
 ```
+`sendme` tells the firmware which page is open. Without it nothing is drawn on the page. Keep it as the **last** line of every Preinitialize Event.
 
 ### home
 - **Timer** `tm_idle`: period 60000, enabled. Timer Event:
@@ -94,7 +96,7 @@ if(ss_min>0)
 }
 ```
 - **TouchCap** `tc`, Touch Press Event: `idle=0`
-- Page Preinitialize Event (in addition to `dim=brightness`): `idle=0`
+- Page Preinitialize Event: put `idle=0` **before** `dim=brightness` / `sendme`
 - Hotspot touch release events:
   - `NAV_MOODS`: `page moods`
   - `NAV_CLIMATE`: `page climate`
@@ -107,7 +109,7 @@ if(ss_min>0)
 tm_back.en=0
 tm_back.en=1
 ```
-- Hotspot `home`, `GOTO_HOME`: `page home`
+- Hotspot `go_home`, `GOTO_HOME`: `page home`
 
 ### moods: `TILE_NN` (Touch Release Event of both `iNN` and `lNN`)
 For tile 01 (repeat for 02–08, changing the two names and the number in `csv.txt`):
@@ -138,7 +140,15 @@ if(tgt.val>tmax.val)
 }
 click_fmt
 ```
-- `TARGET_MINUS` (hotspot `minus`): the same, with `tgt.val-=tstep.val` and `if(tgt.val<tmin.val) { tgt.val=tmin.val }`.
+- `TARGET_MINUS` (hotspot `minus`):
+```
+tgt.val-=tstep.val
+if(tgt.val<tmin.val)
+{
+  tgt.val=tmin.val
+}
+click_fmt
+```
 - Replace `click_fmt` in both with:
 ```
 sys0=tgt.val/10
@@ -167,7 +177,11 @@ page home
 ```
 
 ### screensaver
-- Page Preinitialize Event: `dim=ss_dim`
+- Page Preinitialize Event:
+```
+dim=ss_dim
+sendme
+```
 - `WAKE` (hotspot `wake`, Touch Press Event):
 ```
 dim=brightness

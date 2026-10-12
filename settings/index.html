@@ -3,6 +3,7 @@
 <head>
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <script type="text/javascript" src="iconField.js"></script>
+  <script type="text/javascript" src="moodOptions.js"></script>
   <style>
     body { font-family: -apple-system, sans-serif; padding: 12px; }
     fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 10px; }
@@ -93,11 +94,12 @@
       return row;
     }
 
-    function targetOptions(type) {
-      if (type === 'mood') return '<option value="">—</option>' + moods.map((m) => `<option value="${esc(m.id)}">${esc(m.zone ? m.zone + ' · ' : '')}${esc(m.name)}</option>`).join('');
-      if (type === 'flow') return '<option value="">—</option>' + flows.map((f) => `<option value="${esc(f.id)}" data-advanced="${f.advanced}">${esc(f.name)}${f.advanced ? ' (advanced)' : ''}</option>`).join('');
-      if (type === 'toggle') return deviceOptions((d) => d.capabilities.includes('onoff'));
-      return '<option value="">(use the "Mood tile pressed" flow card)</option>';
+    function targetOptions(type, selectedId, selectedAdvanced) {
+      const toggles = Object.values(devices).filter((d) => !isPanel(d) && d.capabilities.includes('onoff'))
+        .map((d) => ({ id: d.id, name: d.name, zone: d.zoneName }))
+        .sort((x, y) => (x.zone + x.name).localeCompare(y.zone + y.name));
+      return targetChoices(type, { moods, flows, toggles }, selectedId, selectedAdvanced)
+        .map((c) => `<option value="${esc(c.value)}" data-advanced="${c.advanced === true}">${esc(c.label)}</option>`).join('');
     }
 
     function moodRow(tile) {
@@ -113,9 +115,10 @@
         <input data-k="label" maxlength="20" placeholder="label">`;
       const [type, target, icon, label] = row.querySelectorAll('select, input');
       type.value = tile?.type ?? '';
-      target.innerHTML = targetOptions(type.value);
-      target.value = tile?.moodId ?? tile?.flowId ?? tile?.deviceId ?? '';
-      type.onchange = () => { target.innerHTML = targetOptions(type.value); };
+      const stored = tile?.moodId ?? tile?.flowId ?? tile?.deviceId ?? '';
+      target.innerHTML = targetOptions(type.value, stored, tile?.advanced);
+      target.value = stored;
+      type.onchange = () => { target.innerHTML = targetOptions(type.value, '', false); };
       icon.value = tile ? iconLabel(tile.icon, glyphToName) : '';
       label.value = tile?.label ?? '';
       return row;
@@ -210,10 +213,16 @@
     async function onHomeyReady(homey) {
       H = homey;
       H.ready();
+      const loadErrors = [];
+      const orEmpty = (what) => (e) => { loadErrors.push(`${what}: ${e.message || e}`); return []; };
       [devices, icons, moods, flows] = await Promise.all([
         api('GET', '/devices'), api('GET', '/icons'),
-        api('GET', '/moods').catch(() => []), api('GET', '/flows').catch(() => []),
+        api('GET', '/moods').catch(orEmpty('Could not load moods')), api('GET', '/flows').catch(orEmpty('Could not load flows')),
       ]);
+      if (loadErrors.length) {
+        $('status').className = 'error';
+        $('status').textContent = `${loadErrors.join('; ')}. Existing tiles are kept as "(missing)".`;
+      }
       glyphToName = Object.fromEntries(Object.entries(icons).map(([n, g]) => [g, n]));
       $('icon-names').innerHTML = Object.keys(icons).map((n) => `<option value="${n}">`).join('');
       const panels = Object.values(devices).filter((d) => d.driverId === 'nspanel'); // the app's own records (keyed by data id)

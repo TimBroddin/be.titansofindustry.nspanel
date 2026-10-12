@@ -94,7 +94,7 @@ Page: `sta` = image, `pic` = `p_moods`.
 
 | Hotspot | x | y | w | h | touch |
 |---|---|---|---|---|---|
-| home | 416 | 4 | 60 | 52 | GOTO_HOME |
+| go_home | 416 | 4 | 60 | 52 | GOTO_HOME |
 
 ## Page 3: `climate`
 
@@ -112,7 +112,7 @@ Page: `sta` = image, `pic` = `p_climate`.
 
 | Hotspot | x | y | w | h | touch |
 |---|---|---|---|---|---|
-| home | 416 | 4 | 60 | 52 | GOTO_HOME |
+| go_home | 416 | 4 | 60 | 52 | GOTO_HOME |
 | minus | 30 | 86 | 96 | 96 | TARGET_MINUS |
 | plus | 354 | 86 | 96 | 96 | TARGET_PLUS |
 
@@ -142,7 +142,7 @@ Page: `sta` = image, `pic` = `p_calendar`.
 
 | Hotspot | x | y | w | h | touch |
 |---|---|---|---|---|---|
-| home | 416 | 4 | 60 | 52 | GOTO_HOME |
+| go_home | 416 | 4 | 60 | 52 | GOTO_HOME |
 
 ## Page 5: `notification`
 

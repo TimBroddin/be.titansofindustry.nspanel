@@ -77,6 +77,29 @@ describe('ActionRunner', () => {
   });
 });
 
+describe('ActionRunner climate reverts', () => {
+  test('refused target asks to revert the climate page', async () => {
+    const calls: string[] = [];
+    const homey: HomeyActions = {
+      async setMood() {}, async triggerFlow() {}, getCapability: () => null, async fireTileTrigger() {},
+      async setCapability() { calls.push('set'); throw new Error('Device unavailable'); },
+    };
+    const runner = new ActionRunner(() => normalizeConfig({}), homey, () => ({ deviceId: 'th', min: 7, max: 30, step: 0.5 }), () => {});
+    expect(await runner.handle(touch('climate', 'target', '205'))).toEqual({ revertClimate: true, error: 'Device unavailable' });
+  });
+
+  test('no thermostat or garbage value reverts without calling Homey', async () => {
+    const homey: HomeyActions = {
+      async setMood() {}, async triggerFlow() {}, getCapability: () => null, async fireTileTrigger() {},
+      async setCapability() { throw new Error('should not be called'); },
+    };
+    const noThermostat = new ActionRunner(() => normalizeConfig({}), homey, () => null, () => {});
+    expect(await noThermostat.handle(touch('climate', 'target', '205'))).toEqual({ revertClimate: true });
+    const withThermostat = new ActionRunner(() => normalizeConfig({}), homey, () => ({ deviceId: 'th', min: 7, max: 30, step: 0.5 }), () => {});
+    expect(await withThermostat.handle(touch('climate', 'target', 'abc'))).toEqual({ revertClimate: true });
+  });
+});
+
 describe('parseTarget', () => {
   const th = { deviceId: 'th', min: 7, max: 30, step: 0.5 };
   test.each([['205', 20.5], ['207', 20.5], ['999', 30], ['12', 7], ['abc', null], ['', null]])('%s → %p', (arg, want) => {

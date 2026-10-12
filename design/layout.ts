@@ -60,7 +60,7 @@ export interface Page {
 const titleAndHome = (sample: string): { components: Component[]; buttons: RoundButton[]; hotspots: Hotspot[] } => ({
   components: [{ name: 'title', x: 20, y: 12, w: 300, h: 32, font: 'F_TITLE', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample }],
   buttons: [{ x: 426, y: 12, d: 36, icon: 'home-outline' }],
-  hotspots: [{ name: 'home', x: 416, y: 4, w: 60, h: 52, touch: 'GOTO_HOME' }],
+  hotspots: [{ name: 'go_home', x: 416, y: 4, w: 60, h: 52, touch: 'GOTO_HOME' }],
 });
 
 // ---- home ----

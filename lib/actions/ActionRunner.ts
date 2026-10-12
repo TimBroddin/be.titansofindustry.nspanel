@@ -13,7 +13,8 @@ export interface ThermostatTarget { deviceId: string; min: number; max: number; 
 
 // momentaryTile: the tile showed "on" for a one-shot action; turn it off again shortly.
 // revertTile: put the tile back to its real state (action failed or tile is empty).
-export interface ActionResult { momentaryTile?: number; revertTile?: number; error?: string }
+// revertClimate: the panel shows a target Homey did not accept; resend the real one.
+export interface ActionResult { momentaryTile?: number; revertTile?: number; revertClimate?: boolean; error?: string }
 
 export function parseTarget(arg: string, t: ThermostatTarget): number | null {
   if (!/^\d+$/.test(arg)) return null;
@@ -65,13 +66,13 @@ export class ActionRunner {
   private async target(arg: string): Promise<ActionResult> {
     const t = this.thermostat();
     const value = t ? parseTarget(arg, t) : null;
-    if (!t || value === null) return {};
+    if (!t || value === null) return { revertClimate: true };
     try {
       await this.homey.setCapability(t.deviceId, 'target_temperature', value);
       return {};
     } catch (err) {
       this.error('Setting target failed:', err);
-      return { error: (err as Error).message ?? String(err) };
+      return { revertClimate: true, error: (err as Error).message ?? String(err) };
     }
   }
 }

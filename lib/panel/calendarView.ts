@@ -13,6 +13,7 @@ export interface CalendarViewOptions {
   timeZone: string;
   h24: boolean;
   fonts: { small: number; body: number } | null;
+  stale?: boolean; // last successful fetch is too old: mark the title
 }
 
 interface Row { time: string; title: string; pco: string; header: boolean }
@@ -48,7 +49,7 @@ export function buildCalendarProps(events: CalEvent[], o: CalendarViewOptions): 
     });
   }
 
-  const p: Record<string, string> = { 'calendar.title.txt': t(o.lang, 'calendar') };
+  const p: Record<string, string> = { 'calendar.title.txt': `${t(o.lang, 'calendar')}${o.stale ? ' !' : ''}` };
   for (let i = 0; i < CAL_ROWS; i++) {
     const n = pad2(i + 1);
     const row = rows[i] ?? {

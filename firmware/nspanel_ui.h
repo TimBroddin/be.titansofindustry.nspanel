@@ -1,6 +1,11 @@
 #pragma once
 // Helpers for the NSPanel Homey firmware: page table, property cache, CSV parsing.
+#ifdef NSPANEL_UI_HOST_TEST  // compiled on the Mac by tests/firmware.test.ts
+#include <cstdio>
+#define ESP_LOGW(tag, fmt, ...) std::fprintf(stderr, fmt "\n", __VA_ARGS__)
+#else
 #include "esphome.h"
+#endif
 #include <map>
 #include <string>
 #include <vector>
@@ -47,11 +52,11 @@ inline std::string build_command(const std::string &component, const std::string
 }
 
 // Remembers the last value per page/component/attr. Values for the visible page are sent
-// immediately; values for other pages are replayed when that page opens (Blackymas
-// components are local-scope and reset on page change).
+// immediately; values for other pages are replayed when that page opens (components are
+// local-scope and reset on page change).
 class PropCache {
  public:
-  void set(esphome::nextion::Nextion *disp, const std::string &key, const std::string &value) {
+  template<typename Display> void set(Display *disp, const std::string &key, const std::string &value) {
     size_t a = key.find('.');
     size_t b = key.rfind('.');
     if (a == std::string::npos || a == b) {
@@ -60,14 +65,13 @@ class PropCache {
     }
     std::string page = key.substr(0, a);
     std::string comp_attr = key.substr(a + 1);
-    auto &props = by_page_[page];
-    auto it = props.find(comp_attr);
-    if (it != props.end() && it->second == value) return;
-    props[comp_attr] = value;
+    // No "unchanged" check: the app already de-duplicates, and the panel may have changed the value
+    // itself (tile flipped on touch, target tapped), so an explicit resend must always reach it.
+    by_page_[page][comp_attr] = value;
     if (page_name(current_page_) == page) send_(disp, comp_attr, value);
   }
 
-  void on_page(esphome::nextion::Nextion *disp, int page_id) {
+  template<typename Display> void on_page(Display *disp, int page_id) {
     current_page_ = page_id;
     auto it = by_page_.find(page_name(page_id));
     if (it == by_page_.end()) return;
@@ -75,7 +79,7 @@ class PropCache {
   }
 
  private:
-  void send_(esphome::nextion::Nextion *disp, const std::string &comp_attr, const std::string &value) {
+  template<typename Display> void send_(Display *disp, const std::string &comp_attr, const std::string &value) {
     size_t d = comp_attr.rfind('.');
     disp->send_command(build_command(comp_attr.substr(0, d), comp_attr.substr(d + 1), value).c_str());
   }

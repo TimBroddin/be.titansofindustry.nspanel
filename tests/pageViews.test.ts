@@ -94,6 +94,11 @@ describe('buildCalendarProps', () => {
     expect(p['calendar.t08.txt']).not.toBe('MORGEN');
   });
 
+  test('stale data marks the title', () => {
+    const p = buildCalendarProps([], { now: NOW, lang: 'nl', timeZone: TZ, h24: true, fonts: null, stale: true });
+    expect(p['calendar.title.txt']).toBe('Agenda !');
+  });
+
   test('empty calendar shows a message in row 1; no font props without font ids', () => {
     const p = buildCalendarProps([], { now: NOW, lang: 'en', timeZone: TZ, h24: true, fonts: null });
     expect([p['calendar.t01.txt'], p['calendar.e01.txt']]).toEqual(['', 'No events']);

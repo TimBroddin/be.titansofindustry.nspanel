@@ -7,7 +7,7 @@ export interface CalEvent { start: Date; end: Date; allDay: boolean; title: stri
 export type TextFetch = (url: string) => Promise<{ ok: boolean; status: number; text(): Promise<string> }>;
 
 export const MAX_EVENTS = 20;
-const MAX_ITERATIONS = 2000;
+const MAX_ITERATIONS = 200000; // a daily series since 2018 is ~3,000 steps; hourly ~80,000
 
 export async function fetchCalendar(url: string, fetchFn: TextFetch = fetch): Promise<string> {
   const res = await fetchFn(url.replace(/^webcal:\/\//i, 'https://'));
@@ -61,17 +61,30 @@ export function parseUpcoming(ics: string, now: Date, days: number, timeZone: st
   for (const v of vevents) {
     if (v.hasProperty('recurrence-id')) continue;
     const event = new ICAL.Event(v);
-    for (const o of overrides) if (o.getFirstPropertyValue('uid') === event.uid) event.relateException(o);
+    const own = overrides.filter((o: any) => o.getFirstPropertyValue('uid') === event.uid);
+    for (const o of own) event.relateException(o);
 
     if (!event.isRecurring()) {
       consider(event.startDate, event.endDate, event.summary ?? '');
       continue;
     }
+
+    // Original (pre-override) times of moved occurrences: these must not be skipped as "past".
+    const movedFrom = new Map<number, any>(own.map((o: any) => [toDate(o.getFirstPropertyValue('recurrence-id'), timeZone).getTime(), o]));
+    const durationMs = toDate(event.endDate ?? event.startDate, timeZone).getTime() - toDate(event.startDate, timeZone).getTime();
     const it = event.iterator();
     for (let i = 0, next = it.next(); next && i < MAX_ITERATIONS; i++, next = it.next()) {
+      const original = toDate(next, timeZone).getTime();
+      if (original >= windowEnd.getTime()) break; // stop on the series time, not on a moved occurrence
+      if (original + durationMs <= now.getTime() && !movedFrom.has(original)) continue; // cheap skip of the past
       const occ = event.getOccurrenceDetails(next);
-      if (toDate(occ.startDate, timeZone) >= windowEnd) break;
       consider(occ.startDate, occ.endDate, occ.item.summary ?? '');
+    }
+    // Occurrences whose series time is after the window but which were moved into it.
+    for (const [original, o] of movedFrom) {
+      if (original < windowEnd.getTime()) continue;
+      const moved = new ICAL.Event(o);
+      consider(moved.startDate, moved.endDate, moved.summary ?? '');
     }
   }
 
