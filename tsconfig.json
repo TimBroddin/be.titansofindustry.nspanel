@@ -3,13 +3,23 @@
   "compilerOptions": {
     "allowJs": true,
     "outDir": ".homeybuild/",
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": false,
     "declaration": false,
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", ".homeybuild"]
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".homeybuild",
+    "tests",
+    "scripts"
+  ]
 }
