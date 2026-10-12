@@ -2,3 +2,5 @@ tests/
 scripts/
 docs/
 firmware/
+design/
+tft/

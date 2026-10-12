@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-pattern tests --ignore-pattern scripts --ignore-pattern settings .",
-    "test": "bun test"
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-pattern tests --ignore-pattern scripts --ignore-pattern settings --ignore-pattern design .",
+    "test": "bun test",
+    "design": "bun design/export.ts"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.8",
