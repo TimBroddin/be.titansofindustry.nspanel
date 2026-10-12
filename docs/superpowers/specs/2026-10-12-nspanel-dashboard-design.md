@@ -246,9 +246,9 @@ These findings came from reading the Blackymas sources, the `@2colors/esphome-na
 - **Flow cards:** `update_weather`, `show_qrcode` and `button_pressed` are removed for now. Weather is automatic, QR needs a firmware drawing routine, and button pages are gone.
 - **Risk (§12):** Homey's Web API requires the `homey.mood.set` and `homey.flow.start` scopes for setting moods and starting flows. A forum report says apps can get 403 on `triggerFlow`. This must be checked at the start of the moods plan, with the "Tile pressed" trigger as the fallback.
 
-## 14. Visual redesign: decisions so far (2026-10-12, brainstorm paused)
+## 14. Visual redesign: decisions so far (2026-10-12)
 
-The next plan (TFT fork: moods and calendar pages) also gives the panel a modern UI. Brainstorming was paused until Nextion Editor runs on the Mac (see `docs/phase0-findings.md`: wine-mono crash, .NET Framework 4.8 fix pending).
+The next plan (TFT fork: moods and calendar pages) also gives the panel a modern UI. Nextion Editor now runs under CrossOver with .NET 4.8 + 3.5 SP1 and compiles the stock HMI to an identical-size TFT (see `docs/phase0-findings.md`).
 
 Decided so far:
 - **Problem:** the Blackymas look feels dated (flat dark boxes, 2018 dashboard feel).

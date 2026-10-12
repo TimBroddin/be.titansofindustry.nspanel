@@ -8,11 +8,11 @@
 
 ## Nextion Editor on macOS
 - CrossOver 26.3.0, bottle win10_64, macOS 27.0 on M2 Ultra
-- Nextion Editor **does not start**: wine-mono 10.4.1 asserts while loading `ApplicationRUN.s0`
+- Out of the box Nextion Editor crashes: wine-mono 10.4.1 asserts while loading `ApplicationRUN.s0`
   (`mono-error.c:647 error_code != MONO_ERROR_CLEANUP_CALLED_SENTINEL`)
-- Next step: install Microsoft .NET Framework 4.8 into the bottle (CrossOver → Install a Windows Application);
-  fallback .NET 4.7.2 in a fresh bottle, then a Windows 11 ARM VM (UTM)
-- Not blocking for the foundation plan (stock TFT)
+- After installing .NET Framework 4.8: `load dll error: System.Core`. The launcher targets the CLR 2.0 runtime
+- **Fix: install both .NET Framework 4.8 and .NET Framework 3.5 SP1 into the bottle** → Editor starts
+- Stock `nspanel_eu.HMI` (v2026041) compiles: 0 errors, 46 warnings, **7,612,860 bytes, identical in size to the official TFT**
 
 ## Flashing
 - Firmware OTA: OK (first `esphome upload` failed only because the build directory for the new name was empty; compile first)
