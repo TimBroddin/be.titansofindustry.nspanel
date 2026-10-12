@@ -245,3 +245,18 @@ These findings came from reading the Blackymas sources, the `@2colors/esphome-na
 - **Phasing (§11):** the foundation plan (phases 0–2) runs our firmware against the **stock** Blackymas EU TFT. TFT editing starts with the moods/calendar plan. Home target temperature, the climate page, the forecast page, the screensaver, dimming and QR code come with the TFT fork.
 - **Flow cards:** `update_weather`, `show_qrcode` and `button_pressed` are removed for now. Weather is automatic, QR needs a firmware drawing routine, and button pages are gone.
 - **Risk (§12):** Homey's Web API requires the `homey.mood.set` and `homey.flow.start` scopes for setting moods and starting flows. A forum report says apps can get 403 on `triggerFlow`. This must be checked at the start of the moods plan, with the "Tile pressed" trigger as the fallback.
+
+## 14. Visual redesign: decisions so far (2026-10-12, brainstorm paused)
+
+The next plan (TFT fork: moods and calendar pages) also gives the panel a modern UI. Brainstorming was paused until Nextion Editor runs on the Mac (see `docs/phase0-findings.md`: wine-mono crash, .NET Framework 4.8 fix pending).
+
+Decided so far:
+- **Problem:** the Blackymas look feels dated (flat dark boxes, 2018 dashboard feel).
+- **Direction: A · Soft dark.** Deep navy radial gradient background, translucent rounded cards with hairline borders, large thin clock, warm amber accent (#f2b56b), muted blue-grey secondary text (#9fb0cc). Reference mockup: `docs/design/2026-10-12-visual-style-options.html` (option A).
+- **Build approach: images plus a new HMI.** Each page is designed in Pencil (`.pen`) and exported as pixel-exact 480×320 PNGs: background plus on/pressed state variants. In Nextion Editor these become page backgrounds, crop-image text fields and picture-swap tiles. From Blackymas we keep only the plumbing: boot page and handshake, `localevent` CSV protocol, MDI icon font, `Program.s`. Their visible pages are replaced. This overrides "Fork Blackymas' `.HMI` and keep its pages" in §3/§4 for the visual layer. Firmware and app protocol are unchanged.
+- **Option 3 (LVGL on the ESP) ruled out:** the EU NSPanel display is a self-contained Nextion module on a serial link.
+
+Still open, to resume with:
+1. Page designs in Soft dark for home, moods, climate, calendar, notification, screensaver (visual companion).
+2. Font choice and sizes (Nextion fonts are generated per size, so keep the set small).
+3. Component naming and coordinates, delivered as a step-by-step Editor build list per page.

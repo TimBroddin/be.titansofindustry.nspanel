@@ -1,0 +1,110 @@
+<h2>Which visual direction feels right for the kitchen panel?</h2>
+<p class="subtitle">Home screen at real size (480×320). Everything here is achievable on Nextion: backgrounds, cards and gradients are a pre-rendered image; only text, icons and on/off states change at runtime.</p>
+
+<style>
+  .panel { width: 480px; height: 320px; position: relative; overflow: hidden; border-radius: 6px; font-family: -apple-system, "SF Pro Display", "Inter", sans-serif; box-shadow: 0 6px 24px rgba(0,0,0,.35); margin: 0 auto; }
+  .panel * { box-sizing: border-box; }
+  .row { display: flex; }
+  /* A — Soft dark */
+  .a { background: radial-gradient(120% 90% at 0% 0%, #23314d 0%, #121826 55%, #0b0f18 100%); color: #e9eef7; }
+  .a .clock { position: absolute; left: 22px; top: 14px; font-size: 76px; font-weight: 200; letter-spacing: -2px; }
+  .a .date { position: absolute; left: 26px; top: 100px; font-size: 17px; color: #9fb0cc; }
+  .a .card { position: absolute; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); border-radius: 18px; }
+  .a .wx { left: 300px; top: 18px; width: 160px; height: 104px; padding: 12px 14px; }
+  .a .wx .t { font-size: 36px; font-weight: 300; }
+  .a .wx .s { font-size: 13px; color: #9fb0cc; }
+  .a .th { left: 22px; top: 140px; width: 206px; height: 96px; padding: 12px 16px; }
+  .a .th .t { font-size: 38px; font-weight: 300; }
+  .a .th .s { font-size: 13px; color: #f2b56b; }
+  .a .ev { left: 240px; top: 140px; width: 220px; height: 96px; padding: 12px 16px; }
+  .a .ev .k { font-size: 12px; color: #9fb0cc; text-transform: uppercase; letter-spacing: 1px; }
+  .a .ev .v { font-size: 18px; margin-top: 6px; }
+  .a .chips { position: absolute; left: 22px; top: 252px; gap: 10px; }
+  .a .chip { width: 34px; height: 34px; border-radius: 17px; background: rgba(242,181,107,.16); color: #f2b56b; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .a .nav { position: absolute; right: 20px; top: 250px; gap: 10px; }
+  .a .nav div { padding: 9px 14px; border-radius: 14px; background: rgba(255,255,255,.07); font-size: 13px; color: #c9d4e6; }
+  /* B — Light */
+  .b { background: #f3efe8; color: #1b1b1b; }
+  .b .clock { position: absolute; left: 24px; top: 10px; font-size: 84px; font-weight: 600; letter-spacing: -3px; }
+  .b .date { position: absolute; left: 28px; top: 106px; font-size: 17px; color: #6b655c; }
+  .b .wx { position: absolute; right: 26px; top: 26px; text-align: right; }
+  .b .wx .t { font-size: 40px; font-weight: 500; }
+  .b .wx .s { font-size: 13px; color: #6b655c; }
+  .b .line { position: absolute; left: 24px; right: 24px; top: 146px; height: 1px; background: #d8d1c5; }
+  .b .th { position: absolute; left: 24px; top: 160px; }
+  .b .th .t { font-size: 34px; font-weight: 500; }
+  .b .th .s { font-size: 13px; color: #c2551f; }
+  .b .ev { position: absolute; left: 230px; top: 160px; }
+  .b .ev .k { font-size: 12px; color: #6b655c; }
+  .b .ev .v { font-size: 18px; margin-top: 6px; font-weight: 500; }
+  .b .chips { position: absolute; left: 24px; top: 262px; gap: 14px; font-size: 18px; color: #c2551f; }
+  .b .nav { position: absolute; right: 24px; top: 256px; gap: 8px; }
+  .b .nav div { padding: 8px 14px; border-radius: 20px; background: #1b1b1b; color: #f3efe8; font-size: 13px; }
+  /* C — Bold tiles */
+  .c { background: #0e0f12; color: #fff; padding: 12px; }
+  .c .grid { display: grid; grid-template-columns: 1.25fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; height: 236px; }
+  .c .tile { border-radius: 20px; padding: 12px 16px; position: relative; }
+  .c .t1 { grid-row: span 2; background: linear-gradient(160deg, #2b2f3a, #1a1d24); }
+  .c .t1 .clock { font-size: 70px; font-weight: 600; letter-spacing: -2px; line-height: 1; margin-top: 6px; }
+  .c .t1 .date { font-size: 16px; color: #a7aec0; margin-top: 6px; }
+  .c .t1 .ev { position: absolute; left: 16px; bottom: 14px; font-size: 15px; color: #d6dbe6; }
+  .c .t2 { background: linear-gradient(150deg, #3a7bd5, #2a5298); }
+  .c .t3 { background: linear-gradient(150deg, #ff8a3d, #e5533d); }
+  .c .big { font-size: 34px; font-weight: 600; }
+  .c .small { font-size: 12px; opacity: .85; }
+  .c .bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; height: 52px; }
+  .c .chips { display: flex; gap: 8px; }
+  .c .chip { width: 40px; height: 40px; border-radius: 12px; background: #23262e; display: flex; align-items: center; justify-content: center; color: #ffcf6b; }
+  .c .nav { display: flex; gap: 8px; }
+  .c .nav div { padding: 12px 14px; border-radius: 14px; background: #23262e; font-size: 13px; }
+</style>
+
+<div class="cards">
+  <div class="card" data-choice="soft-dark" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="panel a">
+        <div class="clock">13:42</div>
+        <div class="date">maandag 12 oktober</div>
+        <div class="card wx"><div class="t">13°</div><div class="s">☁︎ Half bewolkt</div><div class="s">↑16° ↓8°</div></div>
+        <div class="card th"><div class="s">● Verwarmen naar 20,0°</div><div class="t">21,5°</div><div class="s" style="color:#9fb0cc">Woonkamer</div></div>
+        <div class="card ev"><div class="k">Straks</div><div class="v">18:00 · Zwemles</div><div class="v" style="font-size:14px;color:#9fb0cc">morgen 08:30 · Tandarts</div></div>
+        <div class="row chips"><div class="chip">💡</div><div class="chip">🚪</div><div class="chip">🧺</div></div>
+        <div class="row nav"><div>Sferen</div><div>Klimaat</div><div>Agenda</div></div>
+      </div>
+    </div>
+    <div class="card-body"><h3>A · Soft dark</h3><p>Deep navy gradient, translucent cards, thin large clock, warm amber accent. Calm at night, iOS-widget feel.</p></div>
+  </div>
+
+  <div class="card" data-choice="light-editorial" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="panel b">
+        <div class="clock">13:42</div>
+        <div class="date">maandag 12 oktober</div>
+        <div class="wx"><div class="t">13°</div><div class="s">Half bewolkt · ↑16° ↓8°</div></div>
+        <div class="line"></div>
+        <div class="th"><div class="s">Verwarmen naar 20,0°</div><div class="t">21,5°</div></div>
+        <div class="ev"><div class="k">Straks</div><div class="v">18:00 · Zwemles</div></div>
+        <div class="row chips"><span>💡</span><span>🚪</span><span>🧺</span></div>
+        <div class="row nav"><div>Sferen</div><div>Klimaat</div><div>Agenda</div></div>
+      </div>
+    </div>
+    <div class="card-body"><h3>B · Light editorial</h3><p>Warm paper background, big bold type, hairline divider, terracotta accent. Reads like a magazine; bright in a dark kitchen at night.</p></div>
+  </div>
+
+  <div class="card" data-choice="bold-tiles" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="panel c">
+        <div class="grid">
+          <div class="tile t1"><div class="clock">13:42</div><div class="date">ma 12 okt</div><div class="ev">18:00 · Zwemles</div></div>
+          <div class="tile t2"><div class="small">Buiten</div><div class="big">13°</div><div class="small">Half bewolkt</div></div>
+          <div class="tile t3"><div class="small">Binnen → 20,0°</div><div class="big">21,5°</div><div class="small">Verwarmen</div></div>
+        </div>
+        <div class="bottom">
+          <div class="chips"><div class="chip">💡</div><div class="chip">🚪</div><div class="chip">🧺</div></div>
+          <div class="nav"><div>Sferen</div><div>Klimaat</div><div>Agenda</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body"><h3>C · Bold tiles</h3><p>Colourful rounded tiles (blue weather, orange heating), big numbers, strong grid. Playful, very readable from across the room.</p></div>
+  </div>
+</div>
