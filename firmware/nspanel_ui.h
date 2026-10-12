@@ -9,12 +9,8 @@ namespace nspanel_ui {
 
 static const char *const TAG = "nspanel_ui";
 
-// Page ids of the Blackymas EU TFT (index == Nextion page id).
-static const char *const PAGE_NAMES[] = {
-    "boot",         "home",         "weather01",    "weather02",    "weather03",    "weather04",    "weather05",
-    "climate",      "settings",     "screensaver",  "light",        "cover",        "buttonpage01", "buttonpage02",
-    "buttonpage03", "buttonpage04", "notification", "qrcode",       "entitypage01", "entitypage02", "entitypage03",
-    "entitypage04", "fan",          "alarm",        "keyb_num",     "media_player", "confirm",      "utilities"};
+// Page ids of the Soft dark TFT (index == Nextion page id). See tft/COMPONENTS.md.
+static const char *const PAGE_NAMES[] = {"boot", "home", "moods", "climate", "calendar", "notification", "screensaver"};
 static const int PAGE_COUNT = sizeof(PAGE_NAMES) / sizeof(PAGE_NAMES[0]);
 
 inline std::string page_name(int id) { return (id >= 0 && id < PAGE_COUNT) ? PAGE_NAMES[id] : "unknown"; }

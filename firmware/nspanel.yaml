@@ -1,7 +1,6 @@
 substitutions:
   name: nspanelkeuken
   friendly_name: NSPanel
-  icon_relay_on: "\uE334"  # mdi:lightbulb
 
 esphome:
   name: ${name}
@@ -208,8 +207,9 @@ script:
       - lambda: |-
           auto now = id(sntp_time).now();
           if (!now.is_valid()) return;
-          nspanel_ui::cache().set(id(disp1), "home.time.txt", now.strftime(id(clock_24h) ? "%H:%M" : "%I:%M"));
-          nspanel_ui::cache().set(id(disp1), "home.meridiem.txt", id(clock_24h) ? "" : (now.hour < 12 ? "AM" : "PM"));
+          auto txt = now.strftime(id(clock_24h) ? "%H:%M" : "%I:%M %p");
+          nspanel_ui::cache().set(id(disp1), "home.time.txt", txt);
+          nspanel_ui::cache().set(id(disp1), "screensaver.time.txt", txt);
   - id: hw_button
     mode: queued
     parameters:
@@ -270,19 +270,11 @@ switch:
     name: Relay 1
     pin: 22
     restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
-      - lambda: nspanel_ui::cache().set(id(disp1), "home.chip_relay1.txt", "${icon_relay_on}");
-    on_turn_off:
-      - lambda: nspanel_ui::cache().set(id(disp1), "home.chip_relay1.txt", "");
   - platform: gpio
     id: relay_2
     name: Relay 2
     pin: 19
     restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
-      - lambda: nspanel_ui::cache().set(id(disp1), "home.chip_relay2.txt", "${icon_relay_on}");
-    on_turn_off:
-      - lambda: nspanel_ui::cache().set(id(disp1), "home.chip_relay2.txt", "");
 
 sensor:
   - platform: wifi_signal
