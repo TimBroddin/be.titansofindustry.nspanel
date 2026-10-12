@@ -58,3 +58,29 @@ describe('i18n', () => {
     expect(isActive(null)).toBe(false);
   });
 });
+
+describe('i18n v2 helpers', () => {
+  const { dayKey, formatShortDay, formatTime, t: tt } = require('../lib/i18n');
+  const late = new Date('2026-10-15T17:00:00Z'); // Thursday 19:00 in Brussels
+
+  test('labels in both languages', () => {
+    expect(tt('nl', 'next')).toBe('Straks');
+    expect(tt('en', 'next')).toBe('Up next');
+    expect(tt('nl', 'allDay')).toBe('hele dag');
+    expect(tt('en', 'noEvents')).toBe('No events');
+  });
+
+  test('formatShortDay', () => {
+    expect(formatShortDay(late, 'nl', 'Europe/Brussels')).toBe('do 15 okt');
+    expect(formatShortDay(late, 'en', 'Europe/Brussels')).toBe('Thu 15 Oct');
+  });
+
+  test('formatTime 24h and 12h', () => {
+    expect(formatTime(late, true, 'Europe/Brussels')).toBe('19:00');
+    expect(formatTime(late, false, 'Europe/Brussels')).toBe('7:00 PM');
+  });
+
+  test('dayKey uses the timezone', () => {
+    expect(dayKey(new Date('2026-10-12T23:30:00Z'), 'Europe/Brussels')).toBe('2026-10-13');
+  });
+});

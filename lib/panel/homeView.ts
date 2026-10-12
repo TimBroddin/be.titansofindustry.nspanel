@@ -1,10 +1,11 @@
 import { DashboardConfig, capKey } from '../config';
 import {
-  Lang, formatNumber, formatValue, isActive,
+  Lang, dayKey, formatNumber, formatShortDay, formatTime, isActive, t,
 } from '../i18n';
-import { WeatherNow, weatherPicture } from '../weather';
-
-export const ICON_THERMOMETER = '\uE50E';
+import icons from '../icons.json';
+import { CalEvent } from '../sources/calendar';
+import { WeatherNow, weatherIcon } from '../weather';
+import { truncate } from './text';
 
 export interface HomeState {
   lang: Lang;
@@ -12,46 +13,65 @@ export interface HomeState {
   values: ReadonlyMap<string, unknown>;
   weather: WeatherNow | null;
   panelTemperature: number | null;
+  events: CalEvent[] | null;
+  now: Date;
+  timeZone: string;
+  h24: boolean;
 }
 
-const pad = (n: number): string => String(n).padStart(2, '0');
+const NX1_MAX = 16;
+const NX2_MAX = 33;
+const glyph = (name: string): string => (icons as Record<string, string>)[name] ?? '';
 
-export function buildHomeProps(config: DashboardConfig, state: HomeState): Record<string, string> {
-  const { lang } = state;
-  const get = (deviceId: string, capability: string): unknown => state.values.get(capKey(deviceId, capability));
+export function buildHomeProps(config: DashboardConfig, s: HomeState): Record<string, string> {
+  const { lang } = s;
+  const get = (deviceId: string, capability: string): unknown => s.values.get(capKey(deviceId, capability));
+  const deg = (v: number, decimals: number): string => `${formatNumber(v, decimals, lang)}°`;
   const p: Record<string, string> = {};
 
-  // Blackymas home chrome that this dashboard does not use.
-  for (let i = 1; i <= 7; i++) p[`home.button${pad(i)}.vis`] = '0';
-  for (const id of ['bt_notific', 'bt_qrcode', 'bt_entities', 'bt_utilities']) p[`home.${id}.vis`] = '0';
-  for (const id of ['wifi_icon', 'bt_icon', 'chip_climate', 'left_bt_text', 'right_bt_text']) p[`home.${id}.txt`] = '';
+  p['home.date.txt'] = s.dateText;
+  p['home.in_lbl.txt'] = t(lang, 'inside').toUpperCase();
+  p['home.nx_lbl.txt'] = t(lang, 'next').toUpperCase();
 
-  p['home.date.txt'] = state.dateText;
+  const w = s.weather;
+  p['home.wx_icon.txt'] = w ? glyph(weatherIcon(w.code, w.isDay)) : '';
+  p['home.wx_temp.txt'] = w ? deg(Math.round(w.temperature), 0) : '';
+  p['home.wx_hilo.txt'] = w && typeof w.high === 'number' && typeof w.low === 'number'
+    ? `${t(lang, 'max')} ${deg(Math.round(w.high), 0)} · ${t(lang, 'min')} ${deg(Math.round(w.low), 0)}` : '';
 
-  if (state.weather) {
-    p['home.outdoor_temp.txt'] = `${formatNumber(Math.round(state.weather.temperature), 0, lang)}°`;
-    p['home.weather.pic'] = String(weatherPicture(state.weather.code, state.weather.isDay));
-    p['home.weather.vis'] = '1';
-  } else {
-    p['home.outdoor_temp.txt'] = '';
-    p['home.weather.vis'] = '0';
-  }
-
-  const { thermostat } = config.home;
+  const thermostat = config.home.thermostat;
   const current = thermostat ? get(thermostat.deviceId, 'measure_temperature') : undefined;
-  const indoor = typeof current === 'number' ? current : state.panelTemperature;
-  p['home.indr_temp.txt'] = typeof indoor === 'number' ? `${formatNumber(indoor, 1, lang)}°` : '';
-  p['home.indr_temp_icon.txt'] = typeof indoor === 'number' ? ICON_THERMOMETER : '';
+  const target = thermostat ? get(thermostat.deviceId, 'target_temperature') : undefined;
+  const indoor = typeof current === 'number' ? current : s.panelTemperature;
+  p['home.in_cur.txt'] = typeof indoor === 'number' ? deg(indoor, 1) : '';
+  p['home.in_tgt.txt'] = typeof target === 'number' ? `» ${deg(target, 1)}` : '';
 
-  config.home.chips.forEach((chip, i) => {
-    p[`home.chip${pad(i + 1)}.txt`] = chip && isActive(get(chip.deviceId, chip.capability)) ? chip.icon : '';
-  });
+  p['home.chips.txt'] = config.home.chips
+    .filter((c) => c && isActive(get(c.deviceId, c.capability)))
+    .map((c) => c!.icon).join(' ');
 
-  config.home.values.forEach((v, i) => {
-    const n = pad(i + 1);
-    p[`home.value${n}.txt`] = v ? formatValue(get(v.deviceId, v.capability) ?? null, { lang, unit: v.unit }) : '';
-    p[`home.value${n}_icon.txt`] = v ? v.icon : '';
-  });
-
+  const [first, second] = s.events ?? [];
+  const today = dayKey(s.now, s.timeZone);
+  const tomorrow = dayKey(new Date(s.now.getTime() + 86400000), s.timeZone);
+  const keyOf = (e: CalEvent): string => dayKey(e.start < s.now ? s.now : e.start, s.timeZone);
+  if (!first) {
+    p['home.nx1_t.txt'] = '';
+    p['home.nx1.txt'] = t(lang, 'noEvents');
+    p['home.nx2.txt'] = '';
+  } else {
+    const isToday = keyOf(first) === today;
+    p['home.nx1_t.txt'] = isToday
+      ? (first.allDay ? '' : formatTime(first.start, s.h24, s.timeZone))
+      : formatShortDay(first.start, lang, s.timeZone).split(' ').slice(0, 2).join(' ');
+    p['home.nx1.txt'] = truncate(first.title, NX1_MAX);
+    if (second) {
+      const key = keyOf(second);
+      const day = key === today ? '' : key === tomorrow ? t(lang, 'tomorrow').toLowerCase() : formatShortDay(second.start, lang, s.timeZone);
+      const time = second.allDay ? t(lang, 'allDay') : formatTime(second.start, s.h24, s.timeZone);
+      p['home.nx2.txt'] = truncate([day, time, second.title].filter(Boolean).join(' '), NX2_MAX);
+    } else {
+      p['home.nx2.txt'] = '';
+    }
+  }
   return p;
 }

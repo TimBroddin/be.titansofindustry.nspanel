@@ -138,6 +138,10 @@ class NSPanelDevice extends Homey.Device {
       values: this.capabilities?.values ?? new Map(),
       weather: s.weatherEnabled === false ? null : this.weather,
       panelTemperature: this.panelTemperature,
+      events: null,
+      now: new Date(),
+      timeZone: this.homey.clock.getTimezone(),
+      h24: s.timeFormat !== 'h:mm A',
     }));
   }
 

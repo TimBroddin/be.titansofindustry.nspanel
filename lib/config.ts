@@ -1,9 +1,21 @@
 export const CHIP_SLOTS = 7;
 export const VALUE_SLOTS = 4;
+export const MOOD_SLOTS = 8;
+export const MAX_CALENDAR_DAYS = 14;
 
 export interface ChipConfig { deviceId: string; capability: string; icon: string }
 export interface ValueConfig { deviceId: string; capability: string; icon: string; unit: string }
 export type ButtonMode = 'relay' | 'event';
+
+interface TileBase { icon: string; label: string }
+export type MoodTile =
+  | (TileBase & { type: 'mood'; moodId: string })
+  | (TileBase & { type: 'flow'; flowId: string; advanced: boolean })
+  | (TileBase & { type: 'toggle'; deviceId: string })
+  | (TileBase & { type: 'trigger' });
+
+export interface CalendarConfig { url: string; daysAhead: number }
+export interface ScreenConfig { screensaverMinutes: number; screensaverBrightness: number }
 
 export interface DashboardConfig {
   version: 1;
@@ -13,6 +25,9 @@ export interface DashboardConfig {
     values: Array<ValueConfig | null>;
   };
   buttons: { left: ButtonMode; right: ButtonMode };
+  moods: Array<MoodTile | null>;
+  calendar: CalendarConfig | null;
+  screen: ScreenConfig;
 }
 
 export interface CapabilityRef { deviceId: string; capability: string }
@@ -47,6 +62,28 @@ function parseValue(item: Obj): ValueConfig | null {
   } : null;
 }
 
+const int = (v: unknown, min: number, max: number, fallback: number): number => {
+  const n = typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : fallback;
+  return Math.min(max, Math.max(min, n));
+};
+
+function parseTile(item: Obj): MoodTile | null {
+  const base = { icon: decodeIcon(item.icon), label: str(item.label) };
+  switch (item.type) {
+    case 'mood': return str(item.moodId) ? { type: 'mood', moodId: str(item.moodId), ...base } : null;
+    case 'flow': return str(item.flowId) ? { type: 'flow', flowId: str(item.flowId), advanced: item.advanced === true, ...base } : null;
+    case 'toggle': return str(item.deviceId) ? { type: 'toggle', deviceId: str(item.deviceId), ...base } : null;
+    case 'trigger': return { type: 'trigger', ...base };
+    default: return null;
+  }
+}
+
+function parseCalendar(raw: unknown): CalendarConfig | null {
+  const c = obj(raw);
+  const url = str(c.url).trim();
+  return url ? { url, daysAhead: int(c.daysAhead, 1, MAX_CALENDAR_DAYS, 7) } : null;
+}
+
 export function normalizeConfig(raw: unknown): DashboardConfig {
   const r = obj(raw);
   const home = obj(r.home);
@@ -60,6 +97,12 @@ export function normalizeConfig(raw: unknown): DashboardConfig {
       values: slots(home.values, VALUE_SLOTS, parseValue),
     },
     buttons: { left: mode(buttons.left), right: mode(buttons.right) },
+    moods: slots(r.moods, MOOD_SLOTS, parseTile),
+    calendar: parseCalendar(r.calendar),
+    screen: {
+      screensaverMinutes: int(obj(r.screen).screensaverMinutes, 0, 240, 0),
+      screensaverBrightness: int(obj(r.screen).screensaverBrightness, 0, 100, 10),
+    },
   };
 }
 
@@ -85,9 +128,13 @@ export function loadConfig(store: { dashboardConfig?: unknown; nspanelConfig?: u
 }
 
 export function watchedCapabilities(config: DashboardConfig): CapabilityRef[] {
-  const refs: CapabilityRef[] = [...config.home.chips, ...config.home.values]
-    .filter((s): s is ChipConfig | ValueConfig => s !== null)
+  // Value fields are kept in the schema for old configs but no longer shown, so not watched.
+  const refs: CapabilityRef[] = config.home.chips
+    .filter((s): s is ChipConfig => s !== null)
     .map(({ deviceId, capability }) => ({ deviceId, capability }));
+  for (const tile of config.moods) {
+    if (tile?.type === 'toggle') refs.push({ deviceId: tile.deviceId, capability: 'onoff' });
+  }
   const t = config.home.thermostat;
   if (t) {
     refs.push({ deviceId: t.deviceId, capability: 'measure_temperature' }, { deviceId: t.deviceId, capability: 'target_temperature' });

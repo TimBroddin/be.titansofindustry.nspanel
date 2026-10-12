@@ -69,3 +69,49 @@ describe('config', () => {
     ]);
   });
 });
+
+describe('config v2 sections', () => {
+  const { MOOD_SLOTS } = require('../lib/config');
+
+  test('defaults: 8 empty mood slots, no calendar, screensaver off', () => {
+    const c = normalizeConfig({});
+    expect(c.moods).toHaveLength(MOOD_SLOTS);
+    expect(c.moods.every((m) => m === null)).toBe(true);
+    expect(c.calendar).toBeNull();
+    expect(c.screen).toEqual({ screensaverMinutes: 0, screensaverBrightness: 10 });
+  });
+
+  test('mood tile types are validated', () => {
+    const c = normalizeConfig({ moods: [
+      { type: 'mood', moodId: 'm1', icon: 'F', label: 'Film' },
+      { type: 'flow', flowId: 'f1', advanced: true, icon: '', label: 'Eten' },
+      { type: 'toggle', deviceId: 'd1', icon: 'L', label: 'Licht' },
+      { type: 'trigger', icon: 'T', label: 'Bel' },
+      { type: 'mood', icon: 'X', label: 'no id' },
+      { type: 'bogus', icon: '', label: '' },
+    ] });
+    expect(c.moods.slice(0, 6)).toEqual([
+      { type: 'mood', moodId: 'm1', icon: 'F', label: 'Film' },
+      { type: 'flow', flowId: 'f1', advanced: true, icon: '', label: 'Eten' },
+      { type: 'toggle', deviceId: 'd1', icon: 'L', label: 'Licht' },
+      { type: 'trigger', icon: 'T', label: 'Bel' },
+      null,
+      null,
+    ]);
+  });
+
+  test('calendar and screen are clamped', () => {
+    const c = normalizeConfig({
+      calendar: { url: ' webcal://x/y ', daysAhead: 99 },
+      screen: { screensaverMinutes: -3, screensaverBrightness: 500 },
+    });
+    expect(c.calendar).toEqual({ url: 'webcal://x/y', daysAhead: 14 });
+    expect(c.screen).toEqual({ screensaverMinutes: 0, screensaverBrightness: 100 });
+    expect(normalizeConfig({ calendar: { url: '' } }).calendar).toBeNull();
+  });
+
+  test('watchedCapabilities includes toggle tiles', () => {
+    const c = normalizeConfig({ moods: [{ type: 'toggle', deviceId: 'd1', icon: '', label: '' }] });
+    expect(watchedCapabilities(c).map((r) => capKey(r.deviceId, r.capability))).toEqual(['d1:onoff']);
+  });
+});

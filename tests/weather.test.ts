@@ -1,13 +1,14 @@
 import { describe, expect, test } from 'bun:test';
-import { fetchWeather, weatherPicture } from '../lib/weather';
+import { fetchWeather, weatherIcon } from '../lib/weather';
 
-describe('weatherPicture', () => {
+describe('weatherIcon', () => {
   test.each([
-    [0, true, 2], [0, false, 15], [2, true, 11], [2, false, 12], [3, true, 3], [45, true, 8],
-    [61, true, 4], [65, true, 5], [81, true, 5], [71, true, 6], [67, true, 7], [95, true, 13],
-    [95, false, 14], [99, true, 10], [12345, true, 2],
-  ])('code %i day=%p → %i', (code, isDay, pic) => {
-    expect(weatherPicture(code as number, isDay as boolean)).toBe(pic as number);
+    [0, true, 'weather-sunny'], [0, false, 'weather-night'], [2, true, 'weather-partly-cloudy'], [2, false, 'weather-night-partly-cloudy'],
+    [3, true, 'weather-cloudy'], [45, true, 'weather-fog'], [61, true, 'weather-rainy'], [65, true, 'weather-pouring'],
+    [71, true, 'weather-snowy'], [67, true, 'weather-snowy-rainy'], [95, true, 'weather-lightning-rainy'], [99, true, 'weather-hail'],
+    [12345, true, 'weather-sunny'],
+  ])('code %i day=%p → %s', (code, isDay, name) => {
+    expect(weatherIcon(code as number, isDay as boolean)).toBe(name as string);
   });
 });
 
@@ -16,11 +17,12 @@ describe('fetchWeather', () => {
     let requested = '';
     const w = await fetchWeather(51.05, 3.72, async (url) => {
       requested = url;
-      return { ok: true, status: 200, json: async () => ({ current: { temperature_2m: 12.4, weather_code: 3, is_day: 0 } }) };
+      return { ok: true, status: 200, json: async () => ({ current: { temperature_2m: 12.4, weather_code: 3, is_day: 0 }, daily: { temperature_2m_max: [16.2], temperature_2m_min: [7.6] } }) };
     });
     expect(requested).toContain('latitude=51.05');
     expect(requested).toContain('current=temperature_2m,weather_code,is_day');
-    expect(w).toEqual({ temperature: 12.4, code: 3, isDay: false });
+    expect(requested).toContain('daily=temperature_2m_max,temperature_2m_min');
+    expect(w).toEqual({ temperature: 12.4, code: 3, isDay: false, high: 16.2, low: 7.6 });
   });
 
   test('throws on HTTP error and on malformed body', async () => {
