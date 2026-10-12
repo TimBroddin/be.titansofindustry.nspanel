@@ -1,0 +1,19 @@
+{
+  "id": "wake_up",
+  "title": {
+    "en": "Wake up display"
+  },
+  "titleFormatted": {
+    "en": "Wake up NSPanel display"
+  },
+  "hint": {
+    "en": "Activate the NSPanel display from sleep mode"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    }
+  ]
+}

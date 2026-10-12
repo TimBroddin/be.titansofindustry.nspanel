@@ -1,0 +1,1425 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "be.titansofindustry.nspanel",
+  "version": "1.0.0",
+  "compatibility": ">=12.4.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "NSPanel HA Blueprint"
+  },
+  "description": {
+    "en": "Adds support for NSPanel devices running the HA Blueprint firmware. "
+  },
+  "category": [
+    "appliances"
+  ],
+  "permissions": [
+    "homey:manager:geolocation",
+    "homey:manager:api"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Tim Broddin",
+    "email": "tim@wannabes.be"
+  },
+  "brandColor": "#e94560",
+  "api": {
+    "getDevices": {
+      "method": "GET",
+      "path": "/devices"
+    },
+    "putNspanelConfig": {
+      "method": "PUT",
+      "path": "/nspanel/:deviceId/config"
+    }
+  },
+  "flow": {
+    "triggers": [
+      {
+        "id": "button_pressed",
+        "title": {
+          "en": "A button was pressed"
+        },
+        "titleFormatted": {
+          "en": "[[button]] was [[action]]"
+        },
+        "hint": {
+          "en": "Triggers when a physical or touch button is pressed on the NSPanel"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "button",
+            "title": {
+              "en": "Button"
+            },
+            "values": [
+              {
+                "id": "hw_bt_left",
+                "label": {
+                  "en": "Left Physical Button"
+                }
+              },
+              {
+                "id": "hw_bt_right",
+                "label": {
+                  "en": "Right Physical Button"
+                }
+              },
+              {
+                "id": "buttonpage01.bt01",
+                "label": {
+                  "en": "Page 1 - Button 1"
+                }
+              },
+              {
+                "id": "buttonpage01.bt02",
+                "label": {
+                  "en": "Page 1 - Button 2"
+                }
+              },
+              {
+                "id": "buttonpage01.bt03",
+                "label": {
+                  "en": "Page 1 - Button 3"
+                }
+              },
+              {
+                "id": "buttonpage01.bt04",
+                "label": {
+                  "en": "Page 1 - Button 4"
+                }
+              },
+              {
+                "id": "buttonpage01.bt05",
+                "label": {
+                  "en": "Page 1 - Button 5"
+                }
+              },
+              {
+                "id": "buttonpage01.bt06",
+                "label": {
+                  "en": "Page 1 - Button 6"
+                }
+              },
+              {
+                "id": "buttonpage01.bt07",
+                "label": {
+                  "en": "Page 1 - Button 7"
+                }
+              },
+              {
+                "id": "buttonpage01.bt08",
+                "label": {
+                  "en": "Page 1 - Button 8"
+                }
+              },
+              {
+                "id": "buttonpage02.bt01",
+                "label": {
+                  "en": "Page 2 - Button 1"
+                }
+              },
+              {
+                "id": "buttonpage02.bt02",
+                "label": {
+                  "en": "Page 2 - Button 2"
+                }
+              },
+              {
+                "id": "buttonpage02.bt03",
+                "label": {
+                  "en": "Page 2 - Button 3"
+                }
+              },
+              {
+                "id": "buttonpage02.bt04",
+                "label": {
+                  "en": "Page 2 - Button 4"
+                }
+              },
+              {
+                "id": "buttonpage02.bt05",
+                "label": {
+                  "en": "Page 2 - Button 5"
+                }
+              },
+              {
+                "id": "buttonpage02.bt06",
+                "label": {
+                  "en": "Page 2 - Button 6"
+                }
+              },
+              {
+                "id": "buttonpage02.bt07",
+                "label": {
+                  "en": "Page 2 - Button 7"
+                }
+              },
+              {
+                "id": "buttonpage02.bt08",
+                "label": {
+                  "en": "Page 2 - Button 8"
+                }
+              },
+              {
+                "id": "buttonpage03.bt01",
+                "label": {
+                  "en": "Page 3 - Button 1"
+                }
+              },
+              {
+                "id": "buttonpage03.bt02",
+                "label": {
+                  "en": "Page 3 - Button 2"
+                }
+              },
+              {
+                "id": "buttonpage03.bt03",
+                "label": {
+                  "en": "Page 3 - Button 3"
+                }
+              },
+              {
+                "id": "buttonpage03.bt04",
+                "label": {
+                  "en": "Page 3 - Button 4"
+                }
+              },
+              {
+                "id": "buttonpage03.bt05",
+                "label": {
+                  "en": "Page 3 - Button 5"
+                }
+              },
+              {
+                "id": "buttonpage03.bt06",
+                "label": {
+                  "en": "Page 3 - Button 6"
+                }
+              },
+              {
+                "id": "buttonpage03.bt07",
+                "label": {
+                  "en": "Page 3 - Button 7"
+                }
+              },
+              {
+                "id": "buttonpage03.bt08",
+                "label": {
+                  "en": "Page 3 - Button 8"
+                }
+              },
+              {
+                "id": "buttonpage04.bt01",
+                "label": {
+                  "en": "Page 4 - Button 1"
+                }
+              },
+              {
+                "id": "buttonpage04.bt02",
+                "label": {
+                  "en": "Page 4 - Button 2"
+                }
+              },
+              {
+                "id": "buttonpage04.bt03",
+                "label": {
+                  "en": "Page 4 - Button 3"
+                }
+              },
+              {
+                "id": "buttonpage04.bt04",
+                "label": {
+                  "en": "Page 4 - Button 4"
+                }
+              },
+              {
+                "id": "buttonpage04.bt05",
+                "label": {
+                  "en": "Page 4 - Button 5"
+                }
+              },
+              {
+                "id": "buttonpage04.bt06",
+                "label": {
+                  "en": "Page 4 - Button 6"
+                }
+              },
+              {
+                "id": "buttonpage04.bt07",
+                "label": {
+                  "en": "Page 4 - Button 7"
+                }
+              },
+              {
+                "id": "buttonpage04.bt08",
+                "label": {
+                  "en": "Page 4 - Button 8"
+                }
+              },
+              {
+                "id": "any",
+                "label": {
+                  "en": "Any Button"
+                }
+              }
+            ]
+          },
+          {
+            "type": "dropdown",
+            "name": "action",
+            "title": {
+              "en": "Action"
+            },
+            "values": [
+              {
+                "id": "short_click",
+                "label": {
+                  "en": "Short Clicked"
+                }
+              },
+              {
+                "id": "long_click",
+                "label": {
+                  "en": "Long Clicked"
+                }
+              },
+              {
+                "id": "release",
+                "label": {
+                  "en": "Released"
+                }
+              },
+              {
+                "id": "any",
+                "label": {
+                  "en": "Any Action"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "button",
+            "type": "string",
+            "title": {
+              "en": "Button"
+            },
+            "example": {
+              "en": "hw_bt_left"
+            }
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "title": {
+              "en": "Action"
+            },
+            "example": {
+              "en": "short_click"
+            }
+          },
+          {
+            "name": "page",
+            "type": "string",
+            "title": {
+              "en": "Page"
+            },
+            "example": {
+              "en": "buttonpage01"
+            }
+          }
+        ]
+      },
+      {
+        "id": "physical_button_pressed",
+        "title": {
+          "en": "Physical button pressed"
+        },
+        "titleFormatted": {
+          "en": "[[button]] physical button was [[action]]"
+        },
+        "hint": {
+          "en": "Triggers when a physical button (left or right) is pressed on the NSPanel"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "button",
+            "title": {
+              "en": "Button"
+            },
+            "values": [
+              {
+                "id": "left",
+                "label": {
+                  "en": "Left"
+                }
+              },
+              {
+                "id": "right",
+                "label": {
+                  "en": "Right"
+                }
+              },
+              {
+                "id": "any",
+                "label": {
+                  "en": "Any"
+                }
+              }
+            ]
+          },
+          {
+            "type": "dropdown",
+            "name": "action",
+            "title": {
+              "en": "Action"
+            },
+            "values": [
+              {
+                "id": "short_click",
+                "label": {
+                  "en": "Short Click"
+                }
+              },
+              {
+                "id": "long_click",
+                "label": {
+                  "en": "Long Click"
+                }
+              },
+              {
+                "id": "any",
+                "label": {
+                  "en": "Any"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "button",
+            "type": "string",
+            "title": {
+              "en": "Button"
+            },
+            "example": {
+              "en": "left"
+            }
+          },
+          {
+            "name": "action",
+            "type": "string",
+            "title": {
+              "en": "Action"
+            },
+            "example": {
+              "en": "short_click"
+            }
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "clear_notification",
+        "title": {
+          "en": "Clear notification"
+        },
+        "titleFormatted": {
+          "en": "Clear notification on NSPanel"
+        },
+        "hint": {
+          "en": "Remove any displayed notification from the NSPanel screen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          }
+        ]
+      },
+      {
+        "id": "goto_page",
+        "title": {
+          "en": "Go to page"
+        },
+        "titleFormatted": {
+          "en": "Navigate to [[page]] on NSPanel"
+        },
+        "hint": {
+          "en": "Navigate to a specific page on the NSPanel display"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "page",
+            "title": {
+              "en": "Page"
+            },
+            "values": [
+              {
+                "id": "home",
+                "label": {
+                  "en": "Home"
+                }
+              },
+              {
+                "id": "buttonpage01",
+                "label": {
+                  "en": "Buttons Page 1"
+                }
+              },
+              {
+                "id": "buttonpage02",
+                "label": {
+                  "en": "Buttons Page 2"
+                }
+              },
+              {
+                "id": "buttonpage03",
+                "label": {
+                  "en": "Buttons Page 3"
+                }
+              },
+              {
+                "id": "buttonpage04",
+                "label": {
+                  "en": "Buttons Page 4"
+                }
+              },
+              {
+                "id": "entitypage01",
+                "label": {
+                  "en": "Entity Page 1"
+                }
+              },
+              {
+                "id": "entitypage02",
+                "label": {
+                  "en": "Entity Page 2"
+                }
+              },
+              {
+                "id": "entitypage03",
+                "label": {
+                  "en": "Entity Page 3"
+                }
+              },
+              {
+                "id": "entitypage04",
+                "label": {
+                  "en": "Entity Page 4"
+                }
+              },
+              {
+                "id": "climate",
+                "label": {
+                  "en": "Climate"
+                }
+              },
+              {
+                "id": "weather01",
+                "label": {
+                  "en": "Weather"
+                }
+              },
+              {
+                "id": "utilities",
+                "label": {
+                  "en": "Utilities"
+                }
+              },
+              {
+                "id": "qrcode",
+                "label": {
+                  "en": "QR Code"
+                }
+              },
+              {
+                "id": "media_player",
+                "label": {
+                  "en": "Media Player"
+                }
+              },
+              {
+                "id": "alarm",
+                "label": {
+                  "en": "Alarm"
+                }
+              },
+              {
+                "id": "settings",
+                "label": {
+                  "en": "Settings"
+                }
+              },
+              {
+                "id": "screensaver",
+                "label": {
+                  "en": "Screensaver"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "play_sound",
+        "title": {
+          "en": "Play sound"
+        },
+        "titleFormatted": {
+          "en": "Play [[melody]] on NSPanel"
+        },
+        "hint": {
+          "en": "Play an RTTTL melody on the NSPanel buzzer"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "melody",
+            "title": {
+              "en": "Melody"
+            },
+            "values": [
+              {
+                "id": "beep:d=4,o=5,b=100:16e6",
+                "label": {
+                  "en": "Beep"
+                }
+              },
+              {
+                "id": "success:d=4,o=5,b=140:16e6,16g6,16e7",
+                "label": {
+                  "en": "Success"
+                }
+              },
+              {
+                "id": "error:d=4,o=5,b=100:16e5,16c5",
+                "label": {
+                  "en": "Error"
+                }
+              },
+              {
+                "id": "alert:d=4,o=5,b=180:16e6,16p,16e6,16p,16e6",
+                "label": {
+                  "en": "Alert"
+                }
+              },
+              {
+                "id": "doorbell:d=4,o=5,b=100:8g6,8e6",
+                "label": {
+                  "en": "Doorbell"
+                }
+              },
+              {
+                "id": "mario:d=4,o=5,b=100:16e6,16e6,32p,8e6,16c6,8e6,8g6,8p,8g,8p,8c6,16p,8g,16p,8e,16p,8a,8b,16a#,8a,16g.,16e6,16g6,8a6,16f6,8g6,8e6,16c6,16d6,8b,16p",
+                "label": {
+                  "en": "Super Mario"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "show_notification",
+        "title": {
+          "en": "Show notification"
+        },
+        "titleFormatted": {
+          "en": "Show notification [[heading]]: [[message]] for [[timeout]]s"
+        },
+        "hint": {
+          "en": "Display a notification on the NSPanel screen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "text",
+            "name": "heading",
+            "title": {
+              "en": "Heading"
+            },
+            "placeholder": {
+              "en": "Notification Title"
+            }
+          },
+          {
+            "type": "text",
+            "name": "message",
+            "title": {
+              "en": "Message"
+            },
+            "placeholder": {
+              "en": "Notification message..."
+            }
+          },
+          {
+            "type": "number",
+            "name": "timeout",
+            "title": {
+              "en": "Timeout (seconds)"
+            },
+            "min": 0,
+            "max": 300,
+            "step": 1,
+            "placeholder": {
+              "en": "10"
+            }
+          }
+        ]
+      },
+      {
+        "id": "show_qrcode",
+        "title": {
+          "en": "Show QR code"
+        },
+        "titleFormatted": {
+          "en": "Show QR code with [[content]] and heading [[heading]]"
+        },
+        "hint": {
+          "en": "Display a QR code on the NSPanel screen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "text",
+            "name": "content",
+            "title": {
+              "en": "QR Code Content"
+            },
+            "placeholder": {
+              "en": "https://example.com or text..."
+            }
+          },
+          {
+            "type": "text",
+            "name": "heading",
+            "title": {
+              "en": "Heading"
+            },
+            "placeholder": {
+              "en": "Scan me!"
+            },
+            "required": false
+          }
+        ]
+      },
+      {
+        "id": "update_button",
+        "title": {
+          "en": "Update button appearance"
+        },
+        "titleFormatted": {
+          "en": "Set [[button]] on [[page]] to [[label]] ([[state]])"
+        },
+        "hint": {
+          "en": "Update the appearance of a button on the NSPanel"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "page",
+            "title": {
+              "en": "Page"
+            },
+            "values": [
+              {
+                "id": "buttonpage01",
+                "label": {
+                  "en": "Button Page 1"
+                }
+              },
+              {
+                "id": "buttonpage02",
+                "label": {
+                  "en": "Button Page 2"
+                }
+              },
+              {
+                "id": "buttonpage03",
+                "label": {
+                  "en": "Button Page 3"
+                }
+              },
+              {
+                "id": "buttonpage04",
+                "label": {
+                  "en": "Button Page 4"
+                }
+              }
+            ]
+          },
+          {
+            "type": "dropdown",
+            "name": "button",
+            "title": {
+              "en": "Button"
+            },
+            "values": [
+              {
+                "id": "bt01",
+                "label": {
+                  "en": "Button 1"
+                }
+              },
+              {
+                "id": "bt02",
+                "label": {
+                  "en": "Button 2"
+                }
+              },
+              {
+                "id": "bt03",
+                "label": {
+                  "en": "Button 3"
+                }
+              },
+              {
+                "id": "bt04",
+                "label": {
+                  "en": "Button 4"
+                }
+              },
+              {
+                "id": "bt05",
+                "label": {
+                  "en": "Button 5"
+                }
+              },
+              {
+                "id": "bt06",
+                "label": {
+                  "en": "Button 6"
+                }
+              },
+              {
+                "id": "bt07",
+                "label": {
+                  "en": "Button 7"
+                }
+              },
+              {
+                "id": "bt08",
+                "label": {
+                  "en": "Button 8"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "name": "label",
+            "title": {
+              "en": "Label"
+            },
+            "placeholder": {
+              "en": "Button label"
+            }
+          },
+          {
+            "type": "checkbox",
+            "name": "state",
+            "title": {
+              "en": "On/Off State"
+            }
+          }
+        ]
+      },
+      {
+        "id": "update_home_entity",
+        "title": {
+          "en": "Update home screen entity"
+        },
+        "titleFormatted": {
+          "en": "Set home [[entity]] to [[value]] with icon [[icon]]"
+        },
+        "hint": {
+          "en": "Update an entity display on the NSPanel home screen (chips, values, etc.)"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "dropdown",
+            "name": "entity",
+            "title": {
+              "en": "Entity"
+            },
+            "values": [
+              {
+                "id": "chip01",
+                "label": {
+                  "en": "Chip 1"
+                }
+              },
+              {
+                "id": "chip02",
+                "label": {
+                  "en": "Chip 2"
+                }
+              },
+              {
+                "id": "chip03",
+                "label": {
+                  "en": "Chip 3"
+                }
+              },
+              {
+                "id": "chip04",
+                "label": {
+                  "en": "Chip 4"
+                }
+              },
+              {
+                "id": "chip05",
+                "label": {
+                  "en": "Chip 5"
+                }
+              },
+              {
+                "id": "chip06",
+                "label": {
+                  "en": "Chip 6"
+                }
+              },
+              {
+                "id": "outdoor_temp",
+                "label": {
+                  "en": "Outdoor Temperature"
+                }
+              },
+              {
+                "id": "indoor_temp",
+                "label": {
+                  "en": "Indoor Temperature"
+                }
+              },
+              {
+                "id": "weather_icon",
+                "label": {
+                  "en": "Weather Icon"
+                }
+              },
+              {
+                "id": "date",
+                "label": {
+                  "en": "Date Display"
+                }
+              },
+              {
+                "id": "time",
+                "label": {
+                  "en": "Time Display"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "name": "value",
+            "title": {
+              "en": "Value/Text"
+            },
+            "placeholder": {
+              "en": "Display value"
+            }
+          },
+          {
+            "type": "text",
+            "name": "icon",
+            "title": {
+              "en": "Icon (MDI codepoint)"
+            },
+            "placeholder": {
+              "en": "e.g. \\uE599 for sunny"
+            }
+          }
+        ]
+      },
+      {
+        "id": "update_weather",
+        "title": {
+          "en": "Update weather display"
+        },
+        "titleFormatted": {
+          "en": "Update weather: [[temperature]]° [[condition]]"
+        },
+        "hint": {
+          "en": "Update the weather information displayed on the NSPanel home screen"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          },
+          {
+            "type": "text",
+            "name": "temperature",
+            "title": {
+              "en": "Temperature"
+            },
+            "placeholder": {
+              "en": "21"
+            }
+          },
+          {
+            "type": "dropdown",
+            "name": "condition",
+            "title": {
+              "en": "Weather Condition"
+            },
+            "values": [
+              {
+                "id": "sunny",
+                "label": {
+                  "en": "Sunny"
+                }
+              },
+              {
+                "id": "clear-night",
+                "label": {
+                  "en": "Clear Night"
+                }
+              },
+              {
+                "id": "partlycloudy",
+                "label": {
+                  "en": "Partly Cloudy"
+                }
+              },
+              {
+                "id": "cloudy",
+                "label": {
+                  "en": "Cloudy"
+                }
+              },
+              {
+                "id": "fog",
+                "label": {
+                  "en": "Fog"
+                }
+              },
+              {
+                "id": "rainy",
+                "label": {
+                  "en": "Rainy"
+                }
+              },
+              {
+                "id": "snowy",
+                "label": {
+                  "en": "Snowy"
+                }
+              },
+              {
+                "id": "lightning",
+                "label": {
+                  "en": "Thunderstorm"
+                }
+              },
+              {
+                "id": "windy",
+                "label": {
+                  "en": "Windy"
+                }
+              },
+              {
+                "id": "pouring",
+                "label": {
+                  "en": "Heavy Rain"
+                }
+              },
+              {
+                "id": "snowy-rainy",
+                "label": {
+                  "en": "Sleet"
+                }
+              },
+              {
+                "id": "hail",
+                "label": {
+                  "en": "Hail"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "wake_up",
+        "title": {
+          "en": "Wake up display"
+        },
+        "titleFormatted": {
+          "en": "Wake up NSPanel display"
+        },
+        "hint": {
+          "en": "Activate the NSPanel display from sleep mode"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=nspanel"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "NSPanel"
+      },
+      "class": "other",
+      "capabilities": [
+        "onoff",
+        "measure_temperature",
+        "nspanel_page",
+        "nspanel_rssi",
+        "nspanel_brightness",
+        "nspanel_version_blueprint",
+        "nspanel_version_esphome",
+        "nspanel_version_tft"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Display"
+          },
+          "setOnDim": false
+        },
+        "measure_temperature": {
+          "title": {
+            "en": "Panel Temperature"
+          }
+        }
+      },
+      "images": {
+        "small": "/drivers/nspanel/assets/images/small.png",
+        "large": "/drivers/nspanel/assets/images/large.png",
+        "xlarge": "/drivers/nspanel/assets/images/xlarge.png"
+      },
+      "discovery": "esphome",
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          },
+          "options": {
+            "singular": false
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Connection"
+          },
+          "children": [
+            {
+              "id": "host",
+              "type": "text",
+              "label": {
+                "en": "IP Address"
+              },
+              "hint": {
+                "en": "The IP address of your NSPanel"
+              },
+              "value": ""
+            },
+            {
+              "id": "port",
+              "type": "number",
+              "label": {
+                "en": "Port"
+              },
+              "hint": {
+                "en": "ESPHome Native API port (default: 6053)"
+              },
+              "value": 6053,
+              "min": 1,
+              "max": 65535
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Authentication"
+          },
+          "children": [
+            {
+              "id": "password",
+              "type": "password",
+              "label": {
+                "en": "API Password"
+              },
+              "hint": {
+                "en": "Leave empty if no password is set"
+              },
+              "value": ""
+            },
+            {
+              "id": "encryptionKey",
+              "type": "password",
+              "label": {
+                "en": "Encryption Key"
+              },
+              "hint": {
+                "en": "Base64-encoded encryption key (if using encryption)"
+              },
+              "value": ""
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Weather"
+          },
+          "children": [
+            {
+              "id": "weatherEnabled",
+              "type": "checkbox",
+              "label": {
+                "en": "Enable Weather"
+              },
+              "hint": {
+                "en": "Automatically update weather on the panel (uses Open-Meteo, no API key required)"
+              },
+              "value": true
+            },
+            {
+              "id": "weatherUpdateInterval",
+              "type": "number",
+              "label": {
+                "en": "Update Interval (minutes)"
+              },
+              "hint": {
+                "en": "How often to refresh weather data"
+              },
+              "value": 30,
+              "min": 5,
+              "max": 120
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Display"
+          },
+          "children": [
+            {
+              "id": "dateFormat",
+              "type": "dropdown",
+              "label": {
+                "en": "Date Format"
+              },
+              "value": "ddd DD MMM",
+              "values": [
+                {
+                  "id": "ddd DD MMM",
+                  "label": {
+                    "en": "Mon 25 Dec"
+                  }
+                },
+                {
+                  "id": "DD/MM/YYYY",
+                  "label": {
+                    "en": "25/12/2024"
+                  }
+                },
+                {
+                  "id": "MM/DD/YYYY",
+                  "label": {
+                    "en": "12/25/2024"
+                  }
+                },
+                {
+                  "id": "YYYY-MM-DD",
+                  "label": {
+                    "en": "2024-12-25"
+                  }
+                },
+                {
+                  "id": "DD MMM YYYY",
+                  "label": {
+                    "en": "25 Dec 2024"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "timeFormat",
+              "type": "dropdown",
+              "label": {
+                "en": "Time Format"
+              },
+              "value": "HH:mm",
+              "values": [
+                {
+                  "id": "HH:mm",
+                  "label": {
+                    "en": "24-hour (14:30)"
+                  }
+                },
+                {
+                  "id": "h:mm A",
+                  "label": {
+                    "en": "12-hour (2:30 PM)"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": "nspanel"
+    }
+  ],
+  "capabilities": {
+    "nspanel_brightness": {
+      "type": "number",
+      "title": {
+        "en": "Display Brightness"
+      },
+      "units": {
+        "en": "%"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/sun.svg",
+      "insights": true,
+      "min": 0,
+      "max": 100
+    },
+    "nspanel_page": {
+      "type": "string",
+      "title": {
+        "en": "Current Page"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/page.svg"
+    },
+    "nspanel_rssi": {
+      "type": "number",
+      "title": {
+        "en": "WiFi Signal"
+      },
+      "units": {
+        "en": "dBm"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/wifi.svg",
+      "insights": true,
+      "min": -100,
+      "max": 0
+    },
+    "nspanel_version_blueprint": {
+      "type": "string",
+      "title": {
+        "en": "Blueprint Version"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/tag.svg"
+    },
+    "nspanel_version_esphome": {
+      "type": "string",
+      "title": {
+        "en": "ESPHome Version"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/cpu.svg"
+    },
+    "nspanel_version_tft": {
+      "type": "string",
+      "title": {
+        "en": "TFT Version"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/icons/monitor.svg"
+    }
+  },
+  "discovery": {
+    "esphome": {
+      "type": "mdns-sd",
+      "mdns-sd": {
+        "name": "esphomelib",
+        "protocol": "tcp"
+      },
+      "id": "{{address}}"
+    }
+  }
+}

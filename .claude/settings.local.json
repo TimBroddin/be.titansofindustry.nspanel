@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(bun add:*)",
+      "Bash(convert:*)",
+      "Bash(magick:*)",
+      "Bash(npx homey app validate:*)",
+      "WebFetch(domain:apps.developer.homey.app)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:docs.nspanel.pky.eu)"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "physical_button_pressed",
+  "title": {
+    "en": "Physical button pressed"
+  },
+  "titleFormatted": {
+    "en": "[[button]] physical button was [[action]]"
+  },
+  "hint": {
+    "en": "Triggers when a physical button (left or right) is pressed on the NSPanel"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "dropdown",
+      "name": "button",
+      "title": {
+        "en": "Button"
+      },
+      "values": [
+        { "id": "left", "label": { "en": "Left" } },
+        { "id": "right", "label": { "en": "Right" } },
+        { "id": "any", "label": { "en": "Any" } }
+      ]
+    },
+    {
+      "type": "dropdown",
+      "name": "action",
+      "title": {
+        "en": "Action"
+      },
+      "values": [
+        { "id": "short_click", "label": { "en": "Short Click" } },
+        { "id": "long_click", "label": { "en": "Long Click" } },
+        { "id": "any", "label": { "en": "Any" } }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "button",
+      "type": "string",
+      "title": {
+        "en": "Button"
+      },
+      "example": {
+        "en": "left"
+      }
+    },
+    {
+      "name": "action",
+      "type": "string",
+      "title": {
+        "en": "Action"
+      },
+      "example": {
+        "en": "short_click"
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "be.titansofindustry.nspanel",
+  "version": "1.0.0",
+  "compatibility": ">=12.4.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "NSPanel HA Blueprint"
+  },
+  "description": {
+    "en": "Adds support for NSPanel devices running the HA Blueprint firmware. "
+  },
+  "category": [
+    "appliances"
+  ],
+  "permissions": [
+    "homey:manager:geolocation",
+    "homey:manager:api"
+  ],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Tim Broddin",
+    "email": "tim@wannabes.be"
+  },
+  "brandColor": "#e94560",
+  "api": {
+    "getDevices": {
+      "method": "GET",
+      "path": "/devices"
+    },
+    "putNspanelConfig": {
+      "method": "PUT",
+      "path": "/nspanel/:deviceId/config"
+    }
+  }
+}

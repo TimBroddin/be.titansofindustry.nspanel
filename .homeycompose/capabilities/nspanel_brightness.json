@@ -1,0 +1,16 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Display Brightness"
+  },
+  "units": {
+    "en": "%"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icons/sun.svg",
+  "insights": true,
+  "min": 0,
+  "max": 100
+}

@@ -1,0 +1,19 @@
+{
+  "id": "clear_notification",
+  "title": {
+    "en": "Clear notification"
+  },
+  "titleFormatted": {
+    "en": "Clear notification on NSPanel"
+  },
+  "hint": {
+    "en": "Remove any displayed notification from the NSPanel screen"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    }
+  ]
+}

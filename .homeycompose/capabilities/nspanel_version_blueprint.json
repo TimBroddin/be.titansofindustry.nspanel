@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Blueprint Version"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icons/tag.svg"
+}

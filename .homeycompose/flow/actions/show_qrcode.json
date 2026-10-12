@@ -1,0 +1,40 @@
+{
+  "id": "show_qrcode",
+  "title": {
+    "en": "Show QR code"
+  },
+  "titleFormatted": {
+    "en": "Show QR code with [[content]] and heading [[heading]]"
+  },
+  "hint": {
+    "en": "Display a QR code on the NSPanel screen"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "text",
+      "name": "content",
+      "title": {
+        "en": "QR Code Content"
+      },
+      "placeholder": {
+        "en": "https://example.com or text..."
+      }
+    },
+    {
+      "type": "text",
+      "name": "heading",
+      "title": {
+        "en": "Heading"
+      },
+      "placeholder": {
+        "en": "Scan me!"
+      },
+      "required": false
+    }
+  ]
+}

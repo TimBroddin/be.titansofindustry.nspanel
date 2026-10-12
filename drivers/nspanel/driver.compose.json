@@ -1,0 +1,182 @@
+{
+  "name": {
+    "en": "NSPanel"
+  },
+  "class": "other",
+  "capabilities": [
+    "onoff",
+    "measure_temperature",
+    "nspanel_page",
+    "nspanel_rssi",
+    "nspanel_brightness",
+    "nspanel_version_blueprint",
+    "nspanel_version_esphome",
+    "nspanel_version_tft"
+  ],
+  "capabilitiesOptions": {
+    "onoff": {
+      "title": {
+        "en": "Display"
+      },
+      "setOnDim": false
+    },
+    "measure_temperature": {
+      "title": {
+        "en": "Panel Temperature"
+      }
+    }
+  },
+  "images": {
+    "small": "/drivers/nspanel/assets/images/small.png",
+    "large": "/drivers/nspanel/assets/images/large.png",
+    "xlarge": "/drivers/nspanel/assets/images/xlarge.png"
+  },
+  "discovery": "esphome",
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      },
+      "options": {
+        "singular": false
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "Connection"
+      },
+      "children": [
+        {
+          "id": "host",
+          "type": "text",
+          "label": {
+            "en": "IP Address"
+          },
+          "hint": {
+            "en": "The IP address of your NSPanel"
+          },
+          "value": ""
+        },
+        {
+          "id": "port",
+          "type": "number",
+          "label": {
+            "en": "Port"
+          },
+          "hint": {
+            "en": "ESPHome Native API port (default: 6053)"
+          },
+          "value": 6053,
+          "min": 1,
+          "max": 65535
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Authentication"
+      },
+      "children": [
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "API Password"
+          },
+          "hint": {
+            "en": "Leave empty if no password is set"
+          },
+          "value": ""
+        },
+        {
+          "id": "encryptionKey",
+          "type": "password",
+          "label": {
+            "en": "Encryption Key"
+          },
+          "hint": {
+            "en": "Base64-encoded encryption key (if using encryption)"
+          },
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Weather"
+      },
+      "children": [
+        {
+          "id": "weatherEnabled",
+          "type": "checkbox",
+          "label": {
+            "en": "Enable Weather"
+          },
+          "hint": {
+            "en": "Automatically update weather on the panel (uses Open-Meteo, no API key required)"
+          },
+          "value": true
+        },
+        {
+          "id": "weatherUpdateInterval",
+          "type": "number",
+          "label": {
+            "en": "Update Interval (minutes)"
+          },
+          "hint": {
+            "en": "How often to refresh weather data"
+          },
+          "value": 30,
+          "min": 5,
+          "max": 120
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Display"
+      },
+      "children": [
+        {
+          "id": "dateFormat",
+          "type": "dropdown",
+          "label": {
+            "en": "Date Format"
+          },
+          "value": "ddd DD MMM",
+          "values": [
+            { "id": "ddd DD MMM", "label": { "en": "Mon 25 Dec" } },
+            { "id": "DD/MM/YYYY", "label": { "en": "25/12/2024" } },
+            { "id": "MM/DD/YYYY", "label": { "en": "12/25/2024" } },
+            { "id": "YYYY-MM-DD", "label": { "en": "2024-12-25" } },
+            { "id": "DD MMM YYYY", "label": { "en": "25 Dec 2024" } }
+          ]
+        },
+        {
+          "id": "timeFormat",
+          "type": "dropdown",
+          "label": {
+            "en": "Time Format"
+          },
+          "value": "HH:mm",
+          "values": [
+            { "id": "HH:mm", "label": { "en": "24-hour (14:30)" } },
+            { "id": "h:mm A", "label": { "en": "12-hour (2:30 PM)" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

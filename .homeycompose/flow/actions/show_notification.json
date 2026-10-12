@@ -1,0 +1,52 @@
+{
+  "id": "show_notification",
+  "title": {
+    "en": "Show notification"
+  },
+  "titleFormatted": {
+    "en": "Show notification [[heading]]: [[message]] for [[timeout]]s"
+  },
+  "hint": {
+    "en": "Display a notification on the NSPanel screen"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "text",
+      "name": "heading",
+      "title": {
+        "en": "Heading"
+      },
+      "placeholder": {
+        "en": "Notification Title"
+      }
+    },
+    {
+      "type": "text",
+      "name": "message",
+      "title": {
+        "en": "Message"
+      },
+      "placeholder": {
+        "en": "Notification message..."
+      }
+    },
+    {
+      "type": "number",
+      "name": "timeout",
+      "title": {
+        "en": "Timeout (seconds)"
+      },
+      "min": 0,
+      "max": 300,
+      "step": 1,
+      "placeholder": {
+        "en": "10"
+      }
+    }
+  ]
+}

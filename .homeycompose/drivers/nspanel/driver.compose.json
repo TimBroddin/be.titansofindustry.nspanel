@@ -1,0 +1,109 @@
+{
+  "name": {
+    "en": "NSPanel"
+  },
+  "class": "other",
+  "capabilities": [
+    "onoff",
+    "measure_temperature",
+    "nspanel_page"
+  ],
+  "capabilitiesOptions": {
+    "onoff": {
+      "title": {
+        "en": "Display"
+      },
+      "setOnDim": false
+    },
+    "measure_temperature": {
+      "title": {
+        "en": "Panel Temperature"
+      }
+    }
+  },
+  "images": {
+    "small": "/drivers/nspanel/assets/images/small.png",
+    "large": "/drivers/nspanel/assets/images/large.png",
+    "xlarge": "/drivers/nspanel/assets/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      },
+      "options": {
+        "singular": false
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ],
+  "settings": [
+    {
+      "type": "group",
+      "label": {
+        "en": "Connection"
+      },
+      "children": [
+        {
+          "id": "host",
+          "type": "text",
+          "label": {
+            "en": "IP Address"
+          },
+          "hint": {
+            "en": "The IP address of your NSPanel"
+          },
+          "value": ""
+        },
+        {
+          "id": "port",
+          "type": "number",
+          "label": {
+            "en": "Port"
+          },
+          "hint": {
+            "en": "ESPHome Native API port (default: 6053)"
+          },
+          "value": 6053,
+          "min": 1,
+          "max": 65535
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "label": {
+        "en": "Authentication"
+      },
+      "children": [
+        {
+          "id": "password",
+          "type": "password",
+          "label": {
+            "en": "API Password"
+          },
+          "hint": {
+            "en": "Leave empty if no password is set"
+          },
+          "value": ""
+        },
+        {
+          "id": "encryptionKey",
+          "type": "password",
+          "label": {
+            "en": "Encryption Key"
+          },
+          "hint": {
+            "en": "Base64-encoded encryption key (if using encryption)"
+          },
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

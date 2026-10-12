@@ -1,0 +1,34 @@
+{
+  "id": "play_sound",
+  "title": {
+    "en": "Play sound"
+  },
+  "titleFormatted": {
+    "en": "Play [[melody]] on NSPanel"
+  },
+  "hint": {
+    "en": "Play an RTTTL melody on the NSPanel buzzer"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "dropdown",
+      "name": "melody",
+      "title": {
+        "en": "Melody"
+      },
+      "values": [
+        { "id": "beep:d=4,o=5,b=100:16e6", "label": { "en": "Beep" } },
+        { "id": "success:d=4,o=5,b=140:16e6,16g6,16e7", "label": { "en": "Success" } },
+        { "id": "error:d=4,o=5,b=100:16e5,16c5", "label": { "en": "Error" } },
+        { "id": "alert:d=4,o=5,b=180:16e6,16p,16e6,16p,16e6", "label": { "en": "Alert" } },
+        { "id": "doorbell:d=4,o=5,b=100:8g6,8e6", "label": { "en": "Doorbell" } },
+        { "id": "mario:d=4,o=5,b=100:16e6,16e6,32p,8e6,16c6,8e6,8g6,8p,8g,8p,8c6,16p,8g,16p,8e,16p,8a,8b,16a#,8a,16g.,16e6,16g6,8a6,16f6,8g6,8e6,16c6,16d6,8b,16p", "label": { "en": "Super Mario" } }
+      ]
+    }
+  ]
+}

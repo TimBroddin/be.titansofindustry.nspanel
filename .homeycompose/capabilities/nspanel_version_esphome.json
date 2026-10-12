@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "title": {
+    "en": "ESPHome Version"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icons/cpu.svg"
+}

@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Current Page"
+  },
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/icons/page.svg"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "update_weather",
+  "title": {
+    "en": "Update weather display"
+  },
+  "titleFormatted": {
+    "en": "Update weather: [[temperature]]° [[condition]]"
+  },
+  "hint": {
+    "en": "Update the weather information displayed on the NSPanel home screen"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "text",
+      "name": "temperature",
+      "title": {
+        "en": "Temperature"
+      },
+      "placeholder": {
+        "en": "21"
+      }
+    },
+    {
+      "type": "dropdown",
+      "name": "condition",
+      "title": {
+        "en": "Weather Condition"
+      },
+      "values": [
+        { "id": "sunny", "label": { "en": "Sunny" } },
+        { "id": "clear-night", "label": { "en": "Clear Night" } },
+        { "id": "partlycloudy", "label": { "en": "Partly Cloudy" } },
+        { "id": "cloudy", "label": { "en": "Cloudy" } },
+        { "id": "fog", "label": { "en": "Fog" } },
+        { "id": "rainy", "label": { "en": "Rainy" } },
+        { "id": "snowy", "label": { "en": "Snowy" } },
+        { "id": "lightning", "label": { "en": "Thunderstorm" } },
+        { "id": "windy", "label": { "en": "Windy" } },
+        { "id": "pouring", "label": { "en": "Heavy Rain" } },
+        { "id": "snowy-rainy", "label": { "en": "Sleet" } },
+        { "id": "hail", "label": { "en": "Hail" } }
+      ]
+    }
+  ]
+}
