@@ -232,3 +232,16 @@ Each phase ends with a working panel.
 - **`esphome-native-api` forks** may lag behind current ESPHome protocol versions, for example the event entity or list arguments for services. Mitigation: phase 0/1 verifies event entity and array arguments end to end; fallback is to encode arrays as delimited strings and use a text sensor for events.
 - **Homey API scopes**: starting flows and activating moods need the appropriate app permissions (`homey:manager:api`). Verify in phase 2.
 - **TFT editing is manual GUI work** that only the user can do. Mitigation: keep TFT pages generic, and give exact step-by-step edit lists per page.
+
+## 13. Revisions after implementation research (2026-10-12)
+
+These findings came from reading the Blackymas sources, the `@2colors/esphome-native-api` fork, and a test compile on ESPHome 2026.6. They override the sections above where they conflict.
+
+- **Firmware services (§5):** one generic `set_props(keys: string[], values: string[])` action replaces `set_texts`, `set_tile`, `set_thermostat`, `set_weather` and `set_visibility`. Keys are `page.component.attr`, and the per-page cache replays them when a page opens. Notifications are built from `set_props` + `goto_page`. Thermostat- and tile-specific firmware logic (optimistic tile flip, `target_set` debounce) arrives with the pages that need it.
+- **Events (§5):** ESPHome `event` entities carry only a fixed event type, with no payload. Panel → Homey events use `homeassistant.event` named `esphome.nspanel_ui` with data `{type, page, slot, value}`. The app subscribes to HA services on the native API to receive them.
+- **TFT protocol:** the Blackymas TFT reports touches as CSV `page,event,component` in the `localevent` variable, and needs a boot handshake (`boot,params,...` → `tm_esphome.en=0`, then `page home`). Our forked TFT keeps that protocol.
+- **Home chips (§4/§7):** Blackymas chips are 3-character icon slots, so a chip is a **conditional icon** (shown while the capability is active), not a value. Numeric values go in the 4 value fields. There are 7 chip slots, not 6.
+- **General settings (§6 schema):** language, date and time format, and the weather toggle stay as Homey **device settings**. They aren't part of `dashboardConfig`.
+- **Phasing (§11):** the foundation plan (phases 0–2) runs our firmware against the **stock** Blackymas EU TFT. TFT editing starts with the moods/calendar plan. Home target temperature, the climate page, the forecast page, the screensaver, dimming and QR code come with the TFT fork.
+- **Flow cards:** `update_weather`, `show_qrcode` and `button_pressed` are removed for now. Weather is automatic, QR needs a firmware drawing routine, and button pages are gone.
+- **Risk (§12):** Homey's Web API requires the `homey.mood.set` and `homey.flow.start` scopes for setting moods and starting flows. A forum report says apps can get 403 on `triggerFlow`. This must be checked at the start of the moods plan, with the "Tile pressed" trigger as the fallback.
