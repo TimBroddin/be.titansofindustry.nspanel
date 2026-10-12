@@ -42,7 +42,9 @@ function parseChip(item: Obj): ChipConfig | null {
 function parseValue(item: Obj): ValueConfig | null {
   const deviceId = str(item.deviceId);
   const capability = str(item.capability);
-  return deviceId && capability ? { deviceId, capability, icon: decodeIcon(item.icon), unit: str(item.unit) } : null;
+  return deviceId && capability ? {
+    deviceId, capability, icon: decodeIcon(item.icon), unit: str(item.unit),
+  } : null;
 }
 
 export function normalizeConfig(raw: unknown): DashboardConfig {
@@ -69,7 +71,9 @@ export function migrateLegacy(legacy: unknown): DashboardConfig {
   return normalizeConfig({
     home: {
       chips: list(l.chips).map((c) => ({ deviceId: c.device, capability: c.capability, icon: c.icon })),
-      values: list(l.entities).map((e) => ({ deviceId: e.device, capability: e.capability, icon: e.icon, unit: '' })),
+      values: list(l.entities).map((e) => ({
+        deviceId: e.device, capability: e.capability, icon: e.icon, unit: '',
+      })),
     },
   });
 }

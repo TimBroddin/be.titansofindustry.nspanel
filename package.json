@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-pattern tests --ignore-pattern scripts .",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --ignore-pattern tests --ignore-pattern scripts --ignore-pattern settings .",
     "test": "bun test"
   },
   "devDependencies": {

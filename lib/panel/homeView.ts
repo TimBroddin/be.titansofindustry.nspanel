@@ -1,5 +1,7 @@
 import { DashboardConfig, capKey } from '../config';
-import { Lang, formatNumber, formatValue, isActive } from '../i18n';
+import {
+  Lang, formatNumber, formatValue, isActive,
+} from '../i18n';
 import { WeatherNow, weatherPicture } from '../weather';
 
 export const ICON_THERMOMETER = '\uE50E';
@@ -35,7 +37,7 @@ export function buildHomeProps(config: DashboardConfig, state: HomeState): Recor
     p['home.weather.vis'] = '0';
   }
 
-  const thermostat = config.home.thermostat;
+  const { thermostat } = config.home;
   const current = thermostat ? get(thermostat.deviceId, 'measure_temperature') : undefined;
   const indoor = typeof current === 'number' ? current : state.panelTemperature;
   p['home.indr_temp.txt'] = typeof indoor === 'number' ? `${formatNumber(indoor, 1, lang)}°` : '';

@@ -28,17 +28,28 @@ export class PanelConnection extends EventEmitter {
     return Boolean(this.client?.connected);
   }
 
+  // Emits 'fatal' (message) instead of throwing when the connection cannot be set up at all.
   start(): void {
     this.stop();
-    const client = new Client({
-      host: this.opts.host,
-      port: this.opts.port || 6053,
-      encryptionKey: this.opts.encryptionKey || '',
-      reconnect: true,
-      reconnectInterval: 5000,
-      pingInterval: 15000,
-      pingAttempts: 3,
-    });
+    if (!this.opts.encryptionKey) {
+      this.emit('fatal', 'Encryption key required');
+      return;
+    }
+    let client: any;
+    try {
+      client = new Client({
+        host: this.opts.host,
+        port: this.opts.port || 6053,
+        encryptionKey: this.opts.encryptionKey,
+        reconnect: true,
+        reconnectInterval: 5000,
+        pingInterval: 15000,
+        pingAttempts: 3,
+      });
+    } catch (err) {
+      this.emit('fatal', `Invalid encryption key: ${(err as Error).message}`);
+      return;
+    }
     const conn = client.connection;
 
     conn.on('message.ListEntitiesServicesResponse', (def: ServiceDef) => this.services.set(def.name, def));

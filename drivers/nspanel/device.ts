@@ -6,6 +6,7 @@ import { formatDate, toLang } from '../../lib/i18n';
 import { buildHomeProps } from '../../lib/panel/homeView';
 import { PanelConnection } from '../../lib/panel/PanelConnection';
 import { PanelRenderer } from '../../lib/panel/PanelRenderer';
+import { runReadySequence } from '../../lib/panel/readySequence';
 import { UiEvent } from '../../lib/panel/uiEvents';
 import { CapabilitySource, DeviceProvider } from '../../lib/sources/CapabilitySource';
 import { WeatherNow, fetchWeather } from '../../lib/weather';
@@ -94,18 +95,30 @@ class NSPanelDevice extends Homey.Device {
     this.panel.on('disconnected', () => {
       this.setUnavailable('Disconnected from panel').catch(this.error);
     });
+    this.panel.on('fatal', (message: string) => {
+      this.setUnavailable(message).catch(this.error);
+    });
     this.panel.on('ui', (ev: UiEvent) => this.onUiEvent(ev));
     this.panel.on('sensor', (s2: { name: string; value: unknown }) => this.onSensor(s2.name, s2.value));
+    // Unavailable until the first 'ready': the library only emits 'disconnected' after a successful connect.
+    this.setUnavailable('Connecting to panel…').catch(this.error);
     this.panel.start();
   }
 
   private async onPanelReady(): Promise<void> {
-    await this.setAvailable();
-    await this.setCapabilityValue('onoff', true).catch(this.error);
-    await this.pushPanelSettings();
-    await this.capabilities?.watch(watchedCapabilities(this.config));
     this.renderer.reset(); // panel may have rebooted: its cache is empty
-    this.render();
+    await runReadySequence({
+      repaint: () => this.render(),
+      steps: [
+        () => this.setAvailable(),
+        () => this.setCapabilityValue('onoff', true),
+        () => this.pushPanelSettings(),
+        async () => {
+          await this.capabilities?.watch(watchedCapabilities(this.config));
+        },
+      ],
+      onError: (err) => this.error('Panel ready step failed:', err),
+    });
   }
 
   private async pushPanelSettings(): Promise<void> {

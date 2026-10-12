@@ -11,7 +11,9 @@ export class PanelRenderer {
 
   constructor(
     private readonly send: SendProps,
-    private readonly schedule: Schedule = (fn, ms) => { setTimeout(fn, ms); },
+    private readonly schedule: Schedule = (fn, ms) => {
+      setTimeout(fn, ms);
+    },
     private readonly windowMs = 50,
     private readonly onError: (err: unknown) => void = () => {},
   ) {}

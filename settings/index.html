@@ -2,6 +2,7 @@
 <html>
 <head>
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <script type="text/javascript" src="iconField.js"></script>
   <style>
     body { font-family: -apple-system, sans-serif; padding: 12px; }
     fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 10px; }
@@ -61,7 +62,7 @@
       dev.value = slot?.deviceId ?? '';
       cap.innerHTML = capOptions(dev.value, slot?.capability);
       dev.onchange = () => { cap.innerHTML = capOptions(dev.value, ''); };
-      icon.value = slot ? (glyphToName[slot.icon] ?? '') : '';
+      icon.value = slot ? iconLabel(slot.icon, glyphToName) : '';
       if (kind === 'value') row.querySelector('[data-k=unit]').value = slot?.unit ?? '';
       return row;
     }
@@ -70,7 +71,9 @@
       return [...document.getElementById(containerId).children].map((row) => {
         const get = (k) => row.querySelector(`[data-k=${k}]`)?.value ?? '';
         if (!get('deviceId') || !get('capability')) return null;
-        return { deviceId: get('deviceId'), capability: get('capability'), icon: icons[get('icon')] ?? '', unit: get('unit') };
+        const icon = resolveIcon(get('icon'), icons);
+        if (icon.error) throw new Error(icon.error);
+        return { deviceId: get('deviceId'), capability: get('capability'), icon: icon.glyph, unit: get('unit') };
       });
     }
 
@@ -92,11 +95,19 @@
       const status = document.getElementById('status');
       const id = document.getElementById('panel').value;
       const thermostat = document.getElementById('thermostat').value;
+      let chips, values;
+      try {
+        chips = readSlots('chips');
+        values = readSlots('values');
+      } catch (e) {
+        status.className = 'error'; status.textContent = e.message;
+        return;
+      }
       const body = {
         home: {
           thermostat: thermostat ? { deviceId: thermostat } : null,
-          chips: readSlots('chips'),
-          values: readSlots('values'),
+          chips,
+          values,
         },
         buttons: { left: document.getElementById('btn-left').value, right: document.getElementById('btn-right').value },
       };

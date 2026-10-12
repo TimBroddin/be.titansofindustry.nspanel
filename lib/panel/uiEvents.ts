@@ -12,7 +12,9 @@ export function parseUiEvent(msg: HaActionMessage): UiEvent | null {
   const d: Record<string, string> = {};
   for (const { key, value } of msg.dataList ?? []) d[key] = value;
   switch (d.type) {
-    case 'touch': return { type: 'touch', page: d.page ?? '', component: d.slot ?? '', action: d.value ?? '' };
+    case 'touch': return {
+      type: 'touch', page: d.page ?? '', component: d.slot ?? '', action: d.value ?? '',
+    };
     case 'page': return d.page ? { type: 'page', page: d.page } : null;
     case 'hw_button':
       if ((d.slot === 'left' || d.slot === 'right') && (d.value === 'short' || d.value === 'long')) {
