@@ -1,4 +1,14 @@
 {
-  "fonts": { "small": null, "body": null },
-  "pics": { "moods": 50, "moods_on": 51 }
+  "fonts": {
+    "small": null,
+    "body": null
+  },
+  "pics": {
+    "moods": 50,
+    "moods_on": 51,
+    "home": 49,
+    "home_on": 56,
+    "media": 57,
+    "media_bare": 58
+  }
 }

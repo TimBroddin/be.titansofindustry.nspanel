@@ -110,3 +110,11 @@ describe('buildMediaProps', () => {
     expect(Object.keys(p).some((k) => k.endsWith('.picc'))).toBe(false);
   });
 });
+
+describe('cover area', () => {
+  test('the app draws the cover exactly where the layout reserves it', async () => {
+    const { COVER } = await import('../design/layout');
+    const { COVER_AREA } = await import('../lib/media/coverArea');
+    expect(COVER_AREA).toEqual({ x: COVER.x, y: COVER.y });
+  });
+});

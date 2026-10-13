@@ -106,3 +106,61 @@ describe('parseTarget', () => {
     expect(parseTarget(arg as string, th)).toBe(want as number | null);
   });
 });
+
+describe('ActionRunner media and timer', () => {
+  const sonos = {
+    deviceId: 'keuken', name: 'Keuken', app: 'com.sonos', iconGlyph: '', track: '', artist: '', position: null, duration: null, positionAt: 0,
+    caps: ['speaker_playing', 'speaker_next', 'speaker_prev', 'volume_set'], playing: true, volume: 0.5,
+  };
+  const apple = { ...sonos, deviceId: 'tv', caps: ['speaker_playing', 'volume_up', 'volume_down'], volume: null, playing: false };
+
+  function mediaSetup(active: typeof sonos | null) {
+    const calls: string[] = [];
+    let nextCalls = 0;
+    const homey: HomeyActions = {
+      async setMood() {}, async triggerFlow() {}, getCapability: () => null, async fireTileTrigger() {},
+      async setCapability(d, c, v) { calls.push(`set:${d}:${c}:${v}`); },
+    };
+    const media = { active: () => active, nextPlayer: () => { nextCalls++; } };
+    const runner = new ActionRunner(() => normalizeConfig({}), homey, () => null, () => {}, media);
+    return { runner, calls, next: () => nextCalls };
+  }
+
+  test('play/pause toggles speaker_playing; prev/next press the buttons', async () => {
+    const { runner, calls } = mediaSetup(sonos);
+    await runner.handle(touch('media', 'toggle', ''));
+    await runner.handle(touch('media', 'next', ''));
+    await runner.handle(touch('media', 'prev', ''));
+    expect(calls).toEqual(['set:keuken:speaker_playing:false', 'set:keuken:speaker_next:true', 'set:keuken:speaker_prev:true']);
+  });
+
+  test('volume uses volume_set in 5% steps (clamped), or volume_up/down when that is all there is', async () => {
+    const s = mediaSetup({ ...sonos, volume: 0.98 });
+    await s.runner.handle(touch('media', 'vol', '1'));
+    await s.runner.handle(touch('media', 'vol', '-1'));
+    expect(s.calls).toEqual(['set:keuken:volume_set:1', 'set:keuken:volume_set:0.93']);
+    const a = mediaSetup(apple);
+    await a.runner.handle(touch('media', 'vol', '1'));
+    await a.runner.handle(touch('media', 'vol', '-1'));
+    await a.runner.handle(touch('media', 'next', ''));
+    expect(a.calls).toEqual(['set:tv:volume_up:true', 'set:tv:volume_down:true']);
+  });
+
+  test('player switch asks for the next player and a re-render', async () => {
+    const { runner, next } = mediaSetup(sonos);
+    expect(await runner.handle(touch('media', 'player', 'next'))).toEqual({ mediaChanged: true });
+    expect(next()).toBe(1);
+  });
+
+  test('no active player: media touches do nothing', async () => {
+    const { runner, calls } = mediaSetup(null);
+    expect(await runner.handle(touch('media', 'toggle', ''))).toEqual({});
+    expect(calls).toEqual([]);
+  });
+
+  test('timer finished from the firmware is reported', async () => {
+    const { runner } = mediaSetup(null);
+    expect(await runner.handle(touch('timer', 'finished', ''))).toEqual({ timerFinished: true });
+    expect(await runner.handle(touch('timer', 'add', '300'))).toEqual({});
+  });
+});
