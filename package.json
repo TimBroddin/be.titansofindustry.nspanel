@@ -11,6 +11,7 @@
     "@tsconfig/node16": "^16.1.8",
     "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.12",
     "@types/node": "^25.0.3",
+    "@types/pngjs": "^6.0.5",
     "eslint": "^7.32.0",
     "eslint-config-athom": "^3.1.5",
     "typescript": "^5.9.3"
@@ -18,7 +19,9 @@
   "dependencies": {
     "@2colors/esphome-native-api": "^1.3.6",
     "homey-api": "^3.14.23",
-    "ical.js": "^2.2.1"
+    "ical.js": "^2.2.1",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
   },
   "engines": {
     "node": ">=16"
