@@ -36,9 +36,10 @@ module.exports = {
         name: d.name,
         zoneName: zones[d.zone]?.name ?? '',
         driverId: d.driverId,
+        iconUrl: d.iconObj?.url ?? null,
         capabilities: d.capabilities ?? [],
         capabilitiesObj: Object.fromEntries(Object.entries(d.capabilitiesObj ?? {})
-          .map(([c, o]: [string, any]) => [c, { title: o?.title ?? c, units: o?.units ?? '' }])),
+          .map(([c, o]: [string, any]) => [c, { title: o?.title ?? c, units: o?.units ?? '', type: o?.type ?? '' }])),
       };
     }
     return result;

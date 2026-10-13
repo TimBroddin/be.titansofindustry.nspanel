@@ -4,164 +4,378 @@
   <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
   <script type="text/javascript" src="iconField.js"></script>
   <script type="text/javascript" src="moodOptions.js"></script>
+  <script type="text/javascript" src="iconSearch.js"></script>
+  <script type="text/javascript" src="capabilities.js"></script>
+  <script type="text/javascript" src="preview.js"></script>
   <style>
-    body { font-family: -apple-system, sans-serif; padding: 12px; }
-    fieldset { border: 1px solid #ddd; border-radius: 8px; margin: 0 0 12px; padding: 10px; }
-    legend { font-weight: 600; }
-    .slot { display: grid; grid-template-columns: 1.4fr 1.2fr 0.8fr; gap: 6px; margin-bottom: 6px; }
-    .slot.mood { grid-template-columns: 0.8fr 1.6fr 0.8fr 1fr; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
-    select, input { width: 100%; box-sizing: border-box; padding: 4px; }
-    .hint { color: #777; font-size: 12px; margin: 2px 0 8px; }
-    #status, #cal-result { margin-top: 8px; }
-    #cal-result li { font-size: 13px; }
-    .error { color: #c00; }
+    @font-face { font-family: 'MDI'; src: url('mdi.woff2') format('woff2'); }
+    .mdi { font-family: 'MDI'; font-style: normal; line-height: 1; }
+    body { padding-bottom: 72px; }
+    .top { display: flex; gap: 12px; align-items: center; }
+    .tabs { display: flex; gap: 4px; margin: 12px 0; border-bottom: 1px solid #e5e5e5; }
+    .tabs button { background: none; border: 0; padding: 10px 12px; font: inherit; color: #888; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tabs button.active { color: inherit; border-color: currentColor; font-weight: 600; }
+    section[data-tab] { display: none; }
+    section[data-tab].active { display: block; }
+    .row { display: grid; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .row.chip { grid-template-columns: 1.5fr 1.2fr auto auto; }
+    .row.tile { grid-template-columns: 0.9fr 1.5fr auto 1fr; }
+    .pick { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 8px; background: #fff; text-align: left; font: inherit; cursor: pointer; overflow: hidden; }
+    .pick .mdi { font-size: 22px; width: 24px; text-align: center; }
+    .pick img { width: 22px; height: 22px; object-fit: contain; }
+    .pick .muted, .muted { color: #999; }
+    .iconbtn { width: 40px; justify-content: center; padding: 4px; }
+    .clear { border: 0; background: none; color: #aaa; font-size: 18px; cursor: pointer; }
+    .hint { color: #888; font-size: 12px; margin: 4px 0 10px; }
+    .error { color: #c33; }
+    /* preview */
+    .pv-wrap { width: 100%; max-width: 480px; margin: 0 auto 6px; }
+    .pv { width: 480px; height: 320px; position: relative; overflow: hidden; border-radius: 10px; transform-origin: 0 0;
+          background: radial-gradient(120% 90% at 0% 0%, #23314d 0%, #121826 55%, #0b0f18 100%); font-family: -apple-system, 'Inter', sans-serif; }
+    .pv .card { position: absolute; box-sizing: border-box; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); }
+    .pv .btn { position: absolute; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; color: #c9d4e6; }
+    .pv .btn.amber { background: rgba(242,181,107,.18); border-color: rgba(242,181,107,.45); color: #f6c88f; }
+    .pv .txt { position: absolute; display: flex; overflow: hidden; line-height: 1.15; }
+    /* picker sheet */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: flex-end; justify-content: center; z-index: 10; }
+    .modal.open { display: flex; }
+    .sheet { background: #fff; width: 100%; max-width: 560px; max-height: 80vh; border-radius: 14px 14px 0 0; display: flex; flex-direction: column; }
+    .sheet header { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid #eee; }
+    .sheet header input { flex: 1; }
+    .results { overflow: auto; padding: 8px 12px 16px; }
+    .results h4 { margin: 12px 0 6px; font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: .5px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+    .grid button { border: 1px solid #eee; background: #fff; border-radius: 10px; padding: 8px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .grid button .mdi { font-size: 26px; }
+    .grid button span:last-child { font-size: 10px; color: #777; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-bottom: 1px solid #f2f2f2; background: none; text-align: left; font: inherit; cursor: pointer; }
+    .list button img { width: 24px; height: 24px; object-fit: contain; }
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 12px; align-items: center; }
   </style>
 </head>
 <body>
-  <h1>NSPanel</h1>
-  <p><select id="panel"></select></p>
-  <div id="form" hidden>
-    <fieldset><legend>Thermostat</legend><select id="thermostat"></select></fieldset>
-
-    <fieldset><legend>Chips (icon shown while active)</legend><div id="chips"></div></fieldset>
-
-    <fieldset><legend>Moods page</legend>
-      <p class="hint">8 tiles. Labels fit about 10 characters per line (2 lines).</p>
-      <div id="moods"></div>
-    </fieldset>
-
-    <fieldset><legend>Calendar</legend>
-      <div class="row">
-        <label>Public iCloud link (webcal://…)<input id="cal-url" placeholder="webcal://p01-caldav.icloud.com/published/2/…"></label>
-        <label>Days ahead<input id="cal-days" type="number" min="1" max="14" value="7"></label>
-      </div>
-      <button id="cal-test" type="button">Test</button>
-      <ul id="cal-result"></ul>
-    </fieldset>
-
-    <fieldset><legend>Screen</legend>
-      <div class="row">
-        <label>Screensaver after (minutes, 0 = never)<input id="ss-min" type="number" min="0" max="240" value="0"></label>
-        <label>Screensaver brightness (%)<input id="ss-dim" type="number" min="0" max="100" value="10"></label>
-      </div>
-    </fieldset>
-
-    <fieldset><legend>Physical buttons</legend>
-      <label>Left <select id="btn-left"><option value="relay">Toggle relay</option><option value="event">Event only</option></select></label>
-      <label>Right <select id="btn-right"><option value="relay">Toggle relay</option><option value="event">Event only</option></select></label>
-    </fieldset>
-
-    <button id="save" class="hy-button-primary">Save</button>
-    <div id="status"></div>
+  <div class="top">
+    <h1 class="homey-title" data-i18n="settings.title">NSPanel</h1>
+    <select id="panel" class="homey-form-select" style="max-width: 240px"></select>
   </div>
-  <datalist id="icon-names"></datalist>
+  <p id="nopanel" hidden data-i18n="settings.noPanel"></p>
+
+  <div id="form" hidden>
+    <nav class="tabs">
+      <button data-tab="home" class="active" data-i18n="settings.tabHome"></button>
+      <button data-tab="moods" data-i18n="settings.tabMoods"></button>
+      <button data-tab="calendar" data-i18n="settings.tabCalendar"></button>
+      <button data-tab="screen" data-i18n="settings.tabScreen"></button>
+    </nav>
+
+    <section data-tab="home" class="active">
+      <div class="pv-wrap"><div class="pv" id="pv-home"></div></div>
+      <p class="hint" data-i18n="settings.previewHint"></p>
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="settings.thermostat"></legend>
+        <button class="pick" id="thermostat"></button>
+      </fieldset>
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="settings.chips"></legend>
+        <div id="chips"></div>
+      </fieldset>
+    </section>
+
+    <section data-tab="moods">
+      <div class="pv-wrap"><div class="pv" id="pv-moods"></div></div>
+      <p class="hint" data-i18n="settings.tileHint"></p>
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="settings.tiles"></legend>
+        <div id="tiles"></div>
+      </fieldset>
+    </section>
+
+    <section data-tab="calendar">
+      <fieldset class="homey-form-fieldset">
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="cal-url" data-i18n="settings.calendarUrl"></label>
+          <input class="homey-form-input" id="cal-url" placeholder="webcal://p01-caldav.icloud.com/published/2/…">
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="cal-days" data-i18n="settings.daysAhead"></label>
+          <input class="homey-form-input" id="cal-days" type="number" min="1" max="14" value="7">
+        </div>
+        <button class="homey-button-secondary-small" id="cal-test" data-i18n="settings.test"></button>
+        <ul id="cal-result"></ul>
+      </fieldset>
+    </section>
+
+    <section data-tab="screen">
+      <fieldset class="homey-form-fieldset">
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="ss-min" data-i18n="settings.screensaverMinutes"></label>
+          <input class="homey-form-input" id="ss-min" type="number" min="0" max="240" value="0">
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="ss-dim" data-i18n="settings.screensaverBrightness"></label>
+          <input class="homey-form-input" id="ss-dim" type="number" min="0" max="100" value="10">
+        </div>
+      </fieldset>
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="settings.buttons"></legend>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="btn-left" data-i18n="settings.left"></label>
+          <select class="homey-form-select" id="btn-left"><option value="relay" data-i18n="settings.toggleRelay"></option><option value="event" data-i18n="settings.eventOnly"></option></select>
+        </div>
+        <div class="homey-form-group">
+          <label class="homey-form-label" for="btn-right" data-i18n="settings.right"></label>
+          <select class="homey-form-select" id="btn-right"><option value="relay" data-i18n="settings.toggleRelay"></option><option value="event" data-i18n="settings.eventOnly"></option></select>
+        </div>
+      </fieldset>
+    </section>
+  </div>
+
+  <div class="savebar" id="savebar" hidden>
+    <button class="homey-button-primary-full" id="save" data-i18n="settings.save" style="max-width: 200px"></button>
+    <span id="status"></span>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <header>
+        <input class="homey-form-input" id="modal-search">
+        <button class="homey-button-secondary-small" id="modal-close" data-i18n="settings.close"></button>
+      </header>
+      <div class="results" id="modal-results"></div>
+    </div>
+  </div>
 
   <script>
     const CHIPS = 7, MOODS = 8;
-    let H, devices = {}, icons = {}, glyphToName = {}, moods = [], flows = [];
+    let H, layout, mdi = {}, panelIcons = {}, glyphToName = {}, devices = {}, moods = [], flows = [], cfg = null;
 
-    const api = (method, path, body) => new Promise((ok, fail) => H.api(method, path, body ?? null, (e, r) => e ? fail(e) : ok(r)));
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    const isPanel = (d) => d.driverId === 'nspanel' || String(d.driverId).endsWith(':nspanel');
     const $ = (id) => document.getElementById(id);
+    const api = (method, path, body) => new Promise((ok, fail) => H.api(method, path, body ?? null, (e, r) => e ? fail(e) : ok(r)));
+    const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const tr = (key) => H.__(`settings.${key}`) || key;
+    const isPanel = (d) => d.driverId === 'nspanel' || String(d.driverId).endsWith(':nspanel');
+    const iconChar = (name) => (mdi[name] ? String.fromCodePoint(parseInt(mdi[name], 16)) : '');
+    const display = (glyph) => iconChar(glyphToName[glyph]);
+    const iconHtml = (glyph) => (glyph ? `<span class="mdi">${esc(display(glyph)) || '?'}</span>` : `<span class="mdi muted">${esc(iconChar('plus'))}</span>`);
+    const deviceHtml = (d) => (d
+      ? `${d.iconUrl ? `<img src="${esc(d.iconUrl)}" alt="">` : ''}<span>${esc(d.zoneName ? `${d.zoneName} · ` : '')}${esc(d.name)}</span>`
+      : `<span class="muted">${esc(tr('device'))}</span>`);
+    const otherDevices = (filter) => Object.values(devices).filter((d) => !isPanel(d) && (!filter || filter(d)))
+      .sort((a, b) => (a.zoneName + a.name).localeCompare(b.zoneName + b.name));
+    const toggleTargets = () => otherDevices((d) => d.capabilities.includes('onoff')).map((d) => ({ id: d.id, name: d.name, zone: d.zoneName }));
 
-    function deviceOptions(filter) {
-      const list = Object.values(devices).filter((d) => !isPanel(d) && (!filter || filter(d)))
-        .sort((a, b) => (a.zoneName + a.name).localeCompare(b.zoneName + b.name));
-      return '<option value="">—</option>' + list.map((d) => `<option value="${esc(d.id)}">${esc(d.zoneName ? d.zoneName + ' · ' : '')}${esc(d.name)}</option>`).join('');
+    // ---------- generic picker sheet ----------
+    let pickerRender = null;
+    function openPicker(placeholder, render) {
+      pickerRender = render;
+      $('modal-search').placeholder = placeholder;
+      $('modal-search').value = '';
+      $('modal').classList.add('open');
+      render('');
+      setTimeout(() => $('modal-search').focus(), 50);
+    }
+    function closePicker() { $('modal').classList.remove('open'); pickerRender = null; }
+    function listButtons(items, onPick) {
+      const box = document.createElement('div');
+      box.className = 'list';
+      for (const it of items) {
+        const b = document.createElement('button');
+        b.innerHTML = it.html;
+        b.onclick = () => { closePicker(); onPick(it.value); };
+        box.appendChild(b);
+      }
+      return box;
+    }
+    function section(title, node) {
+      const frag = document.createDocumentFragment();
+      if (title) { const h = document.createElement('h4'); h.textContent = title; frag.appendChild(h); }
+      frag.appendChild(node);
+      return frag;
     }
 
-    function capOptions(deviceId, selected) {
-      const d = devices[deviceId];
-      if (!d) return '<option value="">—</option>';
-      return '<option value="">—</option>' + d.capabilities.map((c) =>
-        `<option value="${esc(c)}" ${c === selected ? 'selected' : ''}>${esc(d.capabilitiesObj[c]?.title || c)}</option>`).join('');
-    }
-
-    function chipRow(slot) {
-      const row = document.createElement('div');
-      row.className = 'slot';
-      row.innerHTML = `
-        <select data-k="deviceId">${deviceOptions()}</select>
-        <select data-k="capability"></select>
-        <input data-k="icon" list="icon-names" placeholder="icon name">`;
-      const [dev, cap, icon] = row.querySelectorAll('select, input');
-      dev.value = slot?.deviceId ?? '';
-      cap.innerHTML = capOptions(dev.value, slot?.capability);
-      dev.onchange = () => { cap.innerHTML = capOptions(dev.value, ''); };
-      icon.value = slot ? iconLabel(slot.icon, glyphToName) : '';
-      return row;
-    }
-
-    function targetOptions(type, selectedId, selectedAdvanced) {
-      const toggles = Object.values(devices).filter((d) => !isPanel(d) && d.capabilities.includes('onoff'))
-        .map((d) => ({ id: d.id, name: d.name, zone: d.zoneName }))
-        .sort((x, y) => (x.zone + x.name).localeCompare(y.zone + y.name));
-      return targetChoices(type, { moods, flows, toggles }, selectedId, selectedAdvanced)
-        .map((c) => `<option value="${esc(c.value)}" data-advanced="${c.advanced === true}">${esc(c.label)}</option>`).join('');
-    }
-
-    function moodRow(tile) {
-      const row = document.createElement('div');
-      row.className = 'slot mood';
-      row.innerHTML = `
-        <select data-k="type">
-          <option value="">—</option><option value="mood">Mood</option><option value="flow">Flow</option>
-          <option value="toggle">Toggle device</option><option value="trigger">Flow card only</option>
-        </select>
-        <select data-k="target"></select>
-        <input data-k="icon" list="icon-names" placeholder="icon name">
-        <input data-k="label" maxlength="20" placeholder="label">`;
-      const [type, target, icon, label] = row.querySelectorAll('select, input');
-      type.value = tile?.type ?? '';
-      const stored = tile?.moodId ?? tile?.flowId ?? tile?.deviceId ?? '';
-      target.innerHTML = targetOptions(type.value, stored, tile?.advanced);
-      target.value = stored;
-      type.onchange = () => { target.innerHTML = targetOptions(type.value, '', false); };
-      icon.value = tile ? iconLabel(tile.icon, glyphToName) : '';
-      label.value = tile?.label ?? '';
-      return row;
-    }
-
-    function readIcon(value) {
-      const icon = resolveIcon(value, icons);
-      if (icon.error) throw new Error(icon.error);
-      return icon.glyph;
-    }
-
-    function readChips() {
-      return [...$('chips').children].map((row) => {
-        const get = (k) => row.querySelector(`[data-k=${k}]`).value;
-        if (!get('deviceId') || !get('capability')) return null;
-        return { deviceId: get('deviceId'), capability: get('capability'), icon: readIcon(get('icon')) };
+    function pickIcon(current, onPick) {
+      const names = Object.keys(panelIcons);
+      openPicker(tr('searchIcons'), (q) => {
+        const res = $('modal-results');
+        res.innerHTML = '';
+        const grid = document.createElement('div');
+        grid.className = 'grid';
+        const add = (name, label, glyph) => {
+          const b = document.createElement('button');
+          b.innerHTML = `<span class="mdi">${esc(iconChar(name))}</span><span>${esc(label)}</span>`;
+          if (glyph === current) b.style.borderColor = '#f2b56b';
+          b.onclick = () => { closePicker(); onPick(glyph); };
+          grid.appendChild(b);
+        };
+        add('close', tr('noIcon'), '');
+        for (const n of searchIcons(q, names, 120)) add(n, n, panelIcons[n]);
+        res.appendChild(grid);
       });
     }
 
-    function readMoods() {
-      return [...$('moods').children].map((row) => {
-        const get = (k) => row.querySelector(`[data-k=${k}]`);
-        const type = get('type').value;
-        const target = get('target');
-        const base = { icon: readIcon(get('icon').value), label: get('label').value.trim() };
-        if (type === 'mood' && target.value) return { type, moodId: target.value, ...base };
-        if (type === 'flow' && target.value) {
-          return { type, flowId: target.value, advanced: target.selectedOptions[0]?.dataset.advanced === 'true', ...base };
+    function pickDevice(filter, onPick) {
+      openPicker(tr('device'), (q) => {
+        const term = q.trim().toLowerCase();
+        const list = otherDevices(filter).filter((d) => !term || `${d.zoneName} ${d.name}`.toLowerCase().includes(term));
+        const res = $('modal-results');
+        res.innerHTML = '';
+        res.appendChild(listButtons([{ value: '', html: `<span class="muted">${esc(tr('none'))}</span>` }], onPick));
+        for (const z of [...new Set(list.map((d) => d.zoneName || ''))]) {
+          const items = list.filter((d) => (d.zoneName || '') === z).map((d) => ({ value: d.id, html: deviceHtml({ ...d, zoneName: '' }) }));
+          res.appendChild(section(z, listButtons(items, onPick)));
         }
-        if (type === 'toggle' && target.value) return { type, deviceId: target.value, ...base };
-        if (type === 'trigger') return { type, ...base };
-        return null;
       });
     }
 
+    function pickCapability(device, onPick) {
+      const groups = groupCapabilities(device);
+      openPicker(tr('capability'), (q) => {
+        const term = q.trim().toLowerCase();
+        const match = (c) => !term || `${c.title} ${c.id}`.toLowerCase().includes(term);
+        const toItems = (cs) => cs.filter(match).map((c) => ({ value: c.id, html: `<span>${esc(c.title)}</span><span class="muted">${esc(c.id)}</span>` }));
+        const res = $('modal-results');
+        res.innerHTML = '';
+        if (groups.suggested.some(match)) res.appendChild(section(tr('suggested'), listButtons(toItems(groups.suggested), onPick)));
+        if (groups.other.some(match)) res.appendChild(section(tr('other'), listButtons(toItems(groups.other), onPick)));
+      });
+    }
+
+    function pickTarget(type, current, onPick) {
+      openPicker(tr('target'), (q) => {
+        const term = q.trim().toLowerCase();
+        const choices = targetChoices(type, { moods, flows, toggles: toggleTargets() }, current.id, current.advanced)
+          .filter((c) => !term || c.label.toLowerCase().includes(term));
+        const res = $('modal-results');
+        res.innerHTML = '';
+        res.appendChild(listButtons(choices.map((c) => ({ value: c, html: `<span>${esc(c.label)}</span>` })), onPick));
+      });
+    }
+
+    // ---------- rows ----------
+    function renderThermostat() {
+      const btn = $('thermostat');
+      btn.innerHTML = deviceHtml(devices[cfg.home.thermostat?.deviceId]);
+      btn.onclick = () => pickDevice((x) => x.capabilities.includes('target_temperature'), (id) => {
+        cfg.home.thermostat = id ? { deviceId: id } : null;
+        renderAll();
+      });
+    }
+
+    function renderChips() {
+      const box = $('chips');
+      box.innerHTML = '';
+      for (let i = 0; i < CHIPS; i++) {
+        const chip = cfg.home.chips[i];
+        const d = devices[chip?.deviceId];
+        const capTitle = chip && d ? (d.capabilitiesObj[chip.capability]?.title || chip.capability) : '';
+        const row = document.createElement('div');
+        row.className = 'row chip';
+        row.innerHTML = `
+          <button class="pick" data-a="device">${deviceHtml(d)}</button>
+          <button class="pick" data-a="cap" ${d ? '' : 'disabled'}>${capTitle ? esc(capTitle) : `<span class="muted">${esc(tr('capability'))}</span>`}</button>
+          <button class="pick iconbtn" data-a="icon" title="${esc(tr('chooseIcon'))}">${iconHtml(chip?.icon)}</button>
+          <button class="clear" data-a="clear">✕</button>`;
+        const set = (patch) => {
+          cfg.home.chips[i] = { deviceId: '', capability: '', icon: '', ...(cfg.home.chips[i] ?? {}), ...patch };
+          renderAll();
+        };
+        row.querySelector('[data-a=device]').onclick = () => pickDevice(null, (id) => set({ deviceId: id, capability: '' }));
+        row.querySelector('[data-a=cap]').onclick = () => d && pickCapability(d, (cap) => set({ capability: cap }));
+        row.querySelector('[data-a=icon]').onclick = () => pickIcon(chip?.icon, (glyph) => set({ icon: glyph }));
+        row.querySelector('[data-a=clear]').onclick = () => { cfg.home.chips[i] = null; renderAll(); };
+        box.appendChild(row);
+      }
+    }
+
+    function tileTargetLabel(tile) {
+      if (!tile || tile.type === 'trigger') return '';
+      const id = tile.moodId ?? tile.flowId ?? tile.deviceId ?? '';
+      const c = targetChoices(tile.type, { moods, flows, toggles: toggleTargets() }, id, tile.advanced).find((x) => x.value === id);
+      return c && id ? c.label : '';
+    }
+
+    function renderTiles() {
+      const box = $('tiles');
+      box.innerHTML = '';
+      const typeLabel = {
+        '': 'typeNone', mood: 'typeMood', flow: 'typeFlow', toggle: 'typeToggle', trigger: 'typeTrigger',
+      };
+      for (let i = 0; i < MOODS; i++) {
+        const tile = cfg.moods[i];
+        const targetText = tileTargetLabel(tile) || (tile?.type === 'trigger' ? tr('typeTrigger') : tr('target'));
+        const row = document.createElement('div');
+        row.className = 'row tile';
+        row.innerHTML = `
+          <select class="homey-form-select" data-a="type">${Object.keys(typeLabel).map((t) => `<option value="${t}">${esc(tr(typeLabel[t]))}</option>`).join('')}</select>
+          <button class="pick" data-a="target" ${tile && tile.type !== 'trigger' ? '' : 'disabled'}><span class="${tileTargetLabel(tile) ? '' : 'muted'}">${esc(targetText)}</span></button>
+          <button class="pick iconbtn" data-a="icon" ${tile ? '' : 'disabled'}>${iconHtml(tile?.icon)}</button>
+          <input class="homey-form-input" data-a="label" maxlength="20" placeholder="${esc(tr('label'))}" ${tile ? '' : 'disabled'}>`;
+        const type = row.querySelector('[data-a=type]');
+        type.value = tile?.type ?? '';
+        type.onchange = () => {
+          cfg.moods[i] = type.value ? { type: type.value, icon: tile?.icon ?? '', label: tile?.label ?? '' } : null;
+          renderAll();
+        };
+        row.querySelector('[data-a=target]').onclick = () => {
+          if (!tile) return;
+          pickTarget(tile.type, { id: tile.moodId ?? tile.flowId ?? tile.deviceId ?? '', advanced: tile.advanced }, (c) => {
+            const next = { type: tile.type, icon: tile.icon, label: tile.label };
+            if (tile.type === 'mood') next.moodId = c.value;
+            if (tile.type === 'flow') { next.flowId = c.value; next.advanced = c.advanced === true; }
+            if (tile.type === 'toggle') next.deviceId = c.value;
+            cfg.moods[i] = next;
+            renderAll();
+          });
+        };
+        row.querySelector('[data-a=icon]').onclick = () => tile && pickIcon(tile.icon, (glyph) => { cfg.moods[i] = { ...tile, icon: glyph }; renderAll(); });
+        const label = row.querySelector('[data-a=label]');
+        label.value = tile?.label ?? '';
+        label.oninput = () => { if (cfg.moods[i]) { cfg.moods[i].label = label.value; renderPreview('moods'); } };
+        box.appendChild(row);
+      }
+    }
+
+    // ---------- preview ----------
+    function renderPreview(page) {
+      const el = $(`pv-${page}`);
+      const p = layout.pages[page];
+      const now = new Date();
+      const ctx = {
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' }),
+        labels: { inside: tr('previewInside'), next: tr('previewNext'), moods: tr('tabMoods') },
+        display,
+        iconChar,
+      };
+      const parts = [];
+      for (const c of p.cards) parts.push(`<div class="card" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;border-radius:${c.r ?? 18}px"></div>`);
+      for (const b of p.buttons) {
+        parts.push(`<div class="btn${b.tint === 'amber' ? ' amber' : ''}" style="left:${b.x}px;top:${b.y}px;width:${b.d}px;height:${b.d}px"><span class="mdi" style="font-size:${Math.round(b.d * 0.45)}px">${esc(iconChar(b.icon))}</span></div>`);
+      }
+      for (const it of previewItems(page, layout, cfg, ctx)) {
+        if (!it.text) continue;
+        const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[it.align];
+        const align = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[it.valign];
+        parts.push(`<div class="txt${it.icon ? ' mdi' : ''}" style="left:${it.x}px;top:${it.y}px;width:${it.w}px;height:${it.h}px;font-size:${it.px}px;font-weight:${it.weight};color:${it.color};justify-content:${justify};align-items:${align};white-space:${it.wrap ? 'normal' : 'nowrap'}">${esc(it.text)}</div>`);
+      }
+      el.innerHTML = parts.join('');
+      const width = el.parentElement.clientWidth || layout.W;
+      const scale = Math.min(1, width / layout.W);
+      el.style.transform = `scale(${scale})`;
+      el.parentElement.style.height = `${Math.round(layout.H * scale)}px`;
+    }
+
+    function renderAll() {
+      renderThermostat();
+      renderChips();
+      renderTiles();
+      renderPreview('home');
+      renderPreview('moods');
+    }
+
+    // ---------- load / save ----------
     async function loadPanel(id) {
-      const cfg = await api('GET', `/config/${encodeURIComponent(id)}`);
-      $('thermostat').innerHTML = deviceOptions((d) => d.capabilities.includes('target_temperature'));
-      $('thermostat').value = cfg.home.thermostat?.deviceId ?? '';
-      $('chips').innerHTML = '';
-      for (let i = 0; i < CHIPS; i++) $('chips').appendChild(chipRow(cfg.home.chips[i]));
-      $('moods').innerHTML = '';
-      for (let i = 0; i < MOODS; i++) $('moods').appendChild(moodRow(cfg.moods?.[i]));
+      cfg = await api('GET', `/config/${encodeURIComponent(id)}`);
       $('cal-url').value = cfg.calendar?.url ?? '';
       $('cal-days').value = cfg.calendar?.daysAhead ?? 7;
       $('ss-min').value = cfg.screen?.screensaverMinutes ?? 0;
@@ -169,70 +383,84 @@
       $('btn-left').value = cfg.buttons.left;
       $('btn-right').value = cfg.buttons.right;
       $('form').hidden = false;
+      $('savebar').hidden = false;
+      renderAll();
     }
 
     async function testCalendar() {
       const out = $('cal-result');
-      out.className = ''; out.innerHTML = '<li>Loading…</li>';
+      out.className = '';
+      out.innerHTML = `<li>${esc(tr('loading'))}</li>`;
       try {
         const events = await api('POST', '/calendar/test', { url: $('cal-url').value });
         out.innerHTML = events.length
           ? events.map((e) => `<li>${esc(new Date(e.start).toLocaleString([], e.allDay ? { dateStyle: 'medium' } : { dateStyle: 'medium', timeStyle: 'short' }))} — ${esc(e.title)}</li>`).join('')
-          : '<li>No events in the next 14 days.</li>';
+          : `<li>${esc(tr('noEventsAhead'))}</li>`;
       } catch (e) {
-        out.className = 'error'; out.innerHTML = `<li>${esc(e.message || e)}</li>`;
+        out.className = 'error';
+        out.innerHTML = `<li>${esc(e.message || e)}</li>`;
       }
     }
 
     async function save() {
       const status = $('status');
-      let chips, tiles;
-      try {
-        chips = readChips();
-        tiles = readMoods();
-      } catch (e) {
-        status.className = 'error'; status.textContent = e.message;
-        return;
-      }
-      const thermostat = $('thermostat').value;
+      const url = $('cal-url').value.trim();
       const body = {
-        home: { thermostat: thermostat ? { deviceId: thermostat } : null, chips },
-        moods: tiles,
-        calendar: $('cal-url').value.trim() ? { url: $('cal-url').value.trim(), daysAhead: Number($('cal-days').value) } : null,
+        home: { thermostat: cfg.home.thermostat, chips: cfg.home.chips.map((c) => (c && c.deviceId && c.capability ? c : null)) },
+        moods: cfg.moods,
+        calendar: url ? { url, daysAhead: Number($('cal-days').value) } : null,
         screen: { screensaverMinutes: Number($('ss-min').value), screensaverBrightness: Number($('ss-dim').value) },
         buttons: { left: $('btn-left').value, right: $('btn-right').value },
       };
       try {
-        await api('PUT', `/config/${encodeURIComponent($('panel').value)}`, body);
-        status.className = ''; status.textContent = 'Saved.';
+        cfg = await api('PUT', `/config/${encodeURIComponent($('panel').value)}`, body);
+        renderAll();
+        status.className = '';
+        status.textContent = tr('saved');
       } catch (e) {
-        status.className = 'error'; status.textContent = `Save failed: ${e.message || e}`;
+        status.className = 'error';
+        status.textContent = `${tr('saveFailed')}${e.message || e}`;
       }
     }
 
     async function onHomeyReady(homey) {
       H = homey;
+      document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = H.__(el.dataset.i18n) || el.textContent; });
       H.ready();
+
       const loadErrors = [];
-      const orEmpty = (what) => (e) => { loadErrors.push(`${what}: ${e.message || e}`); return []; };
-      [devices, icons, moods, flows] = await Promise.all([
+      const orEmpty = (key) => (e) => { loadErrors.push(`${tr(key)}: ${e.message || e}`); return []; };
+      [devices, panelIcons, moods, flows, layout, mdi] = await Promise.all([
         api('GET', '/devices'), api('GET', '/icons'),
-        api('GET', '/moods').catch(orEmpty('Could not load moods')), api('GET', '/flows').catch(orEmpty('Could not load flows')),
+        api('GET', '/moods').catch(orEmpty('loadMoodsFailed')), api('GET', '/flows').catch(orEmpty('loadFlowsFailed')),
+        fetch('layout.json').then((r) => r.json()), fetch('mdi-codepoints.json').then((r) => r.json()),
       ]);
+      glyphToName = Object.fromEntries(Object.entries(panelIcons).map(([n, g]) => [g, n]));
       if (loadErrors.length) {
         $('status').className = 'error';
-        $('status').textContent = `${loadErrors.join('; ')}. Existing tiles are kept as "(missing)".`;
+        $('status').textContent = `${loadErrors.join('; ')}. ${tr('keptMissing')}`;
       }
-      glyphToName = Object.fromEntries(Object.entries(icons).map(([n, g]) => [g, n]));
-      $('icon-names').innerHTML = Object.keys(icons).map((n) => `<option value="${n}">`).join('');
+
+      document.querySelectorAll('.tabs button').forEach((b) => {
+        b.onclick = () => {
+          document.querySelectorAll('.tabs button, section[data-tab]').forEach((x) => x.classList.toggle('active', x.dataset.tab === b.dataset.tab));
+          renderPreview('home');
+          renderPreview('moods');
+        };
+      });
+      $('modal-close').onclick = closePicker;
+      $('modal').onclick = (e) => { if (e.target === $('modal')) closePicker(); };
+      $('modal-search').oninput = () => pickerRender && pickerRender($('modal-search').value);
+      $('save').onclick = save;
+      $('cal-test').onclick = testCalendar;
+      window.addEventListener('resize', () => { if (cfg) { renderPreview('home'); renderPreview('moods'); } });
+
       const panels = Object.values(devices).filter((d) => d.driverId === 'nspanel'); // the app's own records (keyed by data id)
       const sel = $('panel');
       sel.innerHTML = panels.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
       sel.onchange = () => loadPanel(sel.value);
-      $('save').onclick = save;
-      $('cal-test').onclick = testCalendar;
       if (panels.length) await loadPanel(panels[0].id);
-      else document.body.insertAdjacentHTML('beforeend', '<p>No NSPanel paired yet.</p>');
+      else $('nopanel').hidden = false;
     }
   </script>
 </body>

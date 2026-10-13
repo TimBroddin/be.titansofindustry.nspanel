@@ -21,3 +21,9 @@ Serve the file over HTTP from this Mac, then call the `upload_tft` action from H
 ## Rollback to Blackymas
 Rebuild the Blackymas firmware from their repo using your old YAML, then
 `esphome upload <old>.yaml --device <panel-ip>`. The TFT stays compatible.
+
+## TFT upload: lessons learned
+- Use 115200 baud (`baud: 0`); 921600 fails on this panel.
+- The HTTP server must support Range requests (`python3 -m http.server` does not). A tiny Bun server with `Bun.file().slice()` works.
+- Pause the Homey app during the upload (the ESP's main loop is blocked for ~12 minutes; reconnect attempts plus verbose logging crashed it once).
+- **Before retrying a failed upload, reboot the ESP** (OTA the same firmware). ESPHome keeps an internal "first chunk sent" flag from the failed attempt, and the retry then fails with `Invalid range end ... size: 0`. After the reboot, call `power_cycle_display` and then `upload_tft`. The display resumes where it stopped.
