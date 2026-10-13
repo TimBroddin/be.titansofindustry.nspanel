@@ -92,6 +92,45 @@ api:
         - switch.turn_off: screen_power
         - delay: 2s
         - switch.turn_on: screen_power
+    - action: timer_set
+      variables:
+        seconds: int
+        start: bool
+      then:
+        - lambda: |-
+            nspanel_ui::timer().set(seconds > 0 ? seconds : 0, start, millis());
+            id(rtttl_out).stop();
+        - script.execute: update_timer
+    - action: timer_labels
+      variables:
+        labels: string[]  # running, paused, done, start, pause, resume, stop, reset, home prefix
+      then:
+        - lambda: |-
+            if (labels.size() < 9) return;
+            auto &l = nspanel_ui::timer_labels();
+            l.running = labels[0]; l.paused = labels[1]; l.done = labels[2]; l.start = labels[3]; l.pause = labels[4];
+            l.resume = labels[5]; l.stop = labels[6]; l.reset = labels[7]; l.home_prefix = labels[8];
+        - script.execute: update_timer
+    - action: cover_begin
+      variables:
+        id: string
+      then:
+        - lambda: nspanel_ui::cover().begin(id);
+    - action: cover_strips
+      variables:
+        id: string
+        strips: string[]  # "x,y,w,h,color" rectangles in panel coordinates
+      then:
+        - lambda: |-
+            size_t added = 0;
+            for (auto &s : strips) if (nspanel_ui::cover().add(id, s)) added++;
+            if (added && nspanel_ui::cache().current_page_name() == "media") nspanel_ui::cover().draw_last(id(disp1), added);
+    - action: cover_clear
+      then:
+        - lambda: |-
+            nspanel_ui::cover().clear();
+            // cover_ic is a 96x96 crop-image text over the cover area: refreshing it paints the cover away.
+            if (nspanel_ui::cache().current_page_name() == "media") id(disp1).send_command("ref cover_ic");
     - action: upload_tft
       variables:
         url: string
@@ -119,6 +158,25 @@ globals:
     restore_value: true
     initial_value: "true"
 
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          static uint32_t done_at = 0;
+          static int last_mode = -1;
+          auto &t = nspanel_ui::timer();
+          uint32_t now = millis();
+          if (t.tick(now)) {
+            done_at = now;
+            id(disp1).send_command("page timer");
+            id(send_ui_event).execute("touch", "timer", "", "finished");
+          }
+          // Alarm: a short beep every 3 s for up to a minute, until Stop.
+          if (t.mode == nspanel_ui::TimerState::DONE && now - done_at < 60000 && (now - done_at) % 3000 < 1000)
+            id(rtttl_out).play("alarm:d=16,o=6,b=180:c,p,c,p,c");
+          if (t.mode == nspanel_ui::TimerState::RUNNING || (int) t.mode != last_mode) id(update_timer).execute();
+          last_mode = t.mode;
+
 time:
   - platform: sntp
     id: sntp_time
@@ -145,6 +203,8 @@ display:
     on_page:
       - lambda: |-
           nspanel_ui::cache().on_page(id(disp1), x);
+          // Cover art is not a component: redraw it after the page's own props.
+          if (nspanel_ui::page_name(x) == "media") nspanel_ui::cover().draw(id(disp1));
           id(current_page).publish_state(nspanel_ui::page_name(x));
       - script.execute:
           id: send_ui_event
@@ -172,6 +232,15 @@ text_sensor:
             return;
           }
           std::string slot = p.size() >= 3 ? p[2] : "";
+          if (p[0] == "timer") {
+            // The kitchen timer runs here, so it works without Homey; Homey only gets told.
+            auto &t = nspanel_ui::timer();
+            if (p[1] == "add") t.add(atoi(slot.c_str()), millis());
+            else if (p[1] == "act") t.act(millis());
+            else if (p[1] == "reset") t.reset();
+            if (t.mode != nspanel_ui::TimerState::DONE) id(rtttl_out).stop();
+            id(update_timer).execute();
+          }
           id(send_ui_event).execute("touch", p[0], slot, p[1]);
   - platform: template
     id: tft_version
@@ -202,6 +271,18 @@ script:
             page: !lambda return page;
             slot: !lambda return slot;
             value: !lambda return value;
+  - id: update_timer
+    then:
+      - lambda: |-
+          auto &t = nspanel_ui::timer();
+          std::string end = "";
+          auto now = id(sntp_time).now();
+          if (now.is_valid() && t.mode == nspanel_ui::TimerState::RUNNING) {
+            auto at = esphome::ESPTime::from_epoch_local(now.timestamp + (t.remaining(millis()) + 999) / 1000);
+            end = at.strftime(id(clock_24h) ? "%H:%M" : "%I:%M %p");
+          }
+          for (auto &kv : nspanel_ui::timer_props(t, millis(), end, nspanel_ui::timer_labels()))
+            nspanel_ui::cache().set(id(disp1), kv.first, kv.second);
   - id: update_clock
     then:
       - lambda: |-
@@ -323,4 +404,5 @@ output:
     pin: 21
 
 rtttl:
+  id: rtttl_out
   output: buzzer_out
