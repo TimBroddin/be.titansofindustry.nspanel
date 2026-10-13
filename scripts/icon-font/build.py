@@ -8,7 +8,7 @@ Codepoints are stable: tft/fonts/homey-icons-map.json keeps key -> codepoint, an
 so configured chips/tiles keep their icon across rebuilds.
 
 Outputs:
-  tft/fonts/NSPanelHomeyIcons.ttf        install in the CrossOver bottle, generate Nextion fonts from it
+  tft/fonts/NSPanelHomeyGlyphs.ttf        install in the CrossOver bottle, generate Nextion fonts from it
   tft/fonts/homey-icons-chars.txt        every glyph character, paste into the Nextion font generator
   tft/fonts/homey-icons-chars-utf16.txt  the same characters as UTF-16 LE (font generator file input)
   tft/fonts/homey-icons-map.json         key -> codepoint (source of truth, committed)
@@ -210,14 +210,19 @@ def main(dirs):
         metrics[g] = (UPM, getattr(glyf[g], "xMin", 0))
     fb.setupHorizontalMetrics(metrics)
     fb.setupHorizontalHeader(ascent=UPM, descent=0)
-    fb.setupNameTable({"familyName": "NSPanel Homey Icons", "styleName": "Regular"})
+    # Renamed from "NSPanel Homey Icons" when the icons moved to U+4E00: Wine caches fonts by name and kept
+    # substituting a Chinese system font for the old, empty U+4E00 range.
+    fb.setupNameTable({
+        "familyName": "NSPanel Homey Glyphs", "styleName": "Regular", "uniqueFontIdentifier": "NSPanelHomeyGlyphs-Regular-4E00",
+        "fullName": "NSPanel Homey Glyphs", "version": "Version 2.000", "psName": "NSPanelHomeyGlyphs-Regular",
+    })
     fb.setupOS2(sTypoAscender=UPM, sTypoDescender=0, sTypoLineGap=0, usWinAscent=UPM, usWinDescent=0)
     fb.setupPost()
     os2 = fb.font["OS/2"]
     os2.recalcUnicodeRanges(fb.font)
     os2.ulCodePageRange1 = (1 << 0) | (1 << 18)  # Latin 1 + Chinese Simplified, so Windows treats it as a CJK text font
 
-    out_ttf = ROOT / "tft/fonts/NSPanelHomeyIcons.ttf"
+    out_ttf = ROOT / "tft/fonts/NSPanelHomeyGlyphs.ttf"
     fb.save(str(out_ttf))
     woff = TTFont(str(out_ttf))
     woff.flavor = "woff2"

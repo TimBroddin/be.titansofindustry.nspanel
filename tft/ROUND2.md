@@ -5,9 +5,10 @@ Work in a copy: Save As `~/nspanel-tft/nspanel_soft_dark_r2.HMI`.
 
 ## Steps
 
-1. **Icon font:** copy `tft/fonts/NSPanelHomeyIcons.ttf` into the bottle's `C:\windows\Fonts` (replace the old copy), restart Nextion Editor.
+1. **Icon font:** copy `tft/fonts/NSPanelHomeyGlyphs.ttf` into the bottle's `C:\windows\Fonts`, delete `NSPanelHomeyIcons.ttf` there, restart Nextion Editor.
    The icons sit at U+4E00–U+5496 (CJK range): the font generator turns private-use characters into empty code-0 glyphs.
-2. **Generate two fonts** (Tools → Font Generator): font *NSPanel Homey Icons*, encoding **utf-8**, anti-aliasing on,
+   New family name (*NSPanel Homey Glyphs*) because Wine cached the old font and substituted a Chinese system font.
+2. **Generate two fonts** (Tools → Font Generator): font *NSPanel Homey Glyphs*, encoding **utf-8**, anti-aliasing on,
    characters: **Specify**, either load `tft/fonts/homey-icons-chars-utf16.txt` (UTF-16 LE, like the round-1 charsets)
    or paste `tft/fonts/homey-icons-chars.txt` (`pbcopy < tft/fonts/homey-icons-chars.txt`).
    Test first with only the first 5 characters: the preview must show icons, not blanks or Chinese characters.

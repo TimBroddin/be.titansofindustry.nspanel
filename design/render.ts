@@ -11,7 +11,7 @@ const FONT_CSS: Record<string, string> = {
   'Inter Regular': "font-family: 'InterR'; font-weight: 400;",
   'Inter Medium': "font-family: 'InterM'; font-weight: 500;",
   'MDI (Blackymas)': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
-  'NSPanel Homey Icons': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
+  'NSPanel Homey Glyphs': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
 };
 
 const glyph = (name: string): string => {

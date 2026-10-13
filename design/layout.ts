@@ -33,8 +33,8 @@ export const FONT_SPECS: Record<FontName, { family: string; px: number; chars: s
   F_SMALL: { family: 'Inter Regular', px: 13, chars: 'tft/fonts/charset-international.txt', note: 'secondary lines, caps labels' },
   F_TITLE: { family: 'Inter Medium', px: 22, chars: 'tft/fonts/charset-international.txt', note: 'page titles' },
   F_ICON_L: { family: 'MDI (Blackymas)', px: 32, chars: 'icon font from Blackymas HMI', note: 'weather icon' },
-  F_HICON_S: { family: 'NSPanel Homey Icons', px: 24, chars: 'tft/fonts/homey-icons-chars.txt', note: 'chips' },
-  F_HICON_L: { family: 'NSPanel Homey Icons', px: 32, chars: 'tft/fonts/homey-icons-chars.txt', note: 'mood tiles' },
+  F_HICON_S: { family: 'NSPanel Homey Glyphs', px: 24, chars: 'tft/fonts/homey-icons-chars.txt', note: 'chips' },
+  F_HICON_L: { family: 'NSPanel Homey Glyphs', px: 32, chars: 'tft/fonts/homey-icons-chars.txt', note: 'mood tiles' },
 };
 
 export type Align = 'left' | 'center' | 'right';
