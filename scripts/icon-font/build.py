@@ -10,6 +10,7 @@ so configured chips/tiles keep their icon across rebuilds.
 Outputs:
   tft/fonts/NSPanelHomeyIcons.ttf        install in the CrossOver bottle, generate Nextion fonts from it
   tft/fonts/homey-icons-chars.txt        every glyph character, paste into the Nextion font generator
+  tft/fonts/homey-icons-chars-utf16.txt  the same characters as UTF-16 LE (font generator file input)
   tft/fonts/homey-icons-map.json         key -> codepoint (source of truth, committed)
   lib/homeyIcons.json                    key -> glyph character (used by the app and settings)
   settings/homey-icons.woff2             the same font for the settings page
@@ -33,8 +34,8 @@ ROOT = Path(__file__).resolve().parents[2]
 MAP_FILE = ROOT / "tft/fonts/homey-icons-map.json"
 UPM = 1000
 PAD = 60
-FIRST_CODEPOINT = 0xE000
-LAST_CODEPOINT = 0xF8FF  # BMP private use area; Nextion utf-8 fonts are BMP-only
+FIRST_CODEPOINT = 0x4E00
+LAST_CODEPOINT = 0x9FFF  # CJK ideographs: the Nextion font generator drops private-use characters
 
 
 def is_white(fill: str) -> bool:
@@ -188,7 +189,7 @@ def main(dirs):
             continue
         if key not in mapping:
             if next_cp > LAST_CODEPOINT:
-                raise SystemExit("Private use area exhausted")
+                raise SystemExit("CJK range exhausted")
             mapping[key] = next_cp
             next_cp += 1
         cp = mapping[key]
@@ -212,6 +213,9 @@ def main(dirs):
     fb.setupNameTable({"familyName": "NSPanel Homey Icons", "styleName": "Regular"})
     fb.setupOS2(sTypoAscender=UPM, sTypoDescender=0, sTypoLineGap=0, usWinAscent=UPM, usWinDescent=0)
     fb.setupPost()
+    os2 = fb.font["OS/2"]
+    os2.recalcUnicodeRanges(fb.font)
+    os2.ulCodePageRange1 = (1 << 0) | (1 << 18)  # Latin 1 + Chinese Simplified, so Windows treats it as a CJK text font
 
     out_ttf = ROOT / "tft/fonts/NSPanelHomeyIcons.ttf"
     fb.save(str(out_ttf))
@@ -222,7 +226,10 @@ def main(dirs):
     live = {k: cp for k, cp in mapping.items() if cp in cmap}
     MAP_FILE.write_text(json.dumps(dict(sorted(mapping.items(), key=lambda kv: kv[1])), indent=0) + "\n")
     (ROOT / "lib/homeyIcons.json").write_text(json.dumps({k: chr(cp) for k, cp in sorted(live.items())}, ensure_ascii=False) + "\n")
-    (ROOT / "tft/fonts/homey-icons-chars.txt").write_text("".join(chr(cp) for cp in sorted(cmap)), encoding="utf-8")
+    chars = "".join(chr(cp) for cp in sorted(cmap))
+    (ROOT / "tft/fonts/homey-icons-chars.txt").write_text(chars, encoding="utf-8")
+    # The font generator's "load from file" route reads UTF-16 LE with a BOM.
+    (ROOT / "tft/fonts/homey-icons-chars-utf16.txt").write_bytes(b"\xff\xfe" + chars.encode("utf-16-le"))
 
     print(f"{len(cmap)} icons in font, {len(failed)} skipped, {SKIPPED_SHAPES} unusable shapes left out")
     for line in failed[:20]:

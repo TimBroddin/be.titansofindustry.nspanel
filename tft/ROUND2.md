@@ -5,12 +5,18 @@ Work in a copy: Save As `~/nspanel-tft/nspanel_soft_dark_r2.HMI`.
 
 ## Steps
 
-1. **Icon font:** copy `tft/fonts/NSPanelHomeyIcons.ttf` into the bottle's `C:\windows\Fonts`, restart Nextion Editor.
+1. **Icon font:** copy `tft/fonts/NSPanelHomeyIcons.ttf` into the bottle's `C:\windows\Fonts` (replace the old copy), restart Nextion Editor.
+   The icons sit at U+4E00–U+5496 (CJK range): the font generator turns private-use characters into empty code-0 glyphs.
 2. **Generate two fonts** (Tools → Font Generator): font *NSPanel Homey Icons*, encoding **utf-8**, anti-aliasing on,
-   characters: **Specify**, paste the contents of `tft/fonts/homey-icons-chars.txt`.
+   characters: **Specify**, either load `tft/fonts/homey-icons-chars-utf16.txt` (UTF-16 LE, like the round-1 charsets)
+   or paste `tft/fonts/homey-icons-chars.txt` (`pbcopy < tft/fonts/homey-icons-chars.txt`).
+   Test first with only the first 5 characters: the preview must show icons, not blanks or Chinese characters.
    - height **24** → `homey24` (`F_HICON_S`)
    - height **32** → `homey32` (`F_HICON_L`)
 3. **Replace the 8 existing pictures** (ids 48–55) with the files of the same name from `tft/assets/` (Picture panel → Replace).
+   Under CrossOver the link in the "Add Picture" window opens a Windows file dialog that can appear *behind* the Editor
+   (the Editor then looks frozen). Find it via the CrossOver/Wine window list or Cmd-Tab, and paste the path into
+   "File name", e.g. `Z:\Users\timbroddin\nspanel-tft\r2-assets\home.png`. Dragging from Finder does not work.
 4. **Add 4 pictures** in this order: `home-on.png`, `media.png`, `media-bare.png`, `timer.png` (ids 56–59).
    In **Program.s**, add after the existing `int p_boot=…` line: `int p_home_on=56,p_media=57,p_media_bare=58,p_timer=59`
 5. **Edit the existing pages** as listed below.

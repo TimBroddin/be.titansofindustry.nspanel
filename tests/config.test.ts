@@ -46,6 +46,15 @@ describe('config', () => {
     expect(c.home.chips[0]?.icon).toBe('\uE335');
   });
 
+  test('Homey icon glyphs stored at their old private-use codepoints move to U+4E00', () => {
+    const c = normalizeConfig({
+      home: { chips: [{ deviceId: 'd1', capability: 'onoff', icon: '\uE000' }] },
+      moods: [{ type: 'trigger', icon: '\uE696', label: 'x' }, { type: 'trigger', icon: '\uE697', label: 'y' }],
+    });
+    expect(c.home.chips[0]?.icon).toBe('\u4E00');
+    expect([c.moods[0]?.icon, c.moods[1]?.icon]).toEqual(['\u5496', '\uE697']);
+  });
+
   test('loadConfig prefers dashboardConfig over legacy', () => {
     const c = loadConfig({
       dashboardConfig: { home: { thermostat: { deviceId: 'new' } } },

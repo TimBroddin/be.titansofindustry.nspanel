@@ -41,8 +41,12 @@ const obj = (v: unknown): Obj => (v && typeof v === 'object' ? v as Obj : {});
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 const mode = (v: unknown): ButtonMode => (v === 'event' ? 'event' : 'relay');
 
+// Homey icons used to live at U+E000-U+E696; the Nextion font generator drops private-use characters, so they
+// moved to U+4E00. Stored glyphs move with them.
+const moveIcon = (glyph: string): string => glyph.replace(/[\uE000-\uE696]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xE000 + 0x4E00));
+
 // The old settings page stored icons as the 6-character text "\uE335" instead of the glyph.
-const decodeIcon = (v: unknown): string => str(v).replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+const decodeIcon = (v: unknown): string => moveIcon(str(v)).replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
 
 function slots<T>(raw: unknown, count: number, parse: (item: Obj) => T | null): Array<T | null> {
   const arr = Array.isArray(raw) ? raw : [];
