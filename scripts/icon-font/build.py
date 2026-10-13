@@ -66,11 +66,76 @@ def dedupe_ids(raw: str) -> str:
     return re.sub(r'\sid="([^"]*)"', rename, raw)
 
 
+def plain_length(value: str) -> str:
+    """CSS lengths like "1.5pt" / "4px" -> SVG user units ("2" / "4"); other values unchanged."""
+    m = re.fullmatch(r"(-?[\d.]+)(px|pt)", value)
+    if not m:
+        return value
+    n = float(m.group(1)) * (4 / 3 if m.group(2) == "pt" else 1)
+    return f"{n:.4f}".rstrip("0").rstrip(".")
+
+
+def inline_css(raw: str) -> str:
+    """Apply simple `.class { prop: value }` rules from <style> blocks as attributes (picosvg rejects <style>).
+    Later rules win, as in CSS; attributes already on an element are kept."""
+    rules = []
+    for block in re.findall(r"<style[^>]*>(.*?)</style>", raw, flags=re.S):
+        block = re.sub(r"/\*.*?\*/", "", block, flags=re.S)
+        for selectors, body in re.findall(r"([^{}]+)\{([^}]*)\}", block):
+            decls = {}
+            for decl in body.split(";"):
+                if ":" in decl:
+                    k, v = decl.split(":", 1)
+                    decls[k.strip()] = plain_length(v.strip())
+            for sel in selectors.split(","):
+                sel = sel.strip()
+                if re.fullmatch(r"\.[\w-]+", sel):
+                    rules.append((sel[1:], decls))
+    raw = re.sub(r"<style[^>]*>.*?</style>", "", raw, flags=re.S)
+    # Inline style="...; stroke-width:1.5pt; ..." declarations get the same unit conversion.
+    raw = re.sub(r'(\sstyle=")([^"]*)(")', lambda m: m.group(1) + re.sub(r"(?<=:)\s*(-?[\d.]+(?:px|pt))", lambda v: plain_length(v.group(1)), m.group(2)) + m.group(3), raw)
+
+    def apply(m):
+        tag = m.group(0)
+        cm = re.search(r'\sclass="([^"]*)"', tag)
+        if not cm:
+            return tag
+        classes = cm.group(1).split()
+        props = {}
+        for name, decls in rules:
+            if name in classes:
+                props.update(decls)
+        tag = tag.replace(cm.group(0), "")
+        extra = "".join(f' {k}="{v}"' for k, v in props.items() if not re.search(rf"\s{re.escape(k)}=", tag))
+        return re.sub(r"^(<[\w:-]+)", lambda t: t.group(1) + extra, tag, count=1)
+
+    return re.sub(r"<[\w:-]+\b[^>]*>", apply, raw)
+
+
+SKIPPED_SHAPES = 0
+
+
+def union(acc: pathops.Path, p: pathops.Path) -> pathops.Path:
+    """Union with fallbacks: complex paths sometimes make skia-pathops give up. Clean both first; if a shape is
+    still unusable (degenerate geometry), leave it out rather than losing the whole icon."""
+    global SKIPPED_SHAPES  # noqa: PLW0603 - simple build statistic
+    try:
+        return pathops.op(acc, p, pathops.PathOp.UNION)
+    except pathops.PathOpsError:
+        pass
+    try:
+        return pathops.op(pathops.simplify(acc, fix_winding=True), pathops.simplify(p, fix_winding=True), pathops.PathOp.UNION)
+    except pathops.PathOpsError:
+        SKIPPED_SHAPES += 1
+        return acc
+
+
 def icon_outline(svg_file: Path):
     """Returns (pathops.Path in SVG coordinates, viewBox) or None if nothing visible."""
     raw = svg_file.read_text(encoding="utf-8", errors="replace")
     raw = re.sub(r"<text\b.*?</text>", "", raw, flags=re.S)  # labels inside icons: not drawable as outlines
     raw = dedupe_ids(raw)  # Sketch exports reuse ids, which picosvg rejects
+    raw = inline_css(raw)
     pico = SVG.fromstring(raw).topicosvg(ndigits=2)
     view = pico.view_box()
     ink, holes = pathops.Path(), pathops.Path()
@@ -78,7 +143,7 @@ def icon_outline(svg_file: Path):
         if not shape.d or shape.fill in ("none", "transparent") or getattr(shape, "opacity", 1) == 0:
             continue
         target = holes if is_white(shape.fill) else ink
-        target = pathops.op(target, to_pathops(shape.d, shape.fill_rule), pathops.PathOp.UNION)
+        target = union(target, to_pathops(shape.d, shape.fill_rule))
         if is_white(shape.fill):
             holes = target
         else:
@@ -159,7 +224,7 @@ def main(dirs):
     (ROOT / "lib/homeyIcons.json").write_text(json.dumps({k: chr(cp) for k, cp in sorted(live.items())}, ensure_ascii=False) + "\n")
     (ROOT / "tft/fonts/homey-icons-chars.txt").write_text("".join(chr(cp) for cp in sorted(cmap)), encoding="utf-8")
 
-    print(f"{len(cmap)} icons in font, {len(failed)} skipped")
+    print(f"{len(cmap)} icons in font, {len(failed)} skipped, {SKIPPED_SHAPES} unusable shapes left out")
     for line in failed[:20]:
         print("  skipped:", line)
 

@@ -29,4 +29,20 @@ function nextLabel(currentLabel, previousDefault, newDefault) {
   return !current || current === previousDefault ? newDefault : currentLabel;
 }
 
-if (typeof module !== 'undefined') module.exports = { targetChoices, nextLabel };
+// Key of a device's own icon in the panel's Homey icon font. Must match scripts/icon-font/fetch-device-icons.ts:
+// "homey:app:nl.philips.hue:bulb" -> "device-icons/nl.philips.hue/bulb".
+function deviceIconKey(driverId) {
+  const parts = String(driverId || '').split(':');
+  const name = parts.length >= 4 ? `${parts[2]}/${parts.slice(3).join('-')}` : parts.slice(1).join('/');
+  return `device-icons/${name}`;
+}
+
+// Icon after picking a device: keep a chosen icon, otherwise the device's own icon if the panel font has it.
+function defaultIcon(currentIcon, driverId, icons) {
+  if (currentIcon) return currentIcon;
+  return icons[deviceIconKey(driverId)] || '';
+}
+
+if (typeof module !== 'undefined') module.exports = {
+  targetChoices, nextLabel, deviceIconKey, defaultIcon,
+};

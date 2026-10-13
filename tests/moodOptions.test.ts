@@ -41,3 +41,20 @@ describe('tile label defaults', () => {
     expect(nextLabel('Kino!', 'Film', 'Hawaii')).toBe('Kino!');
   });
 });
+
+describe('device icon defaults', () => {
+  const { deviceIconKey, defaultIcon } = require('../settings/moodOptions.js');
+
+  test('driver id maps to the key the icon fetcher used', () => {
+    expect(deviceIconKey('homey:app:nl.philips.hue:bulb')).toBe('device-icons/nl.philips.hue/bulb');
+    expect(deviceIconKey('homey:app:com.xiaomi-mi:remote.b28ac1')).toBe('device-icons/com.xiaomi-mi/remote.b28ac1');
+    expect(deviceIconKey('homey:manager:vdevice:x')).toBe('device-icons/vdevice/x');
+  });
+
+  test('keeps a chosen icon, otherwise uses the device icon when the panel font has it', () => {
+    const icons = { 'device-icons/nl.philips.hue/bulb': 'B' };
+    expect(defaultIcon('', 'homey:app:nl.philips.hue:bulb', icons)).toBe('B');
+    expect(defaultIcon('X', 'homey:app:nl.philips.hue:bulb', icons)).toBe('X');
+    expect(defaultIcon('', 'homey:app:unknown:thing', icons)).toBe('');
+  });
+});

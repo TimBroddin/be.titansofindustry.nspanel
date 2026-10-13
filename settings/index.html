@@ -294,7 +294,9 @@
           cfg.home.chips[i] = { deviceId: '', capability: '', icon: '', ...(cfg.home.chips[i] ?? {}), ...patch };
           renderAll();
         };
-        row.querySelector('[data-a=device]').onclick = () => pickDevice(null, (id) => set({ deviceId: id, capability: '' }));
+        row.querySelector('[data-a=device]').onclick = () => pickDevice(null, (id) => set({
+          deviceId: id, capability: '', icon: defaultIcon(chip?.icon, devices[id]?.driverId, panelIcons),
+        }));
         row.querySelector('[data-a=cap]').onclick = () => d && pickCapability(d, (cap) => set({ capability: cap }));
         row.querySelector('[data-a=icon]').onclick = () => pickIcon(chip?.icon, (glyph) => set({ icon: glyph }));
         row.querySelector('[data-a=clear]').onclick = () => { cfg.home.chips[i] = null; renderAll(); };
@@ -340,7 +342,10 @@
             const next = { type: tile.type, icon: tile.icon, label };
             if (tile.type === 'mood') next.moodId = c.value;
             if (tile.type === 'flow') { next.flowId = c.value; next.advanced = c.advanced === true; }
-            if (tile.type === 'toggle') next.deviceId = c.value;
+            if (tile.type === 'toggle') {
+              next.deviceId = c.value;
+              next.icon = defaultIcon(tile.icon, devices[c.value]?.driverId, panelIcons);
+            }
             cfg.moods[i] = next;
             renderAll();
           });
