@@ -162,8 +162,24 @@ export function renderStrips(strips: string[], size: number, ox: number, oy: num
   return out;
 }
 
-export function coverStrips(buf: Uint8Array, origin: { x: number; y: number }, opts: { size?: number; colors?: number; blue?: number } = {}): string[] {
+// The firmware caches at most 2000 rects (COVER_MAX_RECTS); stay well below it.
+export const MAX_COVER_RECTS = 1500;
+const COLOR_STEPS = [32, 24, 16, 12, 8, 6, 4, 2];
+
+export function coverStrips(
+  buf: Uint8Array,
+  origin: { x: number; y: number },
+  opts: { size?: number; colors?: number; blue?: number; maxRects?: number } = {},
+): string[] {
   const size = opts.size ?? COVER_SIZE;
+  const max = opts.maxRects ?? MAX_COVER_RECTS;
   const img = correctBlue(coverFit(decodeImage(buf), size), opts.blue ?? 0.85);
-  return toStrips(quantize(img, opts.colors ?? 32), size, origin.x, origin.y);
+  // Fewer colours give longer runs and so fewer rects: drop colours until the cover fits.
+  const steps = COLOR_STEPS.filter((n) => n <= (opts.colors ?? 32));
+  let strips: string[] = [];
+  for (const colors of steps) {
+    strips = toStrips(quantize(img, colors), size, origin.x, origin.y);
+    if (strips.length <= max) return strips;
+  }
+  return strips.length <= max ? strips : strips.slice(0, max);
 }

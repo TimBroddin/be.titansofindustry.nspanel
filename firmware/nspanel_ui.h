@@ -188,40 +188,45 @@ inline TimerLabels &timer_labels() {
 
 // ---------------------------------------------------------------- cover art
 // Rectangles from the app ("x,y,w,h,color"), kept so the cover can be redrawn when the media page reopens.
+// Fixed capacity, allocated once with the (function-static) instance: growing a vector here ran the heap out
+// of large blocks and aborted (crash loop -> safe mode). The app sends at most ~1500 rects.
+static const size_t COVER_MAX_RECTS = 2000;
+
+// Drawn a few rects per loop (pump) rather than all at once: a full cover is ~40 KB of UART at 115200.
 class CoverCache {
  public:
-  void begin(const std::string &id) { id_ = id; rects_.clear(); }
+  void begin(const std::string &id) { id_ = id; count_ = 0; drawn_ = 0; }
   void clear() { begin(""); }
-  // false for strips of an older cover (the app switched track mid-transfer) or malformed input.
+  // false for strips of an older cover (the app switched track mid-transfer), malformed input, or a full cache.
   bool add(const std::string &id, const std::string &strip) {
-    if (id.empty() || id != id_) return false;
+    if (id.empty() || id != id_ || count_ >= COVER_MAX_RECTS) return false;
     unsigned x, y, w, h, c;
     if (std::sscanf(strip.c_str(), "%u,%u,%u,%u,%u", &x, &y, &w, &h, &c) != 5) return false;
-    rects_.push_back({(uint16_t) x, (uint16_t) y, (uint16_t) w, (uint16_t) h, (uint16_t) c});
+    rects_[count_++] = {(uint16_t) x, (uint16_t) y, (uint16_t) w, (uint16_t) h, (uint16_t) c};
     return true;
   }
-  template<typename Display> void draw(Display *disp) const {
+  // The page was (re)shown and painted over the cover: draw everything again.
+  void restart() { drawn_ = 0; }
+  // Draws up to n rects not drawn yet; returns how many it drew.
+  template<typename Display> size_t pump(Display *disp, size_t n) {
     char buf[40];
-    for (auto &r : rects_) {
+    size_t done = 0;
+    for (; drawn_ < count_ && done < n; drawn_++, done++) {
+      const Rect &r = rects_[drawn_];
       std::snprintf(buf, sizeof(buf), "fill %u,%u,%u,%u,%u", r.x, r.y, r.w, r.h, r.c);
       disp->send_command(buf);
     }
+    return done;
   }
-  template<typename Display> void draw_last(Display *disp, size_t n) const {
-    char buf[40];
-    for (size_t i = rects_.size() > n ? rects_.size() - n : 0; i < rects_.size(); i++) {
-      auto &r = rects_[i];
-      std::snprintf(buf, sizeof(buf), "fill %u,%u,%u,%u,%u", r.x, r.y, r.w, r.h, r.c);
-      disp->send_command(buf);
-    }
-  }
-  size_t size() const { return rects_.size(); }
+  size_t size() const { return count_; }
   const std::string &id() const { return id_; }
 
  private:
   struct Rect { uint16_t x, y, w, h, c; };
   std::string id_;
-  std::vector<Rect> rects_;
+  Rect rects_[COVER_MAX_RECTS];
+  size_t count_ = 0;
+  size_t drawn_ = 0;
 };
 
 inline CoverCache &cover() {

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 import {
-  RGBImage, correctBlue, coverFit, coverStrips, decodeImage, quantize, renderStrips, rgb565, toStrips,
+  MAX_COVER_RECTS, RGBImage, correctBlue, coverFit, coverStrips, decodeImage, quantize, renderStrips, rgb565, toStrips,
 } from '../lib/media/cover';
 
 const solid = (w: number, h: number, f: (x: number, y: number) => [number, number, number]): RGBImage => {
@@ -63,6 +63,19 @@ describe('cover pipeline', () => {
       expect(drawn[i]).toBe(rgb565((c >> 16) & 255, (c >> 8) & 255, c & 255));
     }
     expect(strips.length).toBeLessThan(96 * 20); // vertical merging keeps it far below one strip per run
+  });
+
+  test('busy images drop colours until they fit the panel cache', () => {
+    const png = new PNG({ width: 96, height: 96 });
+    for (let i = 0; i < 96 * 96; i++) {
+      const v = (i * 2654435761) >>> 0; // noise: worst case for run merging
+      png.data.set([v & 255, (v >> 8) & 255, (v >> 16) & 255, 255], i * 4);
+    }
+    const buf = PNG.sync.write(png);
+    expect(coverStrips(buf, { x: 20, y: 62 }, { maxRects: Infinity }).length).toBeGreaterThan(MAX_COVER_RECTS);
+    const fitted = coverStrips(buf, { x: 20, y: 62 });
+    expect(fitted.length).toBeLessThanOrEqual(MAX_COVER_RECTS);
+    expect(fitted.length).toBeGreaterThan(0);
   });
 
   test('coverStrips end to end from a PNG buffer', () => {

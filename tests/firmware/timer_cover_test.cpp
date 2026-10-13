@@ -40,12 +40,23 @@ int main() {
 
   std::cout << "--cover\n";
   FakeDisplay d;
-  nspanel_ui::CoverCache cover;
+  auto pump = [&](size_t n) { size_t k = nspanel_ui::cover().pump(&d, n); std::cout << "pump " << k << "\n"; };
+  auto &cover = nspanel_ui::cover();  // ~20 KB: the firmware's function-static instance  // ~20 KB: keep it off the stack, as in the firmware
   cover.begin("a");
   std::cout << cover.add("a", "20,62,96,1,65535") << cover.add("b", "1,1,1,1,0") << cover.add("a", "bad") << cover.add("a", "21,63,4,2,31") << "\n";
-  cover.draw(&d);
-  cover.begin("c");
-  cover.draw(&d);
-  std::cout << "size after begin " << cover.size() << "\n";
+  pump(1);
+  pump(5);
+  pump(5);
+  std::cout << "--page shown again: redraw from the start\n";
+  cover.restart();
+  pump(5);
+  std::cout << "--cap\n";
+  cover.begin("big");
+  size_t ok = 0;
+  for (size_t i = 0; i < nspanel_ui::COVER_MAX_RECTS + 5; i++) ok += cover.add("big", "1,1,1,1,0");
+  std::cout << "accepted " << ok << " of " << nspanel_ui::COVER_MAX_RECTS + 5 << "\n";
+  cover.clear();
+  std::cout << "size after clear " << cover.size() << "\n";
+  pump(5);
   return 0;
 }

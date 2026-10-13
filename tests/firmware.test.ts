@@ -35,8 +35,14 @@ test('timer state machine and cover cache', async () => {
     'mode 0',
     '--cover',
     '1001',
-    'fill 20,62,96,1,65535', 'fill 21,63,4,2,31',
-    'size after begin 0',
+    'fill 20,62,96,1,65535', 'pump 1',
+    'fill 21,63,4,2,31', 'pump 1',
+    'pump 0',
+    '--page shown again: redraw from the start',
+    'fill 20,62,96,1,65535', 'fill 21,63,4,2,31', 'pump 2',
+    '--cap',
+    'accepted 2000 of 2005',
+    'size after clear 0', 'pump 0',
     '',
   ].join('\n'));
 });
