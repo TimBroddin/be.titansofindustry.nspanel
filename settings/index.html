@@ -17,15 +17,20 @@
     .tabs button.active { color: inherit; border-color: currentColor; font-weight: 600; }
     section[data-tab] { display: none; }
     section[data-tab].active { display: block; }
-    .row { display: grid; gap: 6px; align-items: center; margin-bottom: 6px; }
-    .row.chip { grid-template-columns: 1.5fr 1.2fr auto auto; }
-    .row.tile { grid-template-columns: 0.9fr 1.5fr auto 1fr; }
-    .pick { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 8px; background: #fff; text-align: left; font: inherit; cursor: pointer; overflow: hidden; }
-    .pick .mdi { font-size: 22px; width: 24px; text-align: center; }
-    .pick img { width: 22px; height: 22px; object-fit: contain; }
+    .row { display: grid; gap: 8px; align-items: stretch; margin-bottom: 8px; }
+    .row.chip { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr) 44px 44px; }
+    .row.tile { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 44px minmax(0, 1fr); }
+    .row > *, #thermostat { box-sizing: border-box; height: 44px; margin: 0 !important; min-width: 0; }
+    .pick { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 10px; border: 0; border-radius: 10px; background: #f2f2f4; text-align: left; font: inherit; cursor: pointer; overflow: hidden; white-space: nowrap; }
+    .pick:disabled { opacity: .5; cursor: default; }
+    .pick > span:not(.mdi) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .pick .mdi { flex: none; font-size: 22px; width: 24px; text-align: center; }
+    .pick img { flex: none; width: 22px; height: 22px; object-fit: contain; }
     .pick .muted, .muted { color: #999; }
-    .iconbtn { width: 40px; justify-content: center; padding: 4px; }
-    .clear { border: 0; background: none; color: #aaa; font-size: 18px; cursor: pointer; }
+    .iconbtn { justify-content: center; padding: 0; }
+    .clear { border: 0; border-radius: 10px; background: none; color: #aaa; font-size: 18px; cursor: pointer; }
+    .clear:hover { background: #f2f2f4; }
+    .row select, .row input { border-radius: 10px; }
     .hint { color: #888; font-size: 12px; margin: 4px 0 10px; }
     .error { color: #c33; }
     /* preview */
@@ -318,8 +323,11 @@
         };
         row.querySelector('[data-a=target]').onclick = () => {
           if (!tile) return;
-          pickTarget(tile.type, { id: tile.moodId ?? tile.flowId ?? tile.deviceId ?? '', advanced: tile.advanced }, (c) => {
-            const next = { type: tile.type, icon: tile.icon, label: tile.label };
+          const currentId = tile.moodId ?? tile.flowId ?? tile.deviceId ?? '';
+          pickTarget(tile.type, { id: currentId, advanced: tile.advanced }, (c) => {
+            const previous = targetChoices(tile.type, { moods, flows, toggles: toggleTargets() }, currentId, tile.advanced).find((x) => x.value === currentId);
+            const label = nextLabel(tile.label, previous?.name ?? '', c.name ?? '');
+            const next = { type: tile.type, icon: tile.icon, label };
             if (tile.type === 'mood') next.moodId = c.value;
             if (tile.type === 'flow') { next.flowId = c.value; next.advanced = c.advanced === true; }
             if (tile.type === 'toggle') next.deviceId = c.value;

@@ -7,9 +7,12 @@
 function targetChoices(type, data, selectedId, selectedAdvanced) {
   const none = { value: '', label: '—' };
   let list = [];
-  if (type === 'mood') list = data.moods.map((m) => ({ value: m.id, label: m.zone ? `${m.zone} · ${m.name}` : m.name }));
-  else if (type === 'flow') list = data.flows.map((f) => ({ value: f.id, label: f.advanced ? `${f.name} (advanced)` : f.name, advanced: f.advanced }));
-  else if (type === 'toggle') list = data.toggles.map((d) => ({ value: d.id, label: d.zone ? `${d.zone} · ${d.name}` : d.name }));
+  if (type === 'mood') list = data.moods.map((m) => ({ value: m.id, name: m.name, label: m.zone ? `${m.zone} · ${m.name}` : m.name }));
+  else if (type === 'flow') {
+    list = data.flows.map((f) => ({
+      value: f.id, name: f.name, label: f.advanced ? `${f.name} (advanced)` : f.name, advanced: f.advanced,
+    }));
+  } else if (type === 'toggle') list = data.toggles.map((d) => ({ value: d.id, name: d.name, label: d.zone ? `${d.zone} · ${d.name}` : d.name }));
   else return [{ value: '', label: '(use the "Mood tile pressed" flow card)' }];
 
   if (selectedId && !list.some((c) => c.value === selectedId)) {
@@ -20,4 +23,10 @@ function targetChoices(type, data, selectedId, selectedAdvanced) {
   return [none, ...list];
 }
 
-if (typeof module !== 'undefined') module.exports = { targetChoices };
+// Label after picking a new target: follow the target's name unless the user typed their own.
+function nextLabel(currentLabel, previousDefault, newDefault) {
+  const current = String(currentLabel || '').trim();
+  return !current || current === previousDefault ? newDefault : currentLabel;
+}
+
+if (typeof module !== 'undefined') module.exports = { targetChoices, nextLabel };
