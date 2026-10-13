@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { componentsMarkdown, rgb565 } from '../design/components';
+import { round2Markdown } from '../design/round2';
 
 describe('Nextion component export', () => {
   test('rgb565 matches the plan constants', () => {
@@ -10,6 +11,10 @@ describe('Nextion component export', () => {
 
   test('tft/COMPONENTS.md is generated from the layout and up to date', async () => {
     expect(await Bun.file('tft/COMPONENTS.md').text()).toBe(componentsMarkdown());
+  });
+
+  test('tft/ROUND2.md is generated and up to date', async () => {
+    expect(await Bun.file('tft/ROUND2.md').text()).toBe(round2Markdown());
   });
 
   test('every moods tile component lists its touch script', () => {

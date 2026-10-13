@@ -41,7 +41,7 @@ export function renderPage(page: Page, mode: Mode, fontDir: string): string {
     @font-face { font-family: 'MDI'; src: url('${fontDir}/materialdesignicons-webfont.ttf'); }
     html, body { margin: 0; padding: 0; }
     .pg { width: ${W}px; height: ${H}px; position: relative; overflow: hidden;
-          background: radial-gradient(120% 90% at 0% 0%, #23314d 0%, #121826 55%, #0b0f18 100%); }
+          background: radial-gradient(120% 90% at 0% 0%, #1d1f23 0%, #141518 55%, #0f1012 100%); }
     .card { position: absolute; box-sizing: border-box; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); }
     .card.amber { background: rgba(242,181,107,.18); border-color: rgba(242,181,107,.45); }
     .btn { position: absolute; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);

@@ -11,15 +11,24 @@ const SUGGESTED_ICONS = [
   'party-popper', 'power', 'bell', 'car', 'robot-vacuum',
 ];
 
+// Homey icon keys look like "homey-vectors/io.nuki.smartlock/lock_nuki"; MDI names like "light-switch".
+const HOMEY_SUGGESTED_DIR = 'homey capability Icons/';
+
 function searchIcons(query, names, limit) {
   const q = String(query || '').trim().toLowerCase();
-  if (!q) return SUGGESTED_ICONS.filter((n) => names.includes(n)).slice(0, limit);
-  const score = (n) => {
-    const words = n.split('-');
-    if (n === q) return 0;
+  if (!q) {
+    const mdi = SUGGESTED_ICONS.filter((n) => names.includes(n));
+    return (mdi.length ? mdi : names.filter((n) => n.includes(HOMEY_SUGGESTED_DIR))).slice(0, limit);
+  }
+  const score = (key) => {
+    const n = key.toLowerCase();
+    const name = n.slice(n.lastIndexOf('/') + 1); // the icon itself, without the app folder
+    const words = name.split(/[-_ .]+/).filter(Boolean);
+    const allWords = n.split(/[-_/ .]+/).filter(Boolean);
+    if (name === q) return 0;
     if (words[0] === q) return 1; // "light" → light-switch before lightbulb
-    if (n.startsWith(q)) return 2;
-    if (words.some((w) => w.startsWith(q))) return 3;
+    if (name.startsWith(q)) return 2;
+    if (allWords.some((w) => w.startsWith(q))) return 3;
     if (n.includes(q)) return 4;
     return -1;
   };

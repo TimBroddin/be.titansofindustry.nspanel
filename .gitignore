@@ -5,3 +5,7 @@
 /firmware/.esphome/
 .DS_Store
 .superpowers/
+.venv/
+
+# icon font build env
+scripts/icon-font/.venv/

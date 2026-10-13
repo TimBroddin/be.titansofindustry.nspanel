@@ -1,7 +1,7 @@
 'use strict';
 
 import { DashboardConfig, loadConfig, normalizeConfig } from './lib/config';
-import icons from './lib/icons.json';
+import homeyIcons from './lib/homeyIcons.json';
 import { fetchCalendar, parseUpcoming } from './lib/sources/calendar';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, global-require */
@@ -45,8 +45,9 @@ module.exports = {
     return result;
   },
 
+  // Icons a chip or mood tile can use: the Homey icon font on the panel (lib/homeyIcons.json).
   async getIcons(): Promise<Record<string, string>> {
-    return icons;
+    return homeyIcons;
   },
 
   async getConfig({ homey, params }: { homey: any; params: { deviceId: string } }): Promise<DashboardConfig> {

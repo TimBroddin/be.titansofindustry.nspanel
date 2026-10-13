@@ -43,7 +43,8 @@ function previewItems(page, layout, config, ctx) {
     align: c.align,
     valign: c.valign,
     wrap: c.wrap,
-    icon: c.font.startsWith('F_ICON'),
+    icon: c.font.startsWith('F_ICON') || c.font.startsWith('F_HICON'),
+    iconSet: c.font.startsWith('F_HICON') ? 'homey' : (c.font.startsWith('F_ICON') ? 'mdi' : null), // eslint-disable-line no-nested-ternary
     weight: c.font === 'F_CLOCK' || c.font === 'F_HUGE' ? 200 : (c.font === 'F_BIG' ? 300 : (c.font === 'F_TITLE' ? 500 : 400)), // eslint-disable-line no-nested-ternary
     text: page === 'home' ? homeText(c.name, config, ctx) : moodsText(c.name, config, ctx),
   }));

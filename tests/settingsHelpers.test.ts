@@ -21,6 +21,14 @@ describe('searchIcons', () => {
   test('empty query returns the suggested icons that exist', () => {
     expect(searchIcons('', names, 10)).toEqual(SUGGESTED_ICONS.filter((n: string) => names.includes(n)));
   });
+
+  test('Homey icon keys: words split on / _ space and dots; suggestions are the Homey capability icons', () => {
+    const keys = ['homey-vectors/io.nuki.smartlock/lock_nuki', 'homey-vectors/homey capability Icons/alarm_CH4', 'homey-vectors/innr/bulb'];
+    expect(searchIcons('lock', keys, 10)).toEqual(['homey-vectors/io.nuki.smartlock/lock_nuki']);
+    expect(searchIcons('nuki', keys, 10)).toEqual(['homey-vectors/io.nuki.smartlock/lock_nuki']);
+    expect(searchIcons('bulb', keys, 10)).toEqual(['homey-vectors/innr/bulb']);
+    expect(searchIcons('', keys, 10)).toEqual(['homey-vectors/homey capability Icons/alarm_CH4']);
+  });
 });
 
 describe('groupCapabilities', () => {
@@ -71,6 +79,7 @@ describe('previewItems', () => {
     expect(items.in_lbl.text).toBe('BINNEN');
     expect(items.in_tgt.text).toBe('» 20,0°');
     expect(items.wx_icon.text).toBe('[weather-partly-cloudy]');
+    expect([items.wx_icon.iconSet, items.chips.iconSet]).toEqual(['mdi', 'homey']);
     const noThermostat = Object.fromEntries(previewItems('home', layout, { ...config, home: { ...config.home, thermostat: null } }, ctx).map((i: any) => [i.name, i]));
     expect(noThermostat.in_tgt.text).toBe('');
   });
@@ -79,13 +88,13 @@ describe('previewItems', () => {
     const config = { home: { chips: [] }, moods: [{ type: 'mood', icon: 'F', label: 'Film' }, null] };
     const items = Object.fromEntries(previewItems('moods', layout, config, ctx).map((i: any) => [i.name, i]));
     expect(items.title.text).toBe('Sferen');
-    expect([items.i01.text, items.l01.text, items.i01.icon]).toEqual(['<F>', 'Film', true]);
+    expect([items.i01.text, items.l01.text, items.i01.icon, items.i01.iconSet]).toEqual(['<F>', 'Film', true, 'homey']);
     expect([items.i02.text, items.l02.text]).toEqual(['', '']);
   });
 
   test('items carry position, pixel font size and colour from the layout', () => {
     const time = previewItems('home', layout, { home: { chips: [] }, moods: [] }, ctx).find((i: any) => i.name === 'time');
-    expect(time).toMatchObject({ x: 18, y: 14, w: 236, h: 88, px: 80, color: '#e9eef7', align: 'left' });
+    expect(time).toMatchObject({ x: 14, y: 14, w: 227, h: 88, px: 80, color: '#e9eef7', align: 'left' });
   });
 });
 

@@ -1,4 +1,4 @@
 {
-  "fonts": { "small": 11, "body": 9 },
+  "fonts": { "small": null, "body": null },
   "pics": { "moods": 50, "moods_on": 51 }
 }

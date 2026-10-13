@@ -13,40 +13,41 @@
   "F_BODY": 17,
   "F_SMALL": 13,
   "F_TITLE": 22,
-  "F_ICON_S": 24,
-  "F_ICON_L": 32
+  "F_ICON_L": 32,
+  "F_HICON_S": 24,
+  "F_HICON_L": 32
  },
  "pages": {
   "home": {
    "cards": [
     {
-     "x": 20,
+     "x": 16,
      "y": 160,
-     "w": 214,
+     "w": 206,
      "h": 84
     },
     {
-     "x": 246,
+     "x": 233,
      "y": 160,
-     "w": 214,
+     "w": 206,
      "h": 84
     }
    ],
    "buttons": [
     {
-     "x": 168,
+     "x": 157,
      "y": 262,
      "d": 44,
      "icon": "palette-outline"
     },
     {
-     "x": 218,
+     "x": 206,
      "y": 262,
      "d": 44,
      "icon": "thermostat"
     },
     {
-     "x": 268,
+     "x": 254,
      "y": 262,
      "d": 44,
      "icon": "calendar-month-outline"
@@ -55,9 +56,9 @@
    "components": [
     {
      "name": "time",
-     "x": 18,
+     "x": 14,
      "y": 14,
-     "w": 236,
+     "w": 227,
      "h": 88,
      "font": "F_CLOCK",
      "color": "text",
@@ -67,9 +68,9 @@
     },
     {
      "name": "date",
-     "x": 24,
+     "x": 20,
      "y": 104,
-     "w": 230,
+     "w": 221,
      "h": 26,
      "font": "F_BODY",
      "color": "muted",
@@ -79,9 +80,9 @@
     },
     {
      "name": "wx_icon",
-     "x": 300,
+     "x": 285,
      "y": 20,
-     "w": 48,
+     "w": 46,
      "h": 48,
      "font": "F_ICON_L",
      "color": "muted",
@@ -91,9 +92,9 @@
     },
     {
      "name": "wx_temp",
-     "x": 348,
+     "x": 331,
      "y": 20,
-     "w": 112,
+     "w": 108,
      "h": 48,
      "font": "F_BIG",
      "color": "text",
@@ -103,9 +104,9 @@
     },
     {
      "name": "wx_hilo",
-     "x": 300,
+     "x": 285,
      "y": 70,
-     "w": 160,
+     "w": 154,
      "h": 22,
      "font": "F_SMALL",
      "color": "muted",
@@ -115,11 +116,11 @@
     },
     {
      "name": "chips",
-     "x": 258,
+     "x": 245,
      "y": 100,
-     "w": 202,
+     "w": 194,
      "h": 36,
-     "font": "F_ICON_S",
+     "font": "F_HICON_S",
      "color": "amber",
      "align": "right",
      "valign": "center",
@@ -127,9 +128,9 @@
     },
     {
      "name": "in_lbl",
-     "x": 36,
+     "x": 31,
      "y": 170,
-     "w": 182,
+     "w": 175,
      "h": 18,
      "font": "F_SMALL",
      "color": "muted",
@@ -139,9 +140,9 @@
     },
     {
      "name": "in_cur",
-     "x": 36,
+     "x": 31,
      "y": 190,
-     "w": 104,
+     "w": 100,
      "h": 44,
      "font": "F_BIG",
      "color": "text",
@@ -151,9 +152,9 @@
     },
     {
      "name": "in_tgt",
-     "x": 140,
+     "x": 131,
      "y": 198,
-     "w": 86,
+     "w": 83,
      "h": 30,
      "font": "F_SMALL",
      "color": "amber",
@@ -163,9 +164,9 @@
     },
     {
      "name": "nx_lbl",
-     "x": 262,
+     "x": 249,
      "y": 170,
-     "w": 182,
+     "w": 175,
      "h": 18,
      "font": "F_SMALL",
      "color": "muted",
@@ -175,9 +176,9 @@
     },
     {
      "name": "nx1_t",
-     "x": 262,
+     "x": 249,
      "y": 194,
-     "w": 54,
+     "w": 52,
      "h": 24,
      "font": "F_BODY",
      "color": "amber",
@@ -187,9 +188,9 @@
     },
     {
      "name": "nx1",
-     "x": 318,
+     "x": 303,
      "y": 194,
-     "w": 136,
+     "w": 130,
      "h": 24,
      "font": "F_BODY",
      "color": "text",
@@ -199,9 +200,9 @@
     },
     {
      "name": "nx2",
-     "x": 262,
+     "x": 249,
      "y": 220,
-     "w": 192,
+     "w": 184,
      "h": 20,
      "font": "F_SMALL",
      "color": "muted",
@@ -214,57 +215,57 @@
   "moods": {
    "cards": [
     {
-     "x": 18,
+     "x": 14,
      "y": 64,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 131,
+     "x": 123,
      "y": 64,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 244,
+     "x": 231,
      "y": 64,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 357,
+     "x": 340,
      "y": 64,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 18,
+     "x": 14,
      "y": 188,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 131,
+     "x": 123,
      "y": 188,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 244,
+     "x": 231,
      "y": 188,
-     "w": 104,
+     "w": 100,
      "h": 112
     },
     {
-     "x": 357,
+     "x": 340,
      "y": 188,
-     "w": 104,
+     "w": 100,
      "h": 112
     }
    ],
    "buttons": [
     {
-     "x": 426,
+     "x": 406,
      "y": 12,
      "d": 36,
      "icon": "home-outline"
@@ -273,9 +274,9 @@
    "components": [
     {
      "name": "title",
-     "x": 20,
+     "x": 16,
      "y": 12,
-     "w": 300,
+     "w": 288,
      "h": 32,
      "font": "F_TITLE",
      "color": "text",
@@ -285,11 +286,11 @@
     },
     {
      "name": "i01",
-     "x": 26,
+     "x": 22,
      "y": 72,
-     "w": 88,
+     "w": 84,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -297,9 +298,9 @@
     },
     {
      "name": "l01",
-     "x": 26,
+     "x": 22,
      "y": 120,
-     "w": 88,
+     "w": 84,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -309,11 +310,11 @@
     },
     {
      "name": "i02",
-     "x": 139,
+     "x": 130,
      "y": 72,
-     "w": 88,
+     "w": 85,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -321,9 +322,9 @@
     },
     {
      "name": "l02",
-     "x": 139,
+     "x": 130,
      "y": 120,
-     "w": 88,
+     "w": 85,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -333,11 +334,11 @@
     },
     {
      "name": "i03",
-     "x": 252,
+     "x": 239,
      "y": 72,
-     "w": 88,
+     "w": 85,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -345,9 +346,9 @@
     },
     {
      "name": "l03",
-     "x": 252,
+     "x": 239,
      "y": 120,
-     "w": 88,
+     "w": 85,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -357,11 +358,11 @@
     },
     {
      "name": "i04",
-     "x": 365,
+     "x": 348,
      "y": 72,
-     "w": 88,
+     "w": 84,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -369,9 +370,9 @@
     },
     {
      "name": "l04",
-     "x": 365,
+     "x": 348,
      "y": 120,
-     "w": 88,
+     "w": 84,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -381,11 +382,11 @@
     },
     {
      "name": "i05",
-     "x": 26,
+     "x": 22,
      "y": 196,
-     "w": 88,
+     "w": 84,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -393,9 +394,9 @@
     },
     {
      "name": "l05",
-     "x": 26,
+     "x": 22,
      "y": 244,
-     "w": 88,
+     "w": 84,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -405,11 +406,11 @@
     },
     {
      "name": "i06",
-     "x": 139,
+     "x": 130,
      "y": 196,
-     "w": 88,
+     "w": 85,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -417,9 +418,9 @@
     },
     {
      "name": "l06",
-     "x": 139,
+     "x": 130,
      "y": 244,
-     "w": 88,
+     "w": 85,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -429,11 +430,11 @@
     },
     {
      "name": "i07",
-     "x": 252,
+     "x": 239,
      "y": 196,
-     "w": 88,
+     "w": 85,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -441,9 +442,9 @@
     },
     {
      "name": "l07",
-     "x": 252,
+     "x": 239,
      "y": 244,
-     "w": 88,
+     "w": 85,
      "h": 48,
      "font": "F_BODY",
      "color": "text",
@@ -453,11 +454,11 @@
     },
     {
      "name": "i08",
-     "x": 365,
+     "x": 348,
      "y": 196,
-     "w": 88,
+     "w": 84,
      "h": 46,
-     "font": "F_ICON_L",
+     "font": "F_HICON_L",
      "color": "text",
      "align": "left",
      "valign": "center",
@@ -465,9 +466,9 @@
     },
     {
      "name": "l08",
-     "x": 365,
+     "x": 348,
      "y": 244,
-     "w": 88,
+     "w": 84,
      "h": 48,
      "font": "F_BODY",
      "color": "text",

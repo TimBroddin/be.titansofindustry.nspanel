@@ -4,6 +4,14 @@
 
 export const W = 480;
 export const H = 320;
+// The EU NSPanel hides its rightmost ~25 px behind the bezel (measured with a calibration pattern on
+// 2026-10-13: x 0..454 visible). Everything is designed on the original 18..462 grid below and then
+// scaled horizontally into 14..441 by fitSafeArea().
+export const SAFE_RIGHT = 454;
+const DESIGN_LEFT = 18;
+const DESIGN_RIGHT = 462;
+const FIT_LEFT = 14;
+const FIT_RIGHT = 441;
 
 export const COLORS = {
   text: '#e9eef7',
@@ -14,7 +22,7 @@ export const COLORS = {
 export type ColorName = keyof typeof COLORS;
 
 // Symbolic Nextion fonts; numeric ids live in tft/ids.json once generated in the Editor.
-export type FontName = 'F_CLOCK' | 'F_HUGE' | 'F_BIG' | 'F_BODY' | 'F_SMALL' | 'F_TITLE' | 'F_ICON_S' | 'F_ICON_L';
+export type FontName = 'F_CLOCK' | 'F_HUGE' | 'F_BIG' | 'F_BODY' | 'F_SMALL' | 'F_TITLE' | 'F_ICON_L' | 'F_HICON_S' | 'F_HICON_L';
 
 export const FONT_SPECS: Record<FontName, { family: string; px: number; chars: string; note: string }> = {
   F_CLOCK: { family: 'Inter ExtraLight', px: 80, chars: '0123456789: APM', note: 'home + screensaver clock' },
@@ -23,8 +31,9 @@ export const FONT_SPECS: Record<FontName, { family: string; px: number; chars: s
   F_BODY: { family: 'Inter Regular', px: 17, chars: 'tft/fonts/charset-international.txt', note: 'body, tile labels, event titles' },
   F_SMALL: { family: 'Inter Regular', px: 13, chars: 'tft/fonts/charset-international.txt', note: 'secondary lines, caps labels' },
   F_TITLE: { family: 'Inter Medium', px: 22, chars: 'tft/fonts/charset-international.txt', note: 'page titles' },
-  F_ICON_S: { family: 'MDI (Blackymas)', px: 24, chars: 'icon font from Blackymas HMI', note: 'chips' },
-  F_ICON_L: { family: 'MDI (Blackymas)', px: 32, chars: 'icon font from Blackymas HMI', note: 'weather, tiles' },
+  F_ICON_L: { family: 'MDI (Blackymas)', px: 32, chars: 'icon font from Blackymas HMI', note: 'weather icon' },
+  F_HICON_S: { family: 'NSPanel Homey Icons', px: 24, chars: 'tft/fonts/homey-icons-chars.txt', note: 'chips' },
+  F_HICON_L: { family: 'NSPanel Homey Icons', px: 32, chars: 'tft/fonts/homey-icons-chars.txt', note: 'mood tiles' },
 };
 
 export type Align = 'left' | 'center' | 'right';
@@ -82,7 +91,7 @@ const home: Page = {
     { name: 'wx_icon', x: 300, y: 20, w: 48, h: 48, font: 'F_ICON_L', color: 'muted', align: 'center', valign: 'center', crop: 'bg', sample: '☁' },
     { name: 'wx_temp', x: 348, y: 20, w: 112, h: 48, font: 'F_BIG', color: 'text', align: 'right', valign: 'center', crop: 'bg', sample: '13°' },
     { name: 'wx_hilo', x: 300, y: 70, w: 160, h: 22, font: 'F_SMALL', color: 'muted', align: 'right', valign: 'center', crop: 'bg', sample: 'max 16° · min 8°' },
-    { name: 'chips', x: 258, y: 100, w: 202, h: 36, font: 'F_ICON_S', color: 'amber', align: 'right', valign: 'center', crop: 'bg', sample: '💡  🚪' },
+    { name: 'chips', x: 258, y: 100, w: 202, h: 36, font: 'F_HICON_S', color: 'amber', align: 'right', valign: 'center', crop: 'bg', sample: '💡  🚪' },
     { name: 'in_lbl', x: 36, y: 170, w: 182, h: 18, font: 'F_SMALL', color: 'muted', align: 'left', valign: 'center', crop: 'bg', sample: 'BINNEN' },
     { name: 'in_cur', x: 36, y: 190, w: 104, h: 44, font: 'F_BIG', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: '21,5°' },
     { name: 'in_tgt', x: 140, y: 198, w: 86, h: 30, font: 'F_SMALL', color: 'amber', align: 'left', valign: 'center', crop: 'bg', sample: '» 20,0°' },
@@ -113,7 +122,7 @@ TILE_ROWS.forEach((y, r) => TILE_COLS.forEach((x, c) => {
   const [icon, label] = MOOD_SAMPLES[r * 4 + c];
   tiles.push({ x, y, w: TILE_W, h: TILE_H });
   tileComponents.push(
-    { name: `i${n}`, x: x + 8, y: y + 8, w: TILE_W - 16, h: 46, font: 'F_ICON_L', color: 'text', align: 'left', valign: 'center', crop: 'bg', touch: `TILE_${n}`, sample: icon },
+    { name: `i${n}`, x: x + 8, y: y + 8, w: TILE_W - 16, h: 46, font: 'F_HICON_L', color: 'text', align: 'left', valign: 'center', crop: 'bg', touch: `TILE_${n}`, sample: icon },
     { name: `l${n}`, x: x + 8, y: y + 56, w: TILE_W - 16, h: TILE_H - 64, font: 'F_BODY', color: 'text', align: 'left', valign: 'bottom', wrap: true, crop: 'bg', touch: `TILE_${n}`, sample: label },
   );
 }));
@@ -169,7 +178,8 @@ for (let i = 0; i < CAL_ROWS; i++) {
   const [t, e] = CAL_SAMPLES[i];
   const header = e === '' ;
   calRows.push(
-    { name: `t${n}`, x: 20, y, w: 74, h: 30, font: header ? 'F_SMALL' : 'F_BODY', color: header ? 'muted' : (CAL_SAMPLES[i][2] ?? 'amber'), align: 'left', valign: 'center', crop: 'bg', sample: t },
+    // One font for every row: the app switches only the colour (header rows muted); runtime font switching needs Editor font ids.
+    { name: `t${n}`, x: 20, y, w: 74, h: 30, font: 'F_BODY', color: header ? 'muted' : (CAL_SAMPLES[i][2] ?? 'amber'), align: 'left', valign: 'center', crop: 'bg', sample: t },
     { name: `e${n}`, x: 96, y, w: 364, h: 30, font: 'F_BODY', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: e },
   );
 }
@@ -212,7 +222,32 @@ const screensaver: Page = {
 // ---- boot (Blackymas boot page kept; only its background changes) ----
 const boot: Page = { id: 0, name: 'boot', cards: [], buttons: [], components: [], hotspots: [] };
 
-export const PAGES: Page[] = [boot, home, moods, climate, calendar, notification, screensaver];
+const K = (FIT_RIGHT - FIT_LEFT) / (DESIGN_RIGHT - DESIGN_LEFT);
+const fx = (x: number): number => Math.round(FIT_LEFT + (x - DESIGN_LEFT) * K);
+const fitBox = <T extends { x: number; w: number }>(b: T): T => {
+  const left = fx(b.x);
+  return { ...b, x: left, w: fx(b.x + b.w) - left };
+};
+// Hotspots may extend to the screen edge; clamp them to what a finger can reach.
+const fitHotspot = (h: Hotspot): Hotspot => {
+  const left = Math.max(0, fx(h.x));
+  return { ...h, x: left, w: Math.min(SAFE_RIGHT, fx(h.x + h.w)) - left };
+};
+const fitButton = (b: RoundButton): RoundButton => ({ ...b, x: Math.round(fx(b.x + b.d / 2) - b.d / 2) });
+
+function fitSafeArea(p: Page): Page {
+  return {
+    ...p,
+    cards: p.cards.map(fitBox),
+    buttons: p.buttons.map(fitButton),
+    components: p.components.map(fitBox),
+    hotspots: p.hotspots.map(fitHotspot),
+  };
+}
+
+// Pages before the safe-area fit: the layout the first Soft dark TFT was built with (used to list edits).
+export const DESIGN_PAGES: Page[] = [boot, home, moods, climate, calendar, notification, screensaver];
+export const PAGES: Page[] = DESIGN_PAGES.map(fitSafeArea);
 
 // Picture import order in the Editor (appended after any existing pictures; ids recorded in tft/ids.json).
 export const PICTURES = ['boot', 'home', 'moods', 'moods-on', 'climate', 'calendar', 'notification', 'screensaver'] as const;

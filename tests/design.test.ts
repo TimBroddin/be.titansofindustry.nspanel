@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import { H, PAGES, PICTURES, W } from '../design/layout';
+import {
+  H, PAGES, PICTURES, SAFE_RIGHT, W,
+} from '../design/layout';
 
 const overlaps = (a: { x: number; y: number; w: number; h: number }, b: typeof a): boolean =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
@@ -18,6 +20,15 @@ describe('layout', () => {
     }
   });
 
+  test('everything visible stays left of the bezel (x <= SAFE_RIGHT)', () => {
+    expect(SAFE_RIGHT).toBe(454);
+    for (const p of PAGES) {
+      const items = [...p.components, ...p.hotspots, ...p.cards].map((c) => ({ name: 'name' in c ? c.name : 'card', right: c.x + c.w }));
+      items.push(...p.buttons.map((b) => ({ name: `button:${b.icon}`, right: b.x + b.d })));
+      expect(items.filter((i) => i.right > SAFE_RIGHT).map((i) => `${p.name}.${i.name}`)).toEqual([]);
+    }
+  });
+
   test('no two text components on a page overlap (crop images would erase each other)', () => {
     for (const p of PAGES) {
       const cs = p.components;
@@ -28,6 +39,11 @@ describe('layout', () => {
         }
       }
     }
+  });
+
+  test('chips and tile icons use the Homey icon font; weather stays on the MDI font', () => {
+    const font = (page: string, name: string) => PAGES.find((p) => p.name === page)!.components.find((c) => c.name === name)!.font;
+    expect([font('home', 'chips'), font('moods', 'i01'), font('moods', 'i08'), font('home', 'wx_icon')]).toEqual(['F_HICON_S', 'F_HICON_L', 'F_HICON_L', 'F_ICON_L']);
   });
 
   test('component names are unique per page and at most 14 chars (Nextion limit)', () => {

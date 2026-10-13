@@ -9,7 +9,10 @@
   <script type="text/javascript" src="preview.js"></script>
   <style>
     @font-face { font-family: 'MDI'; src: url('mdi.woff2') format('woff2'); }
+    @font-face { font-family: 'HomeyIcons'; src: url('homey-icons.woff2') format('woff2'); }
     .mdi { font-family: 'MDI'; font-style: normal; line-height: 1; }
+    .hicon { font-family: 'HomeyIcons'; font-style: normal; line-height: 1; }
+    .repick { color: #c33; font-size: 13px; font-weight: 600; }
     body { padding-bottom: 72px; }
     .top { display: flex; gap: 12px; align-items: center; }
     .tabs { display: flex; gap: 4px; margin: 12px 0; border-bottom: 1px solid #e5e5e5; }
@@ -24,7 +27,7 @@
     .pick { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 10px; border: 0; border-radius: 10px; background: #f2f2f4; text-align: left; font: inherit; cursor: pointer; overflow: hidden; white-space: nowrap; }
     .pick:disabled { opacity: .5; cursor: default; }
     .pick > span:not(.mdi) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-    .pick .mdi { flex: none; font-size: 22px; width: 24px; text-align: center; }
+    .pick .mdi, .pick .hicon { flex: none; font-size: 22px; width: 24px; text-align: center; }
     .pick img { flex: none; width: 22px; height: 22px; object-fit: contain; }
     .pick .muted, .muted { color: #999; }
     .iconbtn { justify-content: center; padding: 0; }
@@ -36,7 +39,7 @@
     /* preview */
     .pv-wrap { width: 100%; max-width: 480px; margin: 0 auto 6px; }
     .pv { width: 480px; height: 320px; position: relative; overflow: hidden; border-radius: 10px; transform-origin: 0 0;
-          background: radial-gradient(120% 90% at 0% 0%, #23314d 0%, #121826 55%, #0b0f18 100%); font-family: -apple-system, 'Inter', sans-serif; }
+          background: radial-gradient(120% 90% at 0% 0%, #1d1f23 0%, #141518 55%, #0f1012 100%); font-family: -apple-system, 'Inter', sans-serif; }
     .pv .card { position: absolute; box-sizing: border-box; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); }
     .pv .btn { position: absolute; box-sizing: border-box; border-radius: 50%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; color: #c9d4e6; }
     .pv .btn.amber { background: rgba(242,181,107,.18); border-color: rgba(242,181,107,.45); color: #f6c88f; }
@@ -51,7 +54,7 @@
     .results h4 { margin: 12px 0 6px; font-size: 12px; text-transform: uppercase; color: #999; letter-spacing: .5px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
     .grid button { border: 1px solid #eee; background: #fff; border-radius: 10px; padding: 8px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .grid button .mdi { font-size: 26px; }
+    .grid button .mdi, .grid button .hicon { font-size: 28px; }
     .grid button span:last-child { font-size: 10px; color: #777; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .list button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border: 0; border-bottom: 1px solid #f2f2f2; background: none; text-align: left; font: inherit; cursor: pointer; }
     .list button img { width: 24px; height: 24px; object-fit: contain; }
@@ -160,8 +163,14 @@
     const tr = (key) => H.__(`settings.${key}`) || key;
     const isPanel = (d) => d.driverId === 'nspanel' || String(d.driverId).endsWith(':nspanel');
     const iconChar = (name) => (mdi[name] ? String.fromCodePoint(parseInt(mdi[name], 16)) : '');
-    const display = (glyph) => iconChar(glyphToName[glyph]);
-    const iconHtml = (glyph) => (glyph ? `<span class="mdi">${esc(display(glyph)) || '?'}</span>` : `<span class="mdi muted">${esc(iconChar('plus'))}</span>`);
+    // Chips and tiles use Homey icons: the stored value is the glyph itself, drawn with the HomeyIcons font.
+    const display = (glyph) => (glyphToName[glyph] ? glyph : '');
+    const iconLabelOf = (key) => key.slice(key.lastIndexOf('/') + 1).replace(/[_-]+/g, ' ');
+    const iconHtml = (glyph) => {
+      if (!glyph) return `<span class="mdi muted">${esc(iconChar('plus'))}</span>`;
+      if (!glyphToName[glyph]) return `<span class="repick" title="Old icon, choose again">!</span>`;
+      return `<span class="hicon">${esc(glyph)}</span>`;
+    };
     const deviceHtml = (d) => (d
       ? `${d.iconUrl ? `<img src="${esc(d.iconUrl)}" alt="">` : ''}<span>${esc(d.zoneName ? `${d.zoneName} · ` : '')}${esc(d.name)}</span>`
       : `<span class="muted">${esc(tr('device'))}</span>`);
@@ -205,15 +214,16 @@
         res.innerHTML = '';
         const grid = document.createElement('div');
         grid.className = 'grid';
-        const add = (name, label, glyph) => {
+        const add = (key, label, glyph) => {
           const b = document.createElement('button');
-          b.innerHTML = `<span class="mdi">${esc(iconChar(name))}</span><span>${esc(label)}</span>`;
+          b.title = key;
+          b.innerHTML = glyph ? `<span class="hicon">${esc(glyph)}</span><span>${esc(label)}</span>` : `<span class="mdi">${esc(iconChar('close'))}</span><span>${esc(label)}</span>`;
           if (glyph === current) b.style.borderColor = '#f2b56b';
           b.onclick = () => { closePicker(); onPick(glyph); };
           grid.appendChild(b);
         };
-        add('close', tr('noIcon'), '');
-        for (const n of searchIcons(q, names, 120)) add(n, n, panelIcons[n]);
+        add('', tr('noIcon'), '');
+        for (const n of searchIcons(q, names, 120)) add(n, iconLabelOf(n), panelIcons[n]);
         res.appendChild(grid);
       });
     }
@@ -364,7 +374,7 @@
         if (!it.text) continue;
         const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[it.align];
         const align = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[it.valign];
-        parts.push(`<div class="txt${it.icon ? ' mdi' : ''}" style="left:${it.x}px;top:${it.y}px;width:${it.w}px;height:${it.h}px;font-size:${it.px}px;font-weight:${it.weight};color:${it.color};justify-content:${justify};align-items:${align};white-space:${it.wrap ? 'normal' : 'nowrap'}">${esc(it.text)}</div>`);
+        parts.push(`<div class="txt${it.iconSet ? ` ${it.iconSet === 'homey' ? 'hicon' : 'mdi'}` : ''}" style="left:${it.x}px;top:${it.y}px;width:${it.w}px;height:${it.h}px;font-size:${it.px}px;font-weight:${it.weight};color:${it.color};justify-content:${justify};align-items:${align};white-space:${it.wrap ? 'normal' : 'nowrap'}">${esc(it.text)}</div>`);
       }
       el.innerHTML = parts.join('');
       const width = el.parentElement.clientWidth || layout.W;
