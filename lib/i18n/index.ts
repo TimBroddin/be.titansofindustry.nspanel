@@ -82,3 +82,8 @@ export function dayLabel(date: Date, now: Date, lang: Lang, timeZone: string): s
   if (key === dayKey(new Date(now.getTime() + 86400000), timeZone)) return t(lang, 'tomorrow');
   return formatShortDay(date, lang, timeZone);
 }
+
+// Strings for the firmware's kitchen timer, in the order of the `timer_labels` action.
+export function timerLabels(lang: Lang): string[] {
+  return (['tmrRunning', 'tmrPaused', 'tmrDone', 'tmrStart', 'tmrPause', 'tmrResume', 'tmrStop', 'tmrReset', 'tmrHome'] as const).map((k) => t(lang, k));
+}

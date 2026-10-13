@@ -19,5 +19,16 @@
   "max": "max",
   "min": "min",
   "close": "Close",
-  "actionFailed": "Action failed"
+  "actionFailed": "Action failed",
+  "noPlayer": "No player",
+  "tmrRunning": "running · ready at",
+  "tmrPaused": "paused",
+  "tmrDone": "Done!",
+  "tmrStart": "Start",
+  "tmrPause": "Pause",
+  "tmrResume": "Resume",
+  "tmrStop": "Stop",
+  "tmrReset": "Reset",
+  "tmrHome": "Timer",
+  "timerFinished": "Timer finished"
 }

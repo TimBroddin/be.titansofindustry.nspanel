@@ -28,6 +28,7 @@ export interface DashboardConfig {
   moods: Array<MoodTile | null>;
   calendar: CalendarConfig | null;
   screen: ScreenConfig;
+  media: { players: string[] }; // ordered device ids; the panel shows the one that is playing
 }
 
 export interface CapabilityRef { deviceId: string; capability: string }
@@ -101,6 +102,7 @@ export function normalizeConfig(raw: unknown): DashboardConfig {
     buttons: { left: mode(buttons.left), right: mode(buttons.right) },
     moods: slots(r.moods, MOOD_SLOTS, parseTile),
     calendar: parseCalendar(r.calendar),
+    media: { players: [...new Set((Array.isArray(obj(r.media).players) ? obj(r.media).players as unknown[] : []).map(str).filter(Boolean))].slice(0, 8) },
     screen: {
       screensaverMinutes: int(obj(r.screen).screensaverMinutes, 0, 240, 0),
       screensaverBrightness: int(obj(r.screen).screensaverBrightness, 0, 100, 10),

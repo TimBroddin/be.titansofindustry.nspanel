@@ -19,5 +19,16 @@
   "max": "max",
   "min": "min",
   "close": "Sluiten",
-  "actionFailed": "Actie mislukt"
+  "actionFailed": "Actie mislukt",
+  "noPlayer": "Geen speler",
+  "tmrRunning": "loopt · klaar om",
+  "tmrPaused": "gepauzeerd",
+  "tmrDone": "Klaar!",
+  "tmrStart": "Start",
+  "tmrPause": "Pauze",
+  "tmrResume": "Verder",
+  "tmrStop": "Stop",
+  "tmrReset": "Reset",
+  "tmrHome": "Timer",
+  "timerFinished": "Timer klaar"
 }
