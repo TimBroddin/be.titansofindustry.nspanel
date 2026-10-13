@@ -1,14 +1,42 @@
 import { describe, expect, test } from 'bun:test';
 import {
-  H, PAGES, PICTURES, SAFE_RIGHT, W,
+  COVER, H, PAGES, PICTURES, SAFE_RIGHT, W,
 } from '../design/layout';
 
 const overlaps = (a: { x: number; y: number; w: number; h: number }, b: typeof a): boolean =>
   a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 describe('layout', () => {
-  test('page ids are 0..6 in order', () => {
-    expect(PAGES.map((p) => p.id)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+  test('page ids are 0..8 in order (media 7, timer 8 appended)', () => {
+    expect(PAGES.map((p) => [p.id, p.name])).toEqual([
+      [0, 'boot'], [1, 'home'], [2, 'moods'], [3, 'climate'], [4, 'calendar'], [5, 'notification'], [6, 'screensaver'], [7, 'media'], [8, 'timer'],
+    ]);
+  });
+
+  test('pictures: existing order kept, new ones appended', () => {
+    expect([...PICTURES]).toEqual(['boot', 'home', 'moods', 'moods-on', 'climate', 'calendar', 'notification', 'screensaver', 'home-on', 'media', 'media-bare', 'timer']);
+  });
+
+  test('cover area is exactly 96x96 and only cover_ic sits on it', () => {
+    const media = PAGES.find((p) => p.name === 'media')!;
+    expect([COVER.w, COVER.h]).toEqual([96, 96]);
+    expect(media.components.filter((c) => c.name !== 'cover_ic' && overlaps(c, COVER)).map((c) => c.name)).toEqual([]);
+    expect(media.components.find((c) => c.name === 'cover_ic')).toMatchObject({ x: COVER.x, y: COVER.y, w: 96, h: 96 });
+  });
+
+  test('home: five nav buttons; nav_med sits exactly on the media button; variants defined', () => {
+    const home = PAGES.find((p) => p.name === 'home')!;
+    expect(home.buttons.map((b) => b.icon)).toEqual(['palette-outline', 'thermostat', 'music', 'timer-outline', 'calendar-month-outline']);
+    const music = home.buttons.find((b) => b.icon === 'music')!;
+    expect(home.components.find((c) => c.name === 'nav_med')).toMatchObject({ x: music.x, y: music.y, w: music.d, h: music.d });
+    expect(home.variants).toEqual([{ suffix: 'on', amberButtons: ['music'] }]);
+    expect(PAGES.find((p) => p.name === 'media')!.variants).toEqual([{ suffix: 'bare', hideButtons: ['skip-previous', 'skip-next'] }]);
+    expect(PAGES.find((p) => p.name === 'moods')!.variants).toEqual([{ suffix: 'on', amberCards: true }]);
+  });
+
+  test('media progress bars are progress components', () => {
+    const media = PAGES.find((p) => p.name === 'media')!;
+    expect(media.components.filter((c) => c.kind === 'progress').map((c) => c.name)).toEqual(['prog', 'vol']);
   });
 
   test('every component and hotspot is inside the screen', () => {

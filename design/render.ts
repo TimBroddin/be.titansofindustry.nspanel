@@ -1,7 +1,9 @@
-import { COLORS, FONT_SPECS, H, Page, W } from './layout';
+import {
+  COLORS, FONT_SPECS, H, Page, Variant, W,
+} from './layout';
 import mdi from './mdi-codepoints.json';
 
-export type Mode = 'bg' | 'on' | 'preview';
+export type Mode = 'bg' | 'preview';
 
 const FONT_CSS: Record<string, string> = {
   'Inter ExtraLight': "font-family: 'InterX'; font-weight: 200;",
@@ -9,9 +11,11 @@ const FONT_CSS: Record<string, string> = {
   'Inter Regular': "font-family: 'InterR'; font-weight: 400;",
   'Inter Medium': "font-family: 'InterM'; font-weight: 500;",
   'MDI (Blackymas)': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
+  'NSPanel Homey Icons': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
 };
 
 const glyph = (name: string): string => {
+  if (!name) return '';
   const cp = (mdi as Record<string, string>)[name];
   if (!cp) throw new Error(`Unknown MDI icon ${name}`);
   return `&#x${cp};`;
@@ -19,14 +23,24 @@ const glyph = (name: string): string => {
 
 const esc = (s: string): string => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
 
-export function renderPage(page: Page, mode: Mode, fontDir: string): string {
-  const amberCards = mode === 'on';
+// variant: render one of the page's crop-source pictures (amber cards/buttons, or buttons left out).
+export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Variant): string {
   const cards = page.cards.map((c) => {
-    const tint = c.tint === 'amber' || amberCards;
+    const tint = c.tint === 'amber' || variant?.amberCards;
     return `<div class="card${tint ? ' amber' : ''}" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;border-radius:${c.r ?? 18}px"></div>`;
   }).join('');
-  const buttons = page.buttons.map((b) => `<div class="btn${b.tint === 'amber' ? ' amber' : ''}" style="left:${b.x}px;top:${b.y}px;width:${b.d}px;height:${b.d}px;font-size:${Math.round(b.d * 0.45)}px">${glyph(b.icon)}</div>`).join('');
+  const buttons = page.buttons
+    .filter((b) => !variant?.hideButtons?.includes(b.icon))
+    .map((b) => {
+      const amber = b.tint === 'amber' || variant?.amberButtons?.includes(b.icon);
+      return `<div class="btn${amber ? ' amber' : ''}" style="left:${b.x}px;top:${b.y}px;width:${b.d}px;height:${b.d}px;font-size:${Math.round(b.d * 0.45)}px">${glyph(b.icon)}</div>`;
+    }).join('');
+  const labels = (page.labels ?? []).map((l) => `<div class="txt" style="left:${l.x}px;top:${l.y}px;width:${l.w}px;height:${l.h}px;color:${COLORS[l.color]};font-size:${l.px}px;${FONT_CSS['Inter Regular']}justify-content:center;align-items:center">${esc(l.text)}</div>`).join('');
   const texts = mode !== 'preview' ? '' : page.components.map((c) => {
+    if (c.kind === 'progress') {
+      const pct = Number(c.sample) || 0;
+      return `<div style="position:absolute;left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${COLORS[c.bco ?? 'track']};border-radius:${c.h / 2}px"><div style="width:${pct}%;height:100%;background:${COLORS[c.color]};border-radius:${c.h / 2}px"></div></div>`;
+    }
     const f = FONT_SPECS[c.font];
     const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[c.align];
     const align = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[c.valign ?? 'center'];
@@ -48,5 +62,5 @@ export function renderPage(page: Page, mode: Mode, fontDir: string): string {
            display: flex; align-items: center; justify-content: center; font-family: 'MDI'; color: #c9d4e6; line-height: 1; }
     .btn.amber { background: rgba(242,181,107,.18); border-color: rgba(242,181,107,.45); color: #f6c88f; }
     .txt { position: absolute; display: flex; overflow: hidden; line-height: 1.15; letter-spacing: 0; }
-  </style></head><body><div class="pg">${cards}${buttons}${texts}</div></body></html>`;
+  </style></head><body><div class="pg">${cards}${buttons}${labels}${texts}</div></body></html>`;
 }

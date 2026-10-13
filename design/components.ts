@@ -50,11 +50,15 @@ export function componentsMarkdown(): string {
     out.push(`Page: \`sta\` = image, \`pic\` = \`p_${page.name}\`.`);
     out.push('');
     if (page.components.length) {
-      out.push('| Name | Type | x | y | w | h | font | pco | xcen | ycen | isbr | crop (picc) | touch | sample |');
-      out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+      out.push('| Name | Type | x | y | w | h | font | pco | bco | xcen | ycen | isbr | crop (picc) | touch | sample |');
+      out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
       for (const c of page.components) {
         const picc = c.crop === 'on' ? `p_${page.name}_on` : `p_${page.name}`;
-        out.push(`| ${c.name} | Text | ${c.x} | ${c.y} | ${c.w} | ${c.h} | ${c.font} | ${rgb565(COLORS[c.color])} | ${XCEN[c.align]} | ${YCEN[c.valign ?? 'center']} | ${c.wrap ? 1 : 0} | ${picc} | ${c.touch ?? ''} | ${c.sample} |`);
+        if (c.kind === 'progress') {
+          out.push(`| ${c.name} | ProgressBar | ${c.x} | ${c.y} | ${c.w} | ${c.h} | — | ${rgb565(COLORS[c.color])} | ${rgb565(COLORS[c.bco ?? 'track'])} | — | — | — | solid colour | ${c.touch ?? ''} | val ${c.sample} |`);
+          continue;
+        }
+        out.push(`| ${c.name} | Text | ${c.x} | ${c.y} | ${c.w} | ${c.h} | ${c.font} | ${rgb565(COLORS[c.color])} | | ${XCEN[c.align]} | ${YCEN[c.valign ?? 'center']} | ${c.wrap ? 1 : 0} | ${picc} | ${c.touch ?? ''} | ${c.sample} |`);
       }
     }
     if (page.hotspots.length) {

@@ -4,7 +4,8 @@
  "colors": {
   "text": "#e9eef7",
   "muted": "#9fb0cc",
-  "amber": "#f2b56b"
+  "amber": "#f2b56b",
+  "track": "#2a2c31"
  },
  "fontPx": {
   "F_CLOCK": 80,
@@ -35,19 +36,31 @@
    ],
    "buttons": [
     {
-     "x": 157,
+     "x": 105,
      "y": 262,
      "d": 44,
      "icon": "palette-outline"
     },
     {
-     "x": 206,
+     "x": 155,
      "y": 262,
      "d": 44,
      "icon": "thermostat"
     },
     {
-     "x": 254,
+     "x": 206,
+     "y": 262,
+     "d": 44,
+     "icon": "music"
+    },
+    {
+     "x": 256,
+     "y": 262,
+     "d": 44,
+     "icon": "timer-outline"
+    },
+    {
+     "x": 306,
      "y": 262,
      "d": 44,
      "icon": "calendar-month-outline"
@@ -207,6 +220,30 @@
      "font": "F_SMALL",
      "color": "muted",
      "align": "left",
+     "valign": "center",
+     "wrap": false
+    },
+    {
+     "name": "tmr",
+     "x": 20,
+     "y": 130,
+     "w": 221,
+     "h": 24,
+     "font": "F_BODY",
+     "color": "amber",
+     "align": "left",
+     "valign": "center",
+     "wrap": false
+    },
+    {
+     "name": "nav_med",
+     "x": 206,
+     "y": 262,
+     "w": 44,
+     "h": 44,
+     "font": "F_BODY",
+     "color": "text",
+     "align": "center",
      "valign": "center",
      "wrap": false
     }

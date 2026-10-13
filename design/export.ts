@@ -4,7 +4,7 @@
 import { mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { PAGES } from './layout';
-import { Mode, renderPage } from './render';
+import { renderPage } from './render';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const root = resolve(import.meta.dir, '..');
@@ -23,17 +23,16 @@ async function shoot(name: string, html: string, out: string): Promise<void> {
   if ((await proc.exited) !== 0) throw new Error(`Chrome failed for ${name}`);
 }
 
-const jobs: Array<[string, Mode, string]> = [];
+const jobs: Array<{ name: string; html: string; out: string }> = [];
 for (const page of PAGES) {
-  jobs.push([page.name, 'bg', `tft/assets/${page.name}.png`]);
-  jobs.push([`${page.name}-preview`, 'preview', `design/preview/${page.name}.png`]);
-  if (page.hasOnVariant) {
-    jobs.push([`${page.name}-on`, 'on', `tft/assets/${page.name}-on.png`]);
+  jobs.push({ name: page.name, html: renderPage(page, 'bg', fontDir), out: `tft/assets/${page.name}.png` });
+  jobs.push({ name: `${page.name}-preview`, html: renderPage(page, 'preview', fontDir), out: `design/preview/${page.name}.png` });
+  for (const v of page.variants ?? []) {
+    jobs.push({ name: `${page.name}-${v.suffix}`, html: renderPage(page, 'bg', fontDir, v), out: `tft/assets/${page.name}-${v.suffix}.png` });
   }
 }
-for (const [name, mode, out] of jobs) {
-  const page = PAGES.find((p) => name.startsWith(p.name))!;
-  await shoot(name, renderPage(page, mode, fontDir), join(root, out));
-  console.log(`${out}`);
+for (const job of jobs) {
+  await shoot(job.name, job.html, join(root, job.out));
+  console.log(job.out);
 }
 rmSync(tmp, { recursive: true, force: true });

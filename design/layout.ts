@@ -17,6 +17,7 @@ export const COLORS = {
   text: '#e9eef7',
   muted: '#9fb0cc',
   amber: '#f2b56b',
+  track: '#2a2c31', // progress bar background
 } as const;
 
 export type ColorName = keyof typeof COLORS;
@@ -49,12 +50,20 @@ export interface Component {
   crop: 'bg' | 'on'; // crop image: the page background, or the page's "on" variant
   touch?: string; // name of the touch script in tft/BUILD.md
   sample: string; // preview text
+  kind?: 'text' | 'progress'; // progress: Nextion Progress Bar (color = bar, bco = track)
+  bco?: ColorName;
 }
 
 export interface Hotspot { name: string; x: number; y: number; w: number; h: number; touch: string }
 
 export interface Card { x: number; y: number; w: number; h: number; r?: number; tint?: 'amber' }
-export interface RoundButton { x: number; y: number; d: number; icon: string; tint?: 'amber' }
+export interface RoundButton { x: number; y: number; d: number; icon: string; tint?: 'amber' } // icon '' = drawn by a component
+
+// Static text baked into the page art (only for strings that are the same in every language).
+export interface ArtLabel { x: number; y: number; w: number; h: number; text: string; px: number; color: ColorName }
+
+// Extra pictures used as crop sources to show/hide parts of the art at runtime.
+export interface Variant { suffix: 'on' | 'bare'; amberCards?: boolean; amberButtons?: string[]; hideButtons?: string[] }
 
 export interface Page {
   id: number;
@@ -63,7 +72,8 @@ export interface Page {
   buttons: RoundButton[];
   components: Component[];
   hotspots: Hotspot[];
-  hasOnVariant?: boolean; // export <page>-on.png with every card tinted amber (tile "on" crop source)
+  labels?: ArtLabel[];
+  variants?: Variant[]; // exported as <page>-<suffix>.png
 }
 
 const titleAndHome = (sample: string): { components: Component[]; buttons: RoundButton[]; hotspots: Hotspot[] } => ({
@@ -80,10 +90,13 @@ const home: Page = {
     { x: 20, y: 160, w: 214, h: 84 },
     { x: 246, y: 160, w: 214, h: 84 },
   ],
+  // Five nav buttons, 52 design px apart (50 px on the panel), centred on the visible area.
   buttons: [
-    { x: 168, y: 262, d: 44, icon: 'palette-outline' },
-    { x: 218, y: 262, d: 44, icon: 'thermostat' },
-    { x: 268, y: 262, d: 44, icon: 'calendar-month-outline' },
+    { x: 114, y: 262, d: 44, icon: 'palette-outline' },
+    { x: 166, y: 262, d: 44, icon: 'thermostat' },
+    { x: 218, y: 262, d: 44, icon: 'music' },
+    { x: 270, y: 262, d: 44, icon: 'timer-outline' },
+    { x: 322, y: 262, d: 44, icon: 'calendar-month-outline' },
   ],
   components: [
     { name: 'time', x: 18, y: 14, w: 236, h: 88, font: 'F_CLOCK', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: '13:42' },
@@ -99,14 +112,20 @@ const home: Page = {
     { name: 'nx1_t', x: 262, y: 194, w: 54, h: 24, font: 'F_BODY', color: 'amber', align: 'left', valign: 'center', crop: 'bg', sample: '18:00' },
     { name: 'nx1', x: 318, y: 194, w: 136, h: 24, font: 'F_BODY', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: 'Zwemles' },
     { name: 'nx2', x: 262, y: 220, w: 192, h: 20, font: 'F_SMALL', color: 'muted', align: 'left', valign: 'center', crop: 'bg', sample: 'morgen 08:30 Tandarts' },
+    // Running timer line (written by the firmware); tap opens the timer page.
+    { name: 'tmr', x: 24, y: 130, w: 230, h: 24, font: 'F_BODY', color: 'amber', align: 'left', valign: 'center', crop: 'bg', touch: 'NAV_TIMER', sample: 'Timer 04:32' },
+    // Empty text exactly over the media button: picc p_home / p_home_on shows it normal or amber (playing).
+    { name: 'nav_med', x: 218, y: 262, w: 44, h: 44, font: 'F_BODY', color: 'text', align: 'center', valign: 'center', crop: 'bg', touch: 'NAV_MEDIA', sample: '' },
   ],
   hotspots: [
     { name: 'go_climate', x: 20, y: 160, w: 214, h: 84, touch: 'NAV_CLIMATE' },
     { name: 'go_cal', x: 246, y: 160, w: 214, h: 84, touch: 'NAV_CALENDAR' },
-    { name: 'nav_moods', x: 162, y: 256, w: 56, h: 60, touch: 'NAV_MOODS' },
-    { name: 'nav_climate', x: 218, y: 256, w: 50, h: 60, touch: 'NAV_CLIMATE' },
-    { name: 'nav_cal', x: 268, y: 256, w: 56, h: 60, touch: 'NAV_CALENDAR' },
+    { name: 'nav_moods', x: 110, y: 256, w: 52, h: 60, touch: 'NAV_MOODS' },
+    { name: 'nav_climate', x: 162, y: 256, w: 52, h: 60, touch: 'NAV_CLIMATE' },
+    { name: 'nav_timer', x: 266, y: 256, w: 52, h: 60, touch: 'NAV_TIMER' },
+    { name: 'nav_cal', x: 318, y: 256, w: 52, h: 60, touch: 'NAV_CALENDAR' },
   ],
+  variants: [{ suffix: 'on', amberButtons: ['music'] }],
 };
 
 // ---- moods ----
@@ -134,7 +153,7 @@ const moods: Page = {
   buttons: moodsTop.buttons,
   components: [...moodsTop.components, ...tileComponents],
   hotspots: moodsTop.hotspots,
-  hasOnVariant: true,
+  variants: [{ suffix: 'on', amberCards: true }],
 };
 
 // ---- climate ----
@@ -219,6 +238,79 @@ const screensaver: Page = {
   hotspots: [{ name: 'wake', x: 0, y: 0, w: W, h: H, touch: 'WAKE' }],
 };
 
+// ---- media ----
+// Cover art: 96x96 on the panel, drawn by the firmware (not a component). Design width 100 fits to 96.
+const COVER_DESIGN = { x: 24, y: 62, w: 100, h: 96 };
+const mediaTop = titleAndHome('Media');
+const media: Page = {
+  id: 7,
+  name: 'media',
+  cards: [
+    { x: 270, y: 14, w: 140, h: 32, r: 16 }, // player pill
+  ],
+  buttons: [
+    ...mediaTop.buttons,
+    { x: 124, y: 190, d: 56, icon: 'skip-previous' },
+    { x: 192, y: 182, d: 72, icon: '', tint: 'amber' }, // play/pause glyph is the `pp` component
+    { x: 278, y: 190, d: 56, icon: 'skip-next' },
+    { x: 40, y: 266, d: 40, icon: 'minus' },
+    { x: 362, y: 266, d: 40, icon: 'plus' },
+  ],
+  components: [
+    ...mediaTop.components.map((c) => ({ ...c, w: 220 })),
+    { name: 'player', x: 276, y: 16, w: 128, h: 28, font: 'F_SMALL', color: 'text', align: 'center', valign: 'center', crop: 'bg', touch: 'MEDIA_PLAYER', sample: 'Keuken ▸' },
+    { name: 'cover_ic', ...COVER_DESIGN, font: 'F_HICON_L', color: 'muted', align: 'center', valign: 'center', crop: 'bg', sample: '♫' },
+    { name: 'src', x: 140, y: 64, w: 300, h: 18, font: 'F_SMALL', color: 'muted', align: 'left', valign: 'center', crop: 'bg', sample: 'SONOS · KEUKEN' },
+    { name: 'track', x: 140, y: 82, w: 300, h: 28, font: 'F_TITLE', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: 'Help!' },
+    { name: 'artist', x: 140, y: 110, w: 300, h: 24, font: 'F_BODY', color: 'muted', align: 'left', valign: 'center', crop: 'bg', sample: 'The Beatles' },
+    { name: 'prog', x: 140, y: 142, w: 300, h: 6, font: 'F_SMALL', color: 'amber', bco: 'track', kind: 'progress', align: 'left', valign: 'center', crop: 'bg', sample: '38' },
+    { name: 'pos', x: 140, y: 150, w: 100, h: 18, font: 'F_SMALL', color: 'muted', align: 'left', valign: 'center', crop: 'bg', sample: '0:53' },
+    { name: 'dur', x: 340, y: 150, w: 100, h: 18, font: 'F_SMALL', color: 'muted', align: 'right', valign: 'center', crop: 'bg', sample: '2:20' },
+    // Empty texts over previous/next: picc p_media / p_media_bare shows or hides the buttons.
+    { name: 'prev_b', x: 124, y: 190, w: 56, h: 56, font: 'F_BODY', color: 'text', align: 'center', valign: 'center', crop: 'bg', touch: 'MEDIA_PREV', sample: '' },
+    { name: 'pp', x: 192, y: 182, w: 72, h: 72, font: 'F_ICON_L', color: 'amber', align: 'center', valign: 'center', crop: 'bg', touch: 'MEDIA_TOGGLE', sample: '⏸' },
+    { name: 'next_b', x: 278, y: 190, w: 56, h: 56, font: 'F_BODY', color: 'text', align: 'center', valign: 'center', crop: 'bg', touch: 'MEDIA_NEXT', sample: '' },
+    { name: 'vol', x: 96, y: 284, w: 250, h: 4, font: 'F_SMALL', color: 'muted', bco: 'track', kind: 'progress', align: 'left', valign: 'center', crop: 'bg', sample: '55' },
+  ],
+  hotspots: [
+    ...mediaTop.hotspots,
+    { name: 'vol_dn', x: 30, y: 256, w: 60, h: 60, touch: 'MEDIA_VOL_DOWN' },
+    { name: 'vol_up', x: 352, y: 256, w: 60, h: 60, touch: 'MEDIA_VOL_UP' },
+  ],
+  variants: [{ suffix: 'bare', hideButtons: ['skip-previous', 'skip-next'] }],
+};
+
+// ---- timer ----
+const timerTop = titleAndHome('Timer');
+const pill = (x: number, y: number, w: number, h: number, tint?: 'amber'): Card => ({ x, y, w, h, r: h / 2, tint });
+const timer: Page = {
+  id: 8,
+  name: 'timer',
+  cards: [
+    pill(44, 192, 116, 44), pill(172, 192, 116, 44), pill(300, 192, 116, 44),
+    pill(44, 252, 182, 48, 'amber'), pill(234, 252, 182, 48),
+  ],
+  buttons: timerTop.buttons,
+  labels: [
+    { x: 44, y: 192, w: 116, h: 44, text: '+1 min', px: 17, color: 'text' },
+    { x: 172, y: 192, w: 116, h: 44, text: '+5 min', px: 17, color: 'text' },
+    { x: 300, y: 192, w: 116, h: 44, text: '+10 min', px: 17, color: 'text' },
+  ],
+  components: [
+    ...timerTop.components,
+    { name: 'remain', x: 18, y: 58, w: 444, h: 96, font: 'F_CLOCK', color: 'text', align: 'center', valign: 'center', crop: 'bg', sample: '04:32' },
+    { name: 'status', x: 18, y: 156, w: 444, h: 24, font: 'F_BODY', color: 'amber', align: 'center', valign: 'center', crop: 'bg', sample: 'loopt · klaar om 13:47' },
+    { name: 'act_lbl', x: 52, y: 258, w: 166, h: 36, font: 'F_BODY', color: 'amber', align: 'center', valign: 'center', crop: 'bg', touch: 'TIMER_ACT', sample: 'Pauze' },
+    { name: 'rst_lbl', x: 242, y: 258, w: 166, h: 36, font: 'F_BODY', color: 'text', align: 'center', valign: 'center', crop: 'bg', touch: 'TIMER_RESET', sample: 'Reset' },
+  ],
+  hotspots: [
+    ...timerTop.hotspots,
+    { name: 'add1', x: 44, y: 192, w: 116, h: 44, touch: 'TIMER_ADD_60' },
+    { name: 'add5', x: 172, y: 192, w: 116, h: 44, touch: 'TIMER_ADD_300' },
+    { name: 'add10', x: 300, y: 192, w: 116, h: 44, touch: 'TIMER_ADD_600' },
+  ],
+};
+
 // ---- boot (Blackymas boot page kept; only its background changes) ----
 const boot: Page = { id: 0, name: 'boot', cards: [], buttons: [], components: [], hotspots: [] };
 
@@ -234,20 +326,33 @@ const fitHotspot = (h: Hotspot): Hotspot => {
   return { ...h, x: left, w: Math.min(SAFE_RIGHT, fx(h.x + h.w)) - left };
 };
 const fitButton = (b: RoundButton): RoundButton => ({ ...b, x: Math.round(fx(b.x + b.d / 2) - b.d / 2) });
+// Components sitting exactly on a round button keep the button's size and follow its centre.
+const fitOnButton = (c: Component, buttons: RoundButton[]): Component | null => {
+  const b = buttons.find((x) => x.x === c.x && x.y === c.y && x.d === c.w && x.d === c.h);
+  return b ? { ...c, x: fitButton(b).x } : null;
+};
+const fitCover = (c: Component): Component | null => (c.name === 'cover_ic' ? { ...c, x: fx(c.x), w: 96 } : null);
 
 function fitSafeArea(p: Page): Page {
   return {
     ...p,
     cards: p.cards.map(fitBox),
     buttons: p.buttons.map(fitButton),
-    components: p.components.map(fitBox),
+    components: p.components.map((c) => fitCover(c) ?? fitOnButton(c, p.buttons) ?? fitBox(c)),
     hotspots: p.hotspots.map(fitHotspot),
+    labels: p.labels?.map(fitBox),
   };
 }
 
 // Pages before the safe-area fit: the layout the first Soft dark TFT was built with (used to list edits).
-export const DESIGN_PAGES: Page[] = [boot, home, moods, climate, calendar, notification, screensaver];
+export const DESIGN_PAGES: Page[] = [boot, home, moods, climate, calendar, notification, screensaver, media, timer];
 export const PAGES: Page[] = DESIGN_PAGES.map(fitSafeArea);
 
+// Where the firmware draws cover art (panel coordinates).
+export const COVER = { x: fx(COVER_DESIGN.x), y: COVER_DESIGN.y, w: 96, h: 96 };
+
 // Picture import order in the Editor (appended after any existing pictures; ids recorded in tft/ids.json).
-export const PICTURES = ['boot', 'home', 'moods', 'moods-on', 'climate', 'calendar', 'notification', 'screensaver'] as const;
+export const PICTURES = [
+  'boot', 'home', 'moods', 'moods-on', 'climate', 'calendar', 'notification', 'screensaver', // first Soft dark TFT (ids 48-55)
+  'home-on', 'media', 'media-bare', 'timer', // round 2, appended so existing ids stay
+] as const;
