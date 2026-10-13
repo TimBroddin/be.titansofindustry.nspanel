@@ -22,6 +22,7 @@
     section[data-tab].active { display: block; }
     .row { display: grid; gap: 8px; align-items: stretch; margin-bottom: 8px; }
     .row.chip { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr) 44px 44px; }
+    .row.player { grid-template-columns: minmax(0, 1fr) 44px 44px 44px; }
     .row.tile { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 44px minmax(0, 1fr); }
     .row > *, #thermostat { box-sizing: border-box; height: 44px; margin: 0 !important; min-width: 0; }
     .pick { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 10px; border: 0; border-radius: 10px; background: #f2f2f4; text-align: left; font: inherit; cursor: pointer; overflow: hidden; white-space: nowrap; }
@@ -72,6 +73,7 @@
     <nav class="tabs">
       <button data-tab="home" class="active" data-i18n="settings.tabHome"></button>
       <button data-tab="moods" data-i18n="settings.tabMoods"></button>
+      <button data-tab="media" data-i18n="settings.tabMedia"></button>
       <button data-tab="calendar" data-i18n="settings.tabCalendar"></button>
       <button data-tab="screen" data-i18n="settings.tabScreen"></button>
     </nav>
@@ -95,6 +97,15 @@
       <fieldset class="homey-form-fieldset">
         <legend class="homey-form-legend" data-i18n="settings.tiles"></legend>
         <div id="tiles"></div>
+      </fieldset>
+    </section>
+
+    <section data-tab="media">
+      <fieldset class="homey-form-fieldset">
+        <legend class="homey-form-legend" data-i18n="settings.players"></legend>
+        <p class="hint" data-i18n="settings.playersHint"></p>
+        <div id="players"></div>
+        <button class="homey-button-secondary-small" id="add-player" data-i18n="settings.addPlayer"></button>
       </fieldset>
     </section>
 
@@ -154,7 +165,7 @@
   </div>
 
   <script>
-    const CHIPS = 7, MOODS = 8;
+    const CHIPS = 7, MOODS = 8, PLAYERS = 8;
     let H, layout, mdi = {}, panelIcons = {}, glyphToName = {}, devices = {}, moods = [], flows = [], cfg = null;
 
     const $ = (id) => document.getElementById(id);
@@ -358,6 +369,38 @@
       }
     }
 
+    const isPlayer = (d) => d.capabilities.includes('speaker_playing');
+
+    function renderPlayers() {
+      const box = $('players');
+      box.innerHTML = '';
+      const list = cfg.media.players;
+      if (!list.length) box.innerHTML = `<p class="hint">${esc(tr('noPlayers'))}</p>`;
+      list.forEach((id, i) => {
+        const row = document.createElement('div');
+        row.className = 'row player';
+        row.innerHTML = `
+          <button class="pick" data-a="device">${deviceHtml(devices[id])}</button>
+          <button class="clear" data-a="up" title="${esc(tr('moveUp'))}" ${i ? '' : 'disabled'}>↑</button>
+          <button class="clear" data-a="down" title="${esc(tr('moveDown'))}" ${i < list.length - 1 ? '' : 'disabled'}>↓</button>
+          <button class="clear" data-a="clear">✕</button>`;
+        const move = (to) => { list.splice(to, 0, list.splice(i, 1)[0]); renderPlayers(); };
+        row.querySelector('[data-a=device]').onclick = () => pickDevice((d) => isPlayer(d) && (d.id === id || !list.includes(d.id)), (picked) => {
+          if (picked) list[i] = picked; else list.splice(i, 1);
+          renderPlayers();
+        });
+        row.querySelector('[data-a=up]').onclick = () => move(i - 1);
+        row.querySelector('[data-a=down]').onclick = () => move(i + 1);
+        row.querySelector('[data-a=clear]').onclick = () => { list.splice(i, 1); renderPlayers(); };
+        box.appendChild(row);
+      });
+      $('add-player').disabled = list.length >= PLAYERS;
+      $('add-player').onclick = () => pickDevice((d) => isPlayer(d) && !list.includes(d.id), (picked) => {
+        if (picked) list.push(picked);
+        renderPlayers();
+      });
+    }
+
     // ---------- preview ----------
     function renderPreview(page) {
       const el = $(`pv-${page}`);
@@ -392,6 +435,7 @@
       renderThermostat();
       renderChips();
       renderTiles();
+      renderPlayers();
       renderPreview('home');
       renderPreview('moods');
     }
@@ -434,6 +478,7 @@
         calendar: url ? { url, daysAhead: Number($('cal-days').value) } : null,
         screen: { screensaverMinutes: Number($('ss-min').value), screensaverBrightness: Number($('ss-dim').value) },
         buttons: { left: $('btn-left').value, right: $('btn-right').value },
+        media: { players: cfg.media.players },
       };
       try {
         cfg = await api('PUT', `/config/${encodeURIComponent($('panel').value)}`, body);

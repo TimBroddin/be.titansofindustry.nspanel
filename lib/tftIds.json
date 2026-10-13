@@ -1,7 +1,7 @@
 {
   "fonts": {
-    "small": null,
-    "body": null
+    "small": 17,
+    "body": 16
   },
   "pics": {
     "moods": 50,
@@ -9,6 +9,7 @@
     "home": 49,
     "home_on": 56,
     "media": 57,
-    "media_bare": 58
+    "media_bare": 58,
+    "timer": 59
   }
 }

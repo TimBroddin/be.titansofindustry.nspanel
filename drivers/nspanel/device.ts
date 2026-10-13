@@ -6,11 +6,16 @@ import {
   DashboardConfig, capKey, loadConfig, watchedCapabilities,
 } from '../../lib/config';
 import {
-  Lang, formatDate, t, toLang,
+  Lang, formatDate, t, timerLabels, toLang,
 } from '../../lib/i18n';
+import homeyIcons from '../../lib/homeyIcons.json';
+import { CoverLoader } from '../../lib/media/coverLoader';
+import { CoverSender } from '../../lib/media/coverSender';
+import { MediaSource, albumArt, deviceIconKey } from '../../lib/media/mediaSource';
 import { buildCalendarProps } from '../../lib/panel/calendarView';
 import { ThermostatInfo, buildClimateProps } from '../../lib/panel/climateView';
 import { buildHomeProps } from '../../lib/panel/homeView';
+import { MediaPictures, buildMediaProps } from '../../lib/panel/mediaView';
 import { buildMoodsProps } from '../../lib/panel/moodsView';
 import { PanelConnection } from '../../lib/panel/PanelConnection';
 import { PanelRenderer } from '../../lib/panel/PanelRenderer';
@@ -29,6 +34,10 @@ const CALENDAR_INTERVAL_MS = 15 * 60 * 1000;
 const RENDER_TICK_MS = 60 * 1000; // keeps date and "up next" current; unchanged values are not resent
 const MOMENTARY_MS = 1500;
 const CALENDAR_STALE_MS = 2 * CALENDAR_INTERVAL_MS;
+const MEDIA_TICK_MS = 1000; // position/progress on the media page while playing
+// Album art often changes a moment after the track: look once soon and once more a bit later.
+const COVER_CHECKS_MS = [1500, 6000];
+const COVER_REPAINT_MS = 150; // renderer batch (50 ms) + panel repaint of the placeholder icon
 
 const SENSOR_CAPABILITIES: Record<string, string> = {
   RSSI: 'nspanel_rssi',
@@ -39,6 +48,12 @@ const SENSOR_CAPABILITIES: Record<string, string> = {
 
 const tileKeys = (index: number): string[] => [`moods.i${pad2(index + 1)}.picc`, `moods.l${pad2(index + 1)}.picc`];
 const num = (v: unknown, fallback: number): number => (typeof v === 'number' && Number.isFinite(v) ? v : fallback);
+const ICONS = homeyIcons as Record<string, string>;
+const MEDIA_PICS: MediaPictures | null = [tftIds.pics.home, tftIds.pics.home_on, tftIds.pics.media, tftIds.pics.media_bare]
+  .every((v) => typeof v === 'number')
+  ? {
+    home: tftIds.pics.home, homeOn: tftIds.pics.home_on, media: tftIds.pics.media, mediaBare: tftIds.pics.media_bare,
+  } : null;
 
 class NSPanelDevice extends Homey.Device {
   private panel!: PanelConnection;
@@ -56,6 +71,12 @@ class NSPanelDevice extends Homey.Device {
   private momentary = new Set<number>();
   private notificationTimer: ReturnType<typeof setTimeout> | null = null;
   private intervals: Array<ReturnType<typeof setInterval>> = [];
+  private media: MediaSource | null = null;
+  private mediaPlayers = '';
+  private cover!: CoverLoader;
+  private coverShown = false;
+  private coverChecks: Array<ReturnType<typeof setTimeout>> = [];
+  private page = '';
 
   async onInit(): Promise<void> {
     for (const cap of ['nspanel_version_blueprint', 'nspanel_brightness']) {
@@ -78,10 +99,41 @@ class NSPanelDevice extends Homey.Device {
       this.api = await HomeyAPI.createAppAPI({ homey: this.homey });
       const provider: DeviceProvider = { getDevice: (id) => this.api.devices.getDevice({ id }) };
       this.capabilities = new CapabilitySource(provider, () => this.render(), (...a) => this.error(...a));
+      this.media = new MediaSource(
+        { getDevice: (id) => this.api.devices.getDevice({ id }) },
+        (driverId) => ICONS[deviceIconKey(driverId)] ?? '',
+        (trackChanged) => {
+          this.render();
+          if (trackChanged) this.scheduleCover();
+        },
+        Date.now,
+        (...a) => this.error(...a),
+      );
     } catch (err) {
       this.error('homey-api unavailable; device values will not be shown:', err);
     }
-    this.runner = new ActionRunner(() => this.config, this.homeyActions(), () => this.thermostatTarget(), (...a) => this.error(...a));
+    this.runner = new ActionRunner(
+      () => this.config,
+      this.homeyActions(),
+      () => this.thermostatTarget(),
+      (...a) => this.error(...a),
+      { active: () => this.media?.active() ?? null, nextPlayer: () => this.media?.nextPlayer() },
+    );
+    this.cover = new CoverLoader({
+      art: async (id) => albumArt((await this.api.devices.getDevice({ id })).images),
+      fetch: (url) => this.fetchHomeyImage(url),
+      sender: new CoverSender(
+        (action, args) => this.panel.call(action, args),
+        (ms) => this.sleep(ms),
+      ),
+      shown: async (on) => {
+        if (on === this.coverShown) return;
+        this.coverShown = on;
+        this.render();
+        await this.sleep(COVER_REPAINT_MS);
+      },
+      error: (...a) => this.error(...a),
+    });
 
     this.registerCapabilityListener('onoff', async (value: boolean) => {
       await this.panel.call('set_brightness', { brightness: value ? 100 : 0 });
@@ -92,6 +144,9 @@ class NSPanelDevice extends Homey.Device {
       this.homey.setInterval(() => this.refreshWeather().catch(this.error), WEATHER_INTERVAL_MS),
       this.homey.setInterval(() => this.refreshCalendar().catch(this.error), CALENDAR_INTERVAL_MS),
       this.homey.setInterval(() => this.render(), RENDER_TICK_MS),
+      this.homey.setInterval(() => {
+        if (this.page === 'media' && this.media?.active()?.playing) this.render();
+      }, MEDIA_TICK_MS),
     );
     this.refreshWeather().catch(this.error);
     this.refreshCalendar().catch(this.error);
@@ -169,6 +224,7 @@ class NSPanelDevice extends Homey.Device {
 
   private async onPanelReady(): Promise<void> {
     this.renderer.reset(); // panel may have rebooted: its cache is empty
+    this.cover.reset(); // and so is its cover cache
     await runReadySequence({
       repaint: () => this.render(),
       steps: [
@@ -179,6 +235,8 @@ class NSPanelDevice extends Homey.Device {
         async () => {
           await this.capabilities?.watch(watchedCapabilities(this.config));
         },
+        () => this.pushTimerLabels(),
+        () => this.watchMedia(true),
       ],
       onError: (err) => this.error('Panel ready step failed:', err),
     });
@@ -191,6 +249,45 @@ class NSPanelDevice extends Homey.Device {
     await this.panel.call('set_button_mode', { button: 'right', relay: this.config.buttons.right === 'relay' });
     await this.panel.call('send_command', { cmd: `ss_min=${this.config.screen.screensaverMinutes}` });
     await this.panel.call('send_command', { cmd: `ss_dim=${this.config.screen.screensaverBrightness}` });
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      this.homey.setTimeout(resolve, ms);
+    });
+  }
+
+  private async pushTimerLabels(): Promise<void> {
+    await this.panel.call('timer_labels', { labels: timerLabels(this.lang()) });
+  }
+
+  private async watchMedia(force = false): Promise<void> {
+    const players = this.config.media.players.join(',');
+    if (!force && players === this.mediaPlayers) return;
+    this.mediaPlayers = players;
+    await this.media?.setPlayers(this.config.media.players);
+    this.scheduleCover();
+  }
+
+  private scheduleCover(): void {
+    this.coverChecks.forEach((c) => this.homey.clearTimeout(c));
+    this.coverChecks = COVER_CHECKS_MS.map((ms) => this.homey.setTimeout(() => {
+      if (!this.panel?.connected) return;
+      this.cover.refresh(this.media?.active()?.deviceId ?? null).catch(this.error);
+    }, ms));
+  }
+
+  // Images of other apps' devices (album art) through the local Web API, with the owner token.
+  private async fetchHomeyImage(path: string): Promise<Uint8Array> {
+    const base = await this.homey.api.getLocalUrl();
+    const token = await this.homey.api.getOwnerApiToken();
+    const res = await fetch(`${base}${path}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`Image ${path}: HTTP ${res.status}`);
+    return new Uint8Array(await res.arrayBuffer());
+  }
+
+  async startTimer(minutes: number): Promise<void> {
+    await this.panel.call('timer_set', { seconds: Math.round(minutes * 60), start: true });
   }
 
   private async loadThermostat(): Promise<void> {
@@ -266,6 +363,14 @@ class NSPanelDevice extends Homey.Device {
         fonts,
         stale: Boolean(this.config.calendar) && Date.now() - this.calendarOkAt > CALENDAR_STALE_MS,
       }),
+      ...buildMediaProps({
+        lang,
+        now: now.getTime(),
+        player: this.media?.active() ?? null,
+        anyPlaying: this.media?.anyPlaying() ?? false,
+        coverShown: this.coverShown,
+        pics: MEDIA_PICS,
+      }),
       'screensaver.date.txt': formatDate(now, s.dateFormat || 'ddd DD MMM', lang, timeZone),
       'notification.close_lbl.txt': t(lang, 'close'),
     });
@@ -302,6 +407,7 @@ class NSPanelDevice extends Homey.Device {
   }
 
   private onSensor(name: string, value: unknown): void {
+    if (name === 'Current page' && typeof value === 'string') this.page = value;
     if (name === 'Temperature' && typeof value === 'number') {
       this.panelTemperature = value;
       this.setCapabilityValue('measure_temperature', value).catch(this.error);
@@ -339,6 +445,11 @@ class NSPanelDevice extends Homey.Device {
       this.renderer.forget(['climate.tgt.val', 'climate.tgt_txt.txt']);
       this.render();
     }
+    if (result.mediaChanged) {
+      this.render();
+      this.scheduleCover();
+    }
+    if (result.timerFinished) await this.homey.flow.getDeviceTriggerCard('timer_finished').trigger(this, {}, {});
     if (result.error) await this.showNotification(t(this.lang(), 'actionFailed'), result.error, 5);
   }
 
@@ -349,6 +460,7 @@ class NSPanelDevice extends Homey.Device {
     await this.pushPanelSettings();
     await this.loadThermostat().catch(this.error);
     await this.capabilities?.watch(watchedCapabilities(this.config));
+    await this.watchMedia();
     this.render();
   }
 
@@ -388,6 +500,7 @@ class NSPanelDevice extends Homey.Device {
       return;
     }
     if (changedKeys.includes('timeFormat')) this.homey.setTimeout(() => this.pushPanelSettings().catch(this.error), 0);
+    if (changedKeys.includes('language')) this.homey.setTimeout(() => this.pushTimerLabels().catch(this.error), 0);
     if (changedKeys.includes('weatherEnabled')) this.homey.setTimeout(() => this.refreshWeather().catch(this.error), 0);
     this.homey.setTimeout(() => this.render(), 0);
   }
@@ -404,7 +517,9 @@ class NSPanelDevice extends Homey.Device {
     this.intervals.forEach((i) => this.homey.clearInterval(i));
     this.intervals = [];
     if (this.notificationTimer) this.homey.clearTimeout(this.notificationTimer);
+    this.coverChecks.forEach((c) => this.homey.clearTimeout(c));
     this.capabilities?.destroy();
+    this.media?.destroy();
     this.panel?.stop();
   }
 }

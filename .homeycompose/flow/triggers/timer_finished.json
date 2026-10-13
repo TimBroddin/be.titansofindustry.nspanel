@@ -1,0 +1,18 @@
+{
+  "id": "timer_finished",
+  "title": {
+    "en": "Kitchen timer finished",
+    "nl": "Keukentimer afgelopen"
+  },
+  "hint": {
+    "en": "Fires when the timer on the panel runs out.",
+    "nl": "Wordt uitgevoerd wanneer de timer op het paneel afloopt."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    }
+  ]
+}

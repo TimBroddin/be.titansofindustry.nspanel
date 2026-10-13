@@ -1,0 +1,37 @@
+{
+  "id": "start_timer",
+  "title": {
+    "en": "Start kitchen timer",
+    "nl": "Start keukentimer"
+  },
+  "titleFormatted": {
+    "en": "Start the timer for [[minutes]] minutes",
+    "nl": "Start de timer voor [[minutes]] minuten"
+  },
+  "hint": {
+    "en": "Starts (or restarts) the timer on the panel. It runs on the panel itself, also when Homey is offline.",
+    "nl": "Start (of herstart) de timer op het paneel. Die loopt op het paneel zelf, ook als Homey offline is."
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=nspanel"
+    },
+    {
+      "type": "number",
+      "name": "minutes",
+      "title": {
+        "en": "Minutes",
+        "nl": "Minuten"
+      },
+      "min": 0.5,
+      "max": 999,
+      "step": 0.5,
+      "placeholder": {
+        "en": "10",
+        "nl": "10"
+      }
+    }
+  ]
+}

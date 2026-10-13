@@ -51,6 +51,13 @@
     "loadFlowsFailed": "Kon flows niet laden",
     "keptMissing": "Bestaande tegels blijven bewaard als \"(missing)\".",
     "previewInside": "BINNEN",
-    "previewNext": "STRAKS"
+    "previewNext": "STRAKS",
+    "tabMedia": "Media",
+    "players": "Mediaspelers",
+    "playersHint": "Het paneel toont de speler die speelt; spelen er meerdere, dan de eerste in deze lijst. Met \"Speler »\" op het paneel wissel je zelf.",
+    "addPlayer": "Speler toevoegen",
+    "noPlayers": "Nog geen spelers. Elk apparaat dat media afspeelt (Sonos, Apple TV, …) werkt.",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag"
   }
 }

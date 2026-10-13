@@ -24,6 +24,7 @@ interface NSPanelDevice extends Homey.Device {
   playSound(melody: string): Promise<void>;
   gotoPage(page: string): Promise<void>;
   refreshCalendar(): Promise<void>;
+  startTimer(minutes: number): Promise<void>;
 }
 
 class NSPanelDriver extends Homey.Driver {
@@ -46,6 +47,7 @@ class NSPanelDriver extends Homey.Driver {
     action('play_sound', (d, a) => d.playSound(a.melody));
     action('goto_page', (d, a) => d.gotoPage(a.page));
     action('refresh_calendar', (d) => d.refreshCalendar());
+    action('start_timer', (d, a) => d.startTimer(Number(a.minutes)));
   }
 
   async onPairListDevices(): Promise<PairDevice[]> {

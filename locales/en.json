@@ -51,6 +51,13 @@
     "loadFlowsFailed": "Could not load flows",
     "keptMissing": "Existing tiles are kept as \"(missing)\".",
     "previewInside": "INSIDE",
-    "previewNext": "UP NEXT"
+    "previewNext": "UP NEXT",
+    "tabMedia": "Media",
+    "players": "Media players",
+    "playersHint": "The panel shows the player that is playing; if several play, the first in this list. \"Player »\" on the panel switches manually.",
+    "addPlayer": "Add player",
+    "noPlayers": "No players yet. Any device that can play media (Sonos, Apple TV, …) works.",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   }
 }
