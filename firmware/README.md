@@ -1,6 +1,6 @@
 # NSPanel firmware (Homey)
 
-Thin ESPHome firmware for the Sonoff NSPanel EU. Drives the Blackymas `nspanel_eu.tft` (tag v2026041).
+Thin ESPHome firmware for the Sonoff NSPanel EU. Drives the Soft dark TFT in `tft/nextion/` (the Blackymas `nspanel_eu.tft`, tag v2026041, works too).
 
 ## Build
     cp secrets.example.yaml secrets.yaml   # then fill in
@@ -12,11 +12,9 @@ Thin ESPHome firmware for the Sonoff NSPanel EU. Drives the Blackymas `nspanel_e
 `ota_password` must match the firmware currently on the panel.
 
 ## TFT upload
-Serve the file over HTTP from this Mac, then call the `upload_tft` action from Homey
-(device → Maintenance flow card) or from `esphome` logs:
+Disable the Homey app first (and wait 60 s after an OTA), then from the repo root:
 
-    cd ~/nspanel-tft && python3 -m http.server 8000
-    # url: http://<mac-ip>:8000/nspanel_eu.tft
+    bun scripts/upload-tft.ts --panel <panel-ip>   # serves tft/nextion/nspanel_soft_dark.tft with Range support
 
 ## Rollback to Blackymas
 Rebuild the Blackymas firmware from their repo using your old YAML, then

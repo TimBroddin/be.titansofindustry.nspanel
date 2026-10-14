@@ -10,7 +10,7 @@ Conventions:
 ## 0. Prepare (once)
 
 1. Install the 4 Inter fonts into the CrossOver bottle. Copy `tft/fonts/Inter-*.ttf` into the bottle's `C:\windows\Fonts` (CrossOver → bottle → *Open C: Drive* → `windows/Fonts`), then restart Nextion Editor.
-2. Open `~/nspanel-tft/nspanel_eu.HMI` and **Save As** `~/nspanel-tft/nspanel_soft_dark.HMI`. Work only in the copy.
+2. Open the Blackymas `nspanel_eu.HMI` (from [their repo](https://github.com/Blackymas/NSPanel_HA_Blueprint), tag v2026041) and **Save As** `tft/nextion/nspanel_soft_dark.HMI`. Work only in the copy. (The finished project is already in `tft/nextion/`; this guide is how it was built.)
 
 ## 1. Remove Blackymas pages
 
@@ -191,7 +191,7 @@ page home
 ## 6. Compile and export
 
 1. **Compile.** Expect 0 errors.
-2. **File → TFT file output** → `~/nspanel-tft/nspanel_soft_dark.tft`.
+2. **File → TFT file output** → `tft/nextion/nspanel_soft_dark.tft`.
 3. Tell Claude. Uploading uses the Range server, 115200 baud, with the Homey app disabled during the upload.
 4. Report the font ids for `inter_body17`, `inter_small13` and the two MDI fonts, plus the picture ids for `moods` and `moods-on`.
 
