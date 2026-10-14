@@ -186,8 +186,8 @@ const climate: Page = {
 // ---- calendar ----
 export const CAL_ROWS = 8;
 const CAL_SAMPLES: Array<[string, string, ColorName?]> = [
-  ['VANDAAG', ''], ['18:00', 'Zwemles'], ['20:30', 'Oudercontact'], ['MORGEN', ''],
-  ['08:30', 'Tandarts'], ['hele dag', 'Oma jarig', 'muted'], ['DO 15 OKT', ''], ['19:00', 'Etentje bij Jan en Lies'],
+  ['', 'VANDAAG'], ['18:00', 'Zwemles'], ['20:30', 'Oudercontact'], ['', 'MORGEN'],
+  ['08:30', 'Tandarts'], ['hele dag', 'Oma jarig', 'muted'], ['', 'DO 15 OKT'], ['19:00', 'Etentje bij Jan en Lies'],
 ];
 const calTop = titleAndHome('Agenda');
 const calRows: Component[] = [];
@@ -195,11 +195,11 @@ for (let i = 0; i < CAL_ROWS; i++) {
   const n = String(i + 1).padStart(2, '0');
   const y = 56 + i * 32;
   const [t, e] = CAL_SAMPLES[i];
-  const header = e === '' ;
+  const header = t === ''; // day headers sit in the title column, small and muted (calendarView)
   calRows.push(
-    // One font for every row: the app switches only the colour (header rows muted); runtime font switching needs Editor font ids.
-    { name: `t${n}`, x: 20, y, w: 74, h: 30, font: 'F_BODY', color: header ? 'muted' : (CAL_SAMPLES[i][2] ?? 'amber'), align: 'left', valign: 'center', crop: 'bg', sample: t },
-    { name: `e${n}`, x: 96, y, w: 364, h: 30, font: 'F_BODY', color: 'text', align: 'left', valign: 'center', crop: 'bg', sample: e },
+    // Editor fonts are F_BODY; the app switches header rows to F_SMALL and muted at runtime (lib/tftIds.json font ids).
+    { name: `t${n}`, x: 20, y, w: 74, h: 30, font: 'F_BODY', color: CAL_SAMPLES[i][2] ?? 'amber', align: 'left', valign: 'center', crop: 'bg', sample: t },
+    { name: `e${n}`, x: 96, y, w: 364, h: 30, font: 'F_BODY', color: header ? 'muted' : 'text', align: 'left', valign: 'center', crop: 'bg', sample: e },
   );
 }
 const calendar: Page = {

@@ -72,26 +72,27 @@ describe('buildCalendarProps', () => {
       ev('2026-10-12T16:00:00Z', 'Zwemles'), ev('2026-10-12T18:30:00Z', 'Oudercontact'),
       ev('2026-10-13T06:30:00Z', 'Tandarts'), ev('2026-10-13T22:00:00Z', 'Oma jarig', true),
     ], { now: NOW, lang: 'nl', timeZone: TZ, h24: true, fonts: FONTS });
-    const row = (n: string) => [p[`calendar.t${n}.txt`], p[`calendar.e${n}.txt`], p[`calendar.t${n}.pco`], p[`calendar.t${n}.font`]];
+    const row = (n: string) => [p[`calendar.t${n}.txt`], p[`calendar.e${n}.txt`], p[`calendar.t${n}.pco`], p[`calendar.e${n}.pco`], p[`calendar.e${n}.font`]];
     expect(p['calendar.title.txt']).toBe('Agenda');
-    expect(row('01')).toEqual(['VANDAAG', '', '40345', '9']);
-    expect(row('02')).toEqual(['18:00', 'Zwemles', '62893', '8']);
-    expect(row('03')).toEqual(['20:30', 'Oudercontact', '62893', '8']);
-    expect(row('04')).toEqual(['MORGEN', '', '40345', '9']);
-    expect(row('05')).toEqual(['08:30', 'Tandarts', '62893', '8']);
-    expect(row('06')).toEqual(['WO 14 OKT', '', '40345', '9']);
-    expect(row('07')).toEqual(['hele dag', 'Oma jarig', '40345', '8']);
-    expect(row('08')).toEqual(['', '', '40345', '8']);
+    // Day headers use the wide title column (the time column is too narrow for "TOMORROW", "THU 15 OCT").
+    expect(row('01')).toEqual(['', 'VANDAAG', '40345', '40345', '9']);
+    expect(row('02')).toEqual(['18:00', 'Zwemles', '62893', '61310', '8']);
+    expect(row('03')).toEqual(['20:30', 'Oudercontact', '62893', '61310', '8']);
+    expect(row('04')).toEqual(['', 'MORGEN', '40345', '40345', '9']);
+    expect(row('05')).toEqual(['08:30', 'Tandarts', '62893', '61310', '8']);
+    expect(row('06')).toEqual(['', 'WO 14 OKT', '40345', '40345', '9']);
+    expect(row('07')).toEqual(['hele dag', 'Oma jarig', '40345', '61310', '8']);
+    expect(row('08')).toEqual(['', '', '40345', '61310', '8']);
   });
 
   test('never ends on a lone header, truncates long titles, and shows ongoing multi-day events today', () => {
     const many = Array.from({ length: 6 }, (_, i) => ev(`2026-10-12T1${i}:00:00Z`, i === 0 ? 'Een heel lange titel die echt niet past op de regel' : `E${i}`));
     const p = buildCalendarProps([ev('2026-10-09T22:00:00Z', 'Herfstvakantie', true), ...many, ev('2026-10-13T08:00:00Z', 'Morgen')],
       { now: NOW, lang: 'nl', timeZone: TZ, h24: true, fonts: FONTS });
-    expect(p['calendar.t01.txt']).toBe('VANDAAG');
+    expect(p['calendar.e01.txt']).toBe('VANDAAG');
     expect(p['calendar.e02.txt']).toBe('Herfstvakantie');
     expect(p['calendar.e03.txt']).toBe('Een heel lange titel die ec…');
-    expect(p['calendar.t08.txt']).not.toBe('MORGEN');
+    expect(p['calendar.e08.txt']).not.toBe('MORGEN');
   });
 
   test('stale data marks the title', () => {

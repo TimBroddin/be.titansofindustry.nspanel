@@ -6,7 +6,7 @@ It started from [Blackymas' NSPanel HA Blueprint](https://github.com/Blackymas/N
 
 ![All pages: home, moods, thermostat, calendar, media, kitchen timer, notification, screensaver](docs/screenshots.png)
 
-<sub>Renders of the display design with sample data (panel language: Dutch). Regenerate with `bun design/export.ts && bun design/screenshots.ts`.</sub>
+<sub>Renders of the display design with sample data, in English ([Dutch version](docs/screenshots-nl.png)). Regenerate with `bun design/export.ts && bun design/screenshots.ts [en|nl]`.</sub>
 
 **Pages**
 - **Home:** clock, date, weather, the inside temperature and up to 7 device chips (any Homey capability), plus the next calendar item.
@@ -101,6 +101,10 @@ If an upload fails, reboot the ESP before retrying (flash the same firmware agai
    - **Screen:** screensaver and button modes.
 
    The device settings hold the panel language, the date and time format, and weather.
+
+### More than one panel
+
+Every panel is its own Homey device with its own dashboard. Pick the panel at the top of the settings page; chips, moods, media players, calendar, screen and buttons are saved per panel, and so are language and time format (device settings). For the firmware, give every panel its own `name` in `firmware/nspanel.yaml` (the secrets can be shared) and flash each one.
 
 Flow cards: show or clear a notification, go to a page, play a sound, wake the screen, refresh the calendar, start the kitchen timer; triggers for the physical buttons, mood tiles and "kitchen timer finished".
 

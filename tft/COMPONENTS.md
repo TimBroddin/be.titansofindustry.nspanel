@@ -132,20 +132,20 @@ Page: `sta` = image, `pic` = `p_calendar`.
 | Name | Type | x | y | w | h | font | pco | bco | xcen | ycen | isbr | crop (picc) | touch | sample |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | title | Text | 16 | 12 | 288 | 32 | F_TITLE | 61310 | | 0 | 1 | 0 | p_calendar |  | Agenda |
-| t01 | Text | 16 | 56 | 71 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | VANDAAG |
-| e01 | Text | 89 | 56 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  |  |
+| t01 | Text | 16 | 56 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  |  |
+| e01 | Text | 89 | 56 | 350 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | VANDAAG |
 | t02 | Text | 16 | 88 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  | 18:00 |
 | e02 | Text | 89 | 88 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  | Zwemles |
 | t03 | Text | 16 | 120 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  | 20:30 |
 | e03 | Text | 89 | 120 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  | Oudercontact |
-| t04 | Text | 16 | 152 | 71 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | MORGEN |
-| e04 | Text | 89 | 152 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  |  |
+| t04 | Text | 16 | 152 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  |  |
+| e04 | Text | 89 | 152 | 350 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | MORGEN |
 | t05 | Text | 16 | 184 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  | 08:30 |
 | e05 | Text | 89 | 184 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  | Tandarts |
 | t06 | Text | 16 | 216 | 71 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | hele dag |
 | e06 | Text | 89 | 216 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  | Oma jarig |
-| t07 | Text | 16 | 248 | 71 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | DO 15 OKT |
-| e07 | Text | 89 | 248 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  |  |
+| t07 | Text | 16 | 248 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  |  |
+| e07 | Text | 89 | 248 | 350 | 30 | F_BODY | 40345 | | 0 | 1 | 0 | p_calendar |  | DO 15 OKT |
 | t08 | Text | 16 | 280 | 71 | 30 | F_BODY | 62893 | | 0 | 1 | 0 | p_calendar |  | 19:00 |
 | e08 | Text | 89 | 280 | 350 | 30 | F_BODY | 61310 | | 0 | 1 | 0 | p_calendar |  | Etentje bij Jan en Lies |
 

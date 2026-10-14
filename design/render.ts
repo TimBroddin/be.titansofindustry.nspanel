@@ -51,7 +51,9 @@ const glyph = (name: string): string => {
 const esc = (s: string): string => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
 
 // variant: render one of the page's crop-source pictures (amber cards/buttons, or buttons left out).
-export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Variant): string {
+// samples: preview text overrides per "page.component" (e.g. English, see previewSamples.ts).
+export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Variant, samples: Record<string, string> = {}): string {
+  const sampleOf = (name: string): string => samples[`${page.name}.${name}`] ?? page.components.find((c) => c.name === name)?.sample ?? '';
   const cards = page.cards.map((c) => {
     const tint = c.tint === 'amber' || variant?.amberCards;
     return `<div class="card${tint ? ' amber' : ''}" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;border-radius:${c.r ?? 18}px"></div>`;
@@ -68,10 +70,12 @@ export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Va
       const pct = Number(c.sample) || 0;
       return `<div style="position:absolute;left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${COLORS[c.bco ?? 'track']};border-radius:${c.h / 2}px"><div style="width:${pct}%;height:100%;background:${COLORS[c.color]};border-radius:${c.h / 2}px"></div></div>`;
     }
-    const f = FONT_SPECS[c.font];
+    // Calendar day headers (title column, no time) switch to the small font at runtime (calendarView).
+    const header = page.name === 'calendar' && /^e\d+$/.test(c.name) && sampleOf(`t${c.name.slice(1)}`) === '' && sampleOf(c.name) !== '';
+    const f = FONT_SPECS[header ? 'F_SMALL' : c.font];
     const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[c.align];
     const align = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[c.valign ?? 'center'];
-    return `<div class="txt" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;color:${COLORS[c.color]};font-size:${f.px}px;${FONT_CSS[f.family]}justify-content:${justify};align-items:${align};white-space:${c.wrap ? 'normal' : 'nowrap'}">${esc(previewSample(c.sample))}</div>`;
+    return `<div class="txt" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;color:${COLORS[c.color]};font-size:${f.px}px;${FONT_CSS[f.family]}justify-content:${justify};align-items:${align};white-space:${c.wrap ? 'normal' : 'nowrap'}">${esc(previewSample(sampleOf(c.name)))}</div>`;
   }).join('');
 
   return `<!doctype html><html><head><meta charset="utf-8"><style>

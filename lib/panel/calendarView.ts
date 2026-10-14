@@ -29,8 +29,9 @@ export function buildCalendarProps(events: CalEvent[], o: CalendarViewOptions): 
     if (key !== lastKey) {
       if (rows.length + 2 > CAL_ROWS) break; // a header needs at least one event under it
       const label = dayLabel(e.start < o.now ? o.now : e.start, o.now, o.lang, o.timeZone);
+      // In the wide title column: the time column (74 px) is too narrow for "TOMORROW" or "THU 15 OCT".
       rows.push({
-        time: label.toUpperCase(), title: '', pco: PCO.muted, header: true,
+        time: '', title: label.toUpperCase(), pco: PCO.muted, header: true,
       });
       lastKey = key;
     }
@@ -58,7 +59,8 @@ export function buildCalendarProps(events: CalEvent[], o: CalendarViewOptions): 
     p[`calendar.t${n}.txt`] = row.time;
     p[`calendar.e${n}.txt`] = row.title;
     p[`calendar.t${n}.pco`] = row.pco;
-    if (o.fonts) p[`calendar.t${n}.font`] = String(row.header ? o.fonts.small : o.fonts.body);
+    p[`calendar.e${n}.pco`] = row.header ? PCO.muted : PCO.text;
+    if (o.fonts) p[`calendar.e${n}.font`] = String(row.header ? o.fonts.small : o.fonts.body);
   }
   return p;
 }

@@ -1,10 +1,12 @@
-// Usage: bun design/screenshots.ts (after bun design/export.ts)
-// Puts the page previews (design/preview/*.png) on one overview image: docs/screenshots.png. Needs Google Chrome.
+// Usage: bun design/screenshots.ts [en|nl] (after bun design/export.ts)
+// Puts the page previews on one overview image: docs/screenshots.png (English) or docs/screenshots-nl.png. Needs Google Chrome.
 import { mkdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const root = resolve(import.meta.dir, '..');
+const lang = process.argv[2] === 'nl' ? 'nl' : 'en';
+const previewDir = lang === 'nl' ? 'design/preview' : 'design/preview-en';
 const PAGES: Array<[string, string]> = [
   ['home', 'Home'], ['moods', 'Moods'], ['climate', 'Thermostat'], ['calendar', 'Calendar'],
   ['media', 'Media'], ['timer', 'Kitchen timer'], ['notification', 'Notification'], ['screensaver', 'Screensaver'],
@@ -17,7 +19,7 @@ const LABEL = 28;
 const width = COLS * W + (COLS + 1) * GAP;
 const height = Math.ceil(PAGES.length / COLS) * (H + LABEL + GAP) + GAP;
 
-const tiles = PAGES.map(([file, title]) => `<figure><img src="file://${join(root, 'design/preview', `${file}.png`)}"><figcaption>${title}</figcaption></figure>`).join('');
+const tiles = PAGES.map(([file, title]) => `<figure><img src="file://${join(root, previewDir, `${file}.png`)}"><figcaption>${title}</figcaption></figure>`).join('');
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>
   html, body { margin: 0; background: #e9e9ec; }
   .grid { display: grid; grid-template-columns: repeat(${COLS}, ${W}px); gap: ${GAP}px; padding: ${GAP}px; }
@@ -31,10 +33,10 @@ mkdirSync(tmp, { recursive: true });
 mkdirSync(join(root, 'docs'), { recursive: true });
 const file = join(tmp, 'sheet.html');
 await Bun.write(file, html);
-const out = join(root, 'docs/screenshots.png');
+const out = join(root, lang === 'nl' ? 'docs/screenshots-nl.png' : 'docs/screenshots.png');
 const proc = Bun.spawn([CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
   '--allow-file-access-from-files', `--window-size=${width},${height}`, '--virtual-time-budget=2000', `--screenshot=${out}`, `file://${file}`],
 { stdout: 'ignore', stderr: 'ignore' });
 if ((await proc.exited) !== 0) throw new Error('Chrome failed');
 rmSync(tmp, { recursive: true, force: true });
-console.log('wrote docs/screenshots.png');
+console.log(`wrote ${out.slice(root.length + 1)}`);
