@@ -4,6 +4,10 @@ A Homey dashboard for the **Sonoff NSPanel (EU)**: a dark, image-based display d
 
 It started from [Blackymas' NSPanel HA Blueprint](https://github.com/Blackymas/NSPanel_HA_Blueprint) (built for Home Assistant) and replaces its Home Assistant side with a Homey app.
 
+![All pages: home, moods, thermostat, calendar, media, kitchen timer, notification, screensaver](docs/screenshots.png)
+
+<sub>Renders of the display design with sample data (panel language: Dutch). Regenerate with `bun design/export.ts && bun design/screenshots.ts`.</sub>
+
 **Pages**
 - **Home:** clock, date, weather, the inside temperature and up to 7 device chips (any Homey capability), plus the next calendar item.
 - **Moods:** 8 tiles. Each one starts a Homey mood or flow, toggles a device, or just fires a flow trigger.

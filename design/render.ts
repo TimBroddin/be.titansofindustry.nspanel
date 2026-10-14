@@ -1,6 +1,7 @@
 import {
   COLORS, FONT_SPECS, H, Page, Variant, W,
 } from './layout';
+import homeyIcons from '../lib/homeyIcons.json';
 import mdi from './mdi-codepoints.json';
 
 export type Mode = 'bg' | 'preview';
@@ -10,9 +11,35 @@ const FONT_CSS: Record<string, string> = {
   'Inter Light': "font-family: 'InterL'; font-weight: 300;",
   'Inter Regular': "font-family: 'InterR'; font-weight: 400;",
   'Inter Medium': "font-family: 'InterM'; font-weight: 500;",
-  'MDI (Blackymas)': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
-  'NSPanel Homey Glyphs': "font-family: -apple-system, 'Apple Color Emoji'; font-weight: 400;",
+  'MDI (Blackymas)': "font-family: 'MDI'; font-weight: 400;",
+  'NSPanel Homey Glyphs': "font-family: 'HomeyGlyphs'; font-weight: 400;",
 };
+
+// Previews draw icon samples with the panel's real icon fonts: layout samples are emoji (readable in the
+// layout source), mapped here to a Homey icon key or an MDI icon name.
+const PREVIEW_ICONS: Record<string, { homey?: string; mdi?: string }> = {
+  '🎬': { homey: 'device-icons/com.basmilius.apple/apple-tv' },
+  '🍽': { homey: 'homey-vectors/cloud.shelly/light_bulb' },
+  '🌴': { homey: 'device-icons/com.sonos/cloud' },
+  '🎨': { homey: 'device-icons/nl.philips.hue/bulb' },
+  '💡': { homey: 'homey-vectors/cloud.shelly/light_bulb' },
+  '🌙': { homey: 'homey-vectors/com.xiaomi-miio/light_bedsidelight' },
+  '🚪': { homey: 'homey-vectors/com.abus/sensor_door' },
+  '⏻': { homey: 'homey-vectors/media/power' },
+  '♫': { homey: 'device-icons/com.sonos/cloud' },
+  '☁': { mdi: 'weather-cloudy' },
+  '⏸': { mdi: 'pause' },
+};
+
+const previewSample = (sample: string): string => [...sample].map((ch) => {
+  const icon = PREVIEW_ICONS[ch];
+  if (icon?.homey) {
+    const g = (homeyIcons as Record<string, string>)[icon.homey];
+    if (!g) throw new Error(`Unknown Homey icon ${icon.homey}`);
+    return g;
+  }
+  return icon?.mdi ? String.fromCodePoint(parseInt((mdi as Record<string, string>)[icon.mdi], 16)) : ch;
+}).join('');
 
 const glyph = (name: string): string => {
   if (!name) return '';
@@ -44,7 +71,7 @@ export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Va
     const f = FONT_SPECS[c.font];
     const justify = { left: 'flex-start', center: 'center', right: 'flex-end' }[c.align];
     const align = { top: 'flex-start', center: 'center', bottom: 'flex-end' }[c.valign ?? 'center'];
-    return `<div class="txt" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;color:${COLORS[c.color]};font-size:${f.px}px;${FONT_CSS[f.family]}justify-content:${justify};align-items:${align};white-space:${c.wrap ? 'normal' : 'nowrap'}">${esc(c.sample)}</div>`;
+    return `<div class="txt" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;color:${COLORS[c.color]};font-size:${f.px}px;${FONT_CSS[f.family]}justify-content:${justify};align-items:${align};white-space:${c.wrap ? 'normal' : 'nowrap'}">${esc(previewSample(c.sample))}</div>`;
   }).join('');
 
   return `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -53,6 +80,7 @@ export function renderPage(page: Page, mode: Mode, fontDir: string, variant?: Va
     @font-face { font-family: 'InterR'; src: url('${fontDir}/Inter-Regular.ttf'); }
     @font-face { font-family: 'InterM'; src: url('${fontDir}/Inter-Medium.ttf'); }
     @font-face { font-family: 'MDI'; src: url('${fontDir}/materialdesignicons-webfont.ttf'); }
+    @font-face { font-family: 'HomeyGlyphs'; src: url('${fontDir}/../../tft/fonts/NSPanelHomeyGlyphs.ttf'); }
     html, body { margin: 0; padding: 0; }
     .pg { width: ${W}px; height: ${H}px; position: relative; overflow: hidden;
           background: radial-gradient(120% 90% at 0% 0%, #1d1f23 0%, #141518 55%, #0f1012 100%); }
