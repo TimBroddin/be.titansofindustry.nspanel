@@ -9,3 +9,4 @@
 
 # icon font build env
 scripts/icon-font/.venv/
+__pycache__/
